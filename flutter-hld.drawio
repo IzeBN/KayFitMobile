@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1654" dy="1169" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2839" pageHeight="2000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- TITLE -->
+    <mxCell id="2" value="Kayfit — Flutter HLD: Архитектура мобильного приложения" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="10" width="2100" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- LEGEND -->
+    <mxCell id="3" value="ЛЕГЕНДА" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="2130" y="10" width="690" height="260" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="✅  Backend: существует, работает без изменений" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="50" width="660" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="🆕  Flutter: новый экран / сервис / виджет / провайдер" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="92" width="660" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="⚡  Backend: новый endpoint (минимальные изменения)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="134" width="660" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="🔧  Миграция / адаптация (логика та же, формат другой)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="176" width="660" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="🌐  Внешний сервис (интеграция без изменений)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="218" width="660" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         FLUTTER APP CONTAINER
+         =================================================== -->
+    <mxCell id="10" value="📱  FLUTTER APP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="10" y="70" width="1060" height="820" as="geometry"/>
+    </mxCell>
+
+    <!-- SCREENS header -->
+    <mxCell id="11" value="ЭКРАНЫ (Screens)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="113" width="310" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="🆕  Dashboard — макросы дня, цель калорий, список блюд, граф веса" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="143" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="🆕  Journal — история блюд (200 записей), группировка по дате" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="198" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="14" value="🆕  Settings — язык (RU/EN), подписка, цели БЖУ, ссылки" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="253" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="🆕  Onboarding (10 шагов) — Landing → Возраст → Рост → Пол → Вес → Тренировки → Фото AI → Скан → Результат → Telegram" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="308" width="310" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="16" value="🆕  WayToGoal — персональный план, форма расчёта, граф похудения" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="383" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="🆕  Tariffs / Paywall — тарифы, таймер скидки, email, YooKassa WebView" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="438" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="18" value="🆕  Admin Panel — пользователи, редактирование профилей, логи" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="493" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="19" value="🆕  Auth Screen — Google + Apple + Telegram (новый экран входа)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="548" width="310" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="19b" value="🆕  Policy / Privacy — WebView или статичные Markdown-страницы" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="603" width="310" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- SERVICES header -->
+    <mxCell id="20" value="СЕРВИСЫ (Services)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="345" y="113" width="340" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="🔧  ApiService — адаптировать api.ts (47 функций) → Dio + CookieJar + interceptors" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="143" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="22" value="🆕  AuthService — Google Sign-In + Apple Sign-In + Telegram OAuth + сессия" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="203" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="23" value="🔧  LocalizationService — мигрировать 341 ключ: ru.ts→app_ru.arb, en.ts→app_en.arb" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="263" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="24" value="🆕  SecureStorageService — flutter_secure_storage: хранить сессию, токены OAuth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="323" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="25" value="✅  SubscriptionService — те же /api/payments/* endpoints, логика без изменений" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="383" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="25b" value="🆕  AudioService — record package: запись голоса → multipart → /api/transcribe" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="443" width="340" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="25c" value="🆕  PhotoService — image_picker: camera + gallery → multipart → /api/recognize_photo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="503" width="340" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- STATE header -->
+    <mxCell id="26" value="СОСТОЯНИЕ (Riverpod Providers)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="345" y="573" width="340" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="27" value="🆕  authProvider — AuthNotifier: сессия, OAuth-статус, onboarding_completed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="603" width="340" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="28" value="🆕  mealsProvider — MealsNotifier: CRUD блюд, сегодня + история" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="650" width="340" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="29" value="🆕  profileProvider — ProfileNotifier: профиль, онбординг, расчёт TDEE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="697" width="340" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="30" value="🆕  goalsProvider — GoalsNotifier: цели БЖУ, сохранение" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="744" width="340" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="🆕  statsProvider — StatsNotifier: статистика дня, прогресс по макросам" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="345" y="791" width="340" height="42" as="geometry"/>
+    </mxCell>
+
+    <!-- NAVIGATION block -->
+    <mxCell id="32" value="НАВИГАЦИЯ (go_router)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="113" width="360" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="33" value="/                     → Dashboard (protected)&lt;br&gt;/journal              → Journal (protected)&lt;br&gt;/settings             → Settings (protected)&lt;br&gt;/admin                → AdminPanel (protected + is_admin)&lt;br&gt;/onboarding           → Onboarding (public)&lt;br&gt;/way-to-goal          → WayToGoal (public)&lt;br&gt;/tariffs              → Tariffs (public)&lt;br&gt;/auth                 → AuthScreen (public)&lt;br&gt;/auth/google/callback → Google OAuth callback&lt;br&gt;/auth/apple/callback  → Apple OAuth callback&lt;br&gt;&lt;br&gt;AuthGuard:&lt;br&gt;  401 → /onboarding&lt;br&gt;  !onboarding_completed → /onboarding&lt;br&gt;&lt;br&gt;DeepLink (app_links):&lt;br&gt;  app.kayfit.ru/* → открыть приложение&lt;br&gt;  t.me bot callback → /auth?token=...&lt;br&gt;&lt;br&gt;Domain routing:&lt;br&gt;  kayfit.ru → Landing (web-only)&lt;br&gt;  app.kayfit.ru → Flutter app" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="700" y="143" width="360" height="730" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         BACKEND API CONTAINER
+         =================================================== -->
+    <mxCell id="34" value="🖥️  BACKEND API — FastAPI + asyncpg + PostgreSQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=16;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="70" width="1040" height="820" as="geometry"/>
+    </mxCell>
+
+    <!-- AUTH NEW -->
+    <mxCell id="35" value="⚡  AUTH — НОВЫЕ ENDPOINTS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1090" y="115" width="490" height="175" as="geometry"/>
+    </mxCell>
+    <mxCell id="36" value="POST /api/auth/google — verify Google ID token → find/create user → Set-Cookie session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="150" width="470" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="37" value="POST /api/auth/apple — verify Apple identity token (JWT RS256) → find/create user → session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="190" width="470" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="38" value="✅  POST /api/auth/telegram — бот webhook (существует, без изменений)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="230" width="470" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- MEALS -->
+    <mxCell id="39" value="✅  MEALS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1090" y="303" width="490" height="205" as="geometry"/>
+    </mxCell>
+    <mxCell id="40" value="GET  /api/meals — сегодняшние блюда&lt;br&gt;POST /api/meals — добавить блюдо&lt;br&gt;PATCH /api/meals/{id} — редактировать&lt;br&gt;DELETE /api/meals/{id} — удалить&lt;br&gt;GET  /api/meals/history?limit= — история (до 200)&lt;br&gt;POST /api/meals/add_selected — пакетное добавление с эмоцией" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="336" width="470" height="160" as="geometry"/>
+    </mxCell>
+
+    <!-- PROFILE / STATS -->
+    <mxCell id="41" value="✅  PROFILE / ONBOARDING / STATS / GOALS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1090" y="521" width="490" height="210" as="geometry"/>
+    </mxCell>
+    <mxCell id="42" value="GET/POST /api/profile&lt;br&gt;GET/POST /api/goals&lt;br&gt;GET      /api/stats&lt;br&gt;POST     /api/onboarding/answer (q_id=1 тренировки, q_id=3 пол)&lt;br&gt;GET      /api/onboarding/answers&lt;br&gt;POST     /api/onboarding/complete&lt;br&gt;POST     /api/calculate (BMR + TDEE + цели)&lt;br&gt;GET      /api/calculation/result" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="556" width="470" height="165" as="geometry"/>
+    </mxCell>
+
+    <!-- AI -->
+    <mxCell id="43" value="✅  AI — Claude Vision + Whisper + FAISS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1592" y="115" width="518" height="210" as="geometry"/>
+    </mxCell>
+    <mxCell id="44" value="POST /api/parse_meal — парсинг текста → КБЖУ&lt;br&gt;POST /api/parse_meal_suggestions — варианты продуктов (FAISS)&lt;br&gt;POST /api/transcribe?language= — Whisper STT (аудио → текст)&lt;br&gt;POST /api/recognize_photo?language= — Claude Vision (фото → КБЖУ)&lt;br&gt;POST /api/onboarding/recognize_photo — demo без подписки" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1602" y="150" width="498" height="165" as="geometry"/>
+    </mxCell>
+
+    <!-- PAYMENTS -->
+    <mxCell id="45" value="✅  PAYMENTS — YooKassa" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1592" y="338" width="518" height="185" as="geometry"/>
+    </mxCell>
+    <mxCell id="46" value="GET  /api/payments/tariffs — тарифы (с таймером скидки)&lt;br&gt;GET  /api/public/tariffs — тарифы без авторизации&lt;br&gt;POST /api/payments/create — создать платёж → confirmation_url&lt;br&gt;GET  /api/payments/subscription — статус подписки&lt;br&gt;POST /api/payments/auto-renew/cancel — отменить авто-продление&lt;br&gt;POST /api/webhook/yookassa — webhook подтверждения оплаты" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1602" y="373" width="498" height="140" as="geometry"/>
+    </mxCell>
+
+    <!-- ADMIN -->
+    <mxCell id="47" value="✅  ADMIN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1592" y="536" width="518" height="195" as="geometry"/>
+    </mxCell>
+    <mxCell id="48" value="GET    /api/admin/me — is_admin check&lt;br&gt;GET    /api/admin/users?q=&amp;amp;limit=&amp;amp;offset= — список&lt;br&gt;GET    /api/admin/users/{id} — детали пользователя&lt;br&gt;PATCH  /api/admin/users/{id}/profile — профиль&lt;br&gt;PATCH  /api/admin/users/{id}/goals — цели БЖУ&lt;br&gt;DELETE /api/admin/users/{id} — удалить&lt;br&gt;GET    /api/admin/logs — аудит лог" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1602" y="571" width="498" height="150" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         EXTERNAL SERVICES
+         =================================================== -->
+    <mxCell id="49" value="🌐  ВНЕШНИЕ СЕРВИСЫ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=16;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="2130" y="70" width="690" height="820" as="geometry"/>
+    </mxCell>
+    <mxCell id="50" value="🌐  Google OAuth 2.0&lt;br&gt;Пакет: google_sign_in&lt;br&gt;Flutter: GoogleSignIn().signIn() → idToken&lt;br&gt;Backend: google-auth library верификация" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="118" width="660" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="51" value="🌐  Sign in with Apple (ASAuthorizationAppleIDRequest)&lt;br&gt;Пакет: sign_in_with_apple&lt;br&gt;Flutter: getAppleIDCredential() → identityToken&lt;br&gt;Backend: PyJWT + Apple public keys (RS256)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="198" width="660" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="52" value="✅  Telegram Bot (@Formavkaif_bot)&lt;br&gt;Существует, bot deep-link + webhook на backend&lt;br&gt;Flutter: url_launcher открывает t.me ссылку&lt;br&gt;Callback через Deep Link / Universal Links" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="278" width="660" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="53" value="✅  YooKassa (платёжная система)&lt;br&gt;Flutter: webview_flutter → confirmation_url из API&lt;br&gt;Webhook /api/webhook/yookassa без изменений&lt;br&gt;Опционально: yookassa_flutter SDK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="358" width="660" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="54" value="✅  Anthropic Claude API (через backend)&lt;br&gt;parse_meal, chat, recognize_photo, search_products&lt;br&gt;Flutter обращается к backend — НЕ напрямую к Claude&lt;br&gt;Модель: claude-sonnet-4-6" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="438" width="660" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="55" value="✅  OpenAI Whisper (через backend)&lt;br&gt;POST /api/transcribe → аудио blob → текст&lt;br&gt;Flutter: record package → m4a/opus → multipart upload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="518" width="660" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="56" value="✅  FAISS + sentence-transformers (через backend)&lt;br&gt;Векторный поиск продуктов — без изменений" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="2145" y="588" width="660" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         OAUTH FLOW DETAIL
+         =================================================== -->
+    <mxCell id="57" value="🔐  OAUTH FLOW — Авторизация в Flutter-приложении" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="10" y="900" width="2810" height="330" as="geometry"/>
+    </mxCell>
+
+    <!-- Google OAuth -->
+    <mxCell id="58" value="Google OAuth (google_sign_in)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="945" width="665" height="275" as="geometry"/>
+    </mxCell>
+    <mxCell id="59" value="1. Кнопка «Sign in with Google» на AuthScreen&lt;br&gt;2. GoogleSignIn.signIn() → Google consent screen&lt;br&gt;3. Получаем authentication.idToken (JWT)&lt;br&gt;4. POST /api/auth/google { &quot;id_token&quot;: &quot;...&quot; }&lt;br&gt;5. Backend: google-auth.verify_oauth2_token()&lt;br&gt;6. Если новый user: INSERT users + INSERT user_profile&lt;br&gt;7. Ответ: HTTP 200 + Set-Cookie: session=... (7 дней)&lt;br&gt;8. dio_cookie_manager перехватывает и хранит cookie&lt;br&gt;9. SecureStorage.write(&apos;session_active&apos;, &apos;true&apos;)&lt;br&gt;10. go_router.go(&apos;/&apos;) или &apos;/onboarding&apos;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="978" width="645" height="230" as="geometry"/>
+    </mxCell>
+
+    <!-- Apple OAuth -->
+    <mxCell id="60" value="Apple Sign-In (sign_in_with_apple)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="705" y="945" width="665" height="275" as="geometry"/>
+    </mxCell>
+    <mxCell id="61" value="1. Кнопка «Sign in with Apple» на AuthScreen&lt;br&gt;2. SignInWithApple.getAppleIDCredential(scopes: [email, fullName])&lt;br&gt;3. Получаем credential.identityToken (JWT RS256 от Apple)&lt;br&gt;4. POST /api/auth/apple { &quot;identity_token&quot;: &quot;...&quot; }&lt;br&gt;5. Backend: PyJWT.decode() + Apple public keys (JWKs)&lt;br&gt;6. Извлекаем sub (apple_id) из payload&lt;br&gt;7. Если новый user: INSERT users + user_profile&lt;br&gt;8. Ответ: HTTP 200 + Set-Cookie: session=... (7 дней)&lt;br&gt;9. Аналогично Google: cookie + SecureStorage&lt;br&gt;Важно: только iOS / macOS (Apple требование)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="715" y="978" width="645" height="230" as="geometry"/>
+    </mxCell>
+
+    <!-- Telegram OAuth -->
+    <mxCell id="62" value="✅  Telegram (существует, адаптировать deep link)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1390" y="945" width="665" height="275" as="geometry"/>
+    </mxCell>
+    <mxCell id="63" value="1. Кнопка «Войти через Telegram» на AuthScreen&lt;br&gt;2. url_launcher: openUrl(t.me/Formavkaif_bot?start=1)&lt;br&gt;3. Telegram-приложение: бот подтверждает вход&lt;br&gt;4. Бот отправляет callback → backend webhook&lt;br&gt;5. Backend устанавливает session cookie&lt;br&gt;6. Deep Link возвращает пользователя в приложение:&lt;br&gt;   iOS: Associated Domains (app.kayfit.ru)&lt;br&gt;   Android: App Links (app.kayfit.ru)&lt;br&gt;7. app_links перехватывает URL → AuthService.handleCallback()&lt;br&gt;8. Polling /api/profile как fallback если deep link не сработал&lt;br&gt;Backend: без изменений" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1400" y="978" width="645" height="230" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend OAuth changes detail -->
+    <mxCell id="64" value="⚡  Backend: что добавить для OAuth (минимум)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="2075" y="945" width="730" height="275" as="geometry"/>
+    </mxCell>
+    <mxCell id="65" value="DB Migration:&lt;br&gt;  ALTER TABLE users ADD COLUMN google_id VARCHAR(255);&lt;br&gt;  ALTER TABLE users ADD COLUMN apple_id VARCHAR(255);&lt;br&gt;&lt;br&gt;Новые файлы:&lt;br&gt;  backend/app/api/auth_oauth.py  (2 endpoints)&lt;br&gt;  backend/app/services/oauth_service.py&lt;br&gt;&lt;br&gt;Сессия: добавить поддержку Bearer token header&lt;br&gt;  (на случай если cookie не работает в WebView)&lt;br&gt;&lt;br&gt;requirements.txt (добавить):&lt;br&gt;  google-auth&gt;=2.0.0&lt;br&gt;  PyJWT&gt;=2.8.0&lt;br&gt;  cryptography (для Apple RS256 верификации)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="2085" y="978" width="710" height="230" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         BOTTOM ROW
+         =================================================== -->
+
+    <!-- i18n Migration -->
+    <mxCell id="66" value="🔧  i18n / ЛОКАЛИЗАЦИЯ — Миграция" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="10" y="1247" width="680" height="320" as="geometry"/>
+    </mxCell>
+    <mxCell id="67" value="ВЕБ (TypeScript) → FLUTTER (ARB):&lt;br&gt;  src/i18n/ru.ts → lib/l10n/app_ru.arb&lt;br&gt;  src/i18n/en.ts → lib/l10n/app_en.arb&lt;br&gt;&lt;br&gt;Количество: 341 ключ в 11 категориях&lt;br&gt;  nav, common, macros, dashboard,&lt;br&gt;  journal, settings, addMeal, meal,&lt;br&gt;  onboarding, wayToGoal, tariffs, emotions&lt;br&gt;&lt;br&gt;Пакеты: flutter_localizations + intl&lt;br&gt;Использование: AppLocalizations.of(context).key&lt;br&gt;&lt;br&gt;Хранение языка: SharedPreferences(user_language)&lt;br&gt;Sync с backend: POST /api/profile { language: &quot;ru&quot; }&lt;br&gt;&lt;br&gt;Эмоции (11 штук, с emoji):&lt;br&gt;  joy, calm, sadness, stress, tiredness,&lt;br&gt;  hunger, indifference, anger, anxiety,&lt;br&gt;  boredom, communication" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="20" y="1282" width="660" height="275" as="geometry"/>
+    </mxCell>
+
+    <!-- Flutter Packages -->
+    <mxCell id="68" value="📦  FLUTTER ПАКЕТЫ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="700" y="1247" width="720" height="320" as="geometry"/>
+    </mxCell>
+    <mxCell id="69" value="Навигация:      go_router&lt;br&gt;State:           flutter_riverpod, riverpod_annotation&lt;br&gt;HTTP:            dio, dio_cookie_manager, cookie_jar&lt;br&gt;Auth:            google_sign_in, sign_in_with_apple&lt;br&gt;Storage:         flutter_secure_storage, shared_preferences&lt;br&gt;i18n:            flutter_localizations, intl&lt;br&gt;Медиа:           image_picker, record&lt;br&gt;Графики:         fl_chart (аналог Graph.tsx)&lt;br&gt;Платёж:          webview_flutter (YooKassa)&lt;br&gt;Deep Links:      app_links (iOS AssociatedDomains + Android AppLinks)&lt;br&gt;Network utils:   connectivity_plus&lt;br&gt;Dev tools:       build_runner, freezed, json_serializable&lt;br&gt;Test:            flutter_test, mocktail&lt;br&gt;&lt;br&gt;UI / Тема:&lt;br&gt;  Шрифт: Geologica (тот же что на вебе)&lt;br&gt;  Primary: #ff597d  Accent: #fe7650&lt;br&gt;  Background: #fff1ea (warm palette)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="710" y="1282" width="700" height="275" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend Minimal Changes -->
+    <mxCell id="70" value="⚡  BACKEND — ИТОГОВЫЕ ИЗМЕНЕНИЯ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="1430" y="1247" width="690" height="320" as="geometry"/>
+    </mxCell>
+    <mxCell id="71" value="ВСЕГО 6 изменений в backend:&lt;br&gt;&lt;br&gt;1. DB: ALTER TABLE users ADD COLUMN google_id VARCHAR(255);&lt;br&gt;2. DB: ALTER TABLE users ADD COLUMN apple_id VARCHAR(255);&lt;br&gt;3. Новый файл: app/api/auth_oauth.py&lt;br&gt;      POST /api/auth/google&lt;br&gt;      POST /api/auth/apple&lt;br&gt;4. Новый файл: app/services/oauth_service.py&lt;br&gt;      find_or_create_by_google(google_id, email)&lt;br&gt;      find_or_create_by_apple(apple_id, email)&lt;br&gt;5. Session middleware: принять Bearer token header&lt;br&gt;6. requirements.txt: google-auth, PyJWT, cryptography&lt;br&gt;&lt;br&gt;ВСЁ ОСТАЛЬНОЕ БЕЗ ИЗМЕНЕНИЙ:&lt;br&gt;  ✅ 47 существующих endpoints&lt;br&gt;  ✅ Telegram auth + бот&lt;br&gt;  ✅ PostgreSQL схема (+ 2 новые колонки)&lt;br&gt;  ✅ AI сервисы, FAISS, Whisper&lt;br&gt;  ✅ YooKassa webhooks и платежи&lt;br&gt;  ✅ Audit middleware, admin API" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1440" y="1282" width="670" height="275" as="geometry"/>
+    </mxCell>
+
+    <!-- What Stays Summary -->
+    <mxCell id="72" value="✅  ЧТО ОСТАЁТСЯ / ПЕРЕНОСИТСЯ 1:1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="2130" y="1247" width="690" height="320" as="geometry"/>
+    </mxCell>
+    <mxCell id="73" value="BACKEND (без изменений):&lt;br&gt;  ✅ FastAPI + asyncpg + PostgreSQL&lt;br&gt;  ✅ Все 47 API endpoints&lt;br&gt;  ✅ Telegram bot + webhook авторизация&lt;br&gt;  ✅ Session middleware (cookie, 7 дней)&lt;br&gt;  ✅ Claude Vision + Whisper + FAISS поиск&lt;br&gt;  ✅ YooKassa интеграция + webhook&lt;br&gt;  ✅ Admin API + Audit middleware&lt;br&gt;  ✅ Docker Compose деплой&lt;br&gt;&lt;br&gt;БИЗНЕС-ЛОГИКА (переносится 1:1):&lt;br&gt;  ✅ Mifflin-St Jeor расчёт BMR/TDEE&lt;br&gt;  ✅ 341 i18n-ключ (меняется только формат)&lt;br&gt;  ✅ 11 эмоций для записей еды&lt;br&gt;  ✅ Онбординг 10 шагов (та же логика)&lt;br&gt;  ✅ Тарифная система + таймер скидки&lt;br&gt;  ✅ Warm palette (#ff597d, #fe7650, #fff1ea)&lt;br&gt;  ✅ Шрифт Geologica" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="2140" y="1282" width="670" height="275" as="geometry"/>
+    </mxCell>
+
+    <!-- ===================================================
+         ARROWS (connection lines)
+         =================================================== -->
+
+    <!-- Flutter ApiService → Backend API -->
+    <mxCell id="80" value="HTTPS + Cookie" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=11;fontStyle=1;" edge="1" source="21" target="34" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Flutter AuthService → Google External -->
+    <mxCell id="81" value="idToken" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6;fontColor=#9673a6;fontSize=10;" edge="1" source="22" target="50" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Flutter AuthService → Apple External -->
+    <mxCell id="82" value="identityToken" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6;fontColor=#9673a6;fontSize=10;" edge="1" source="22" target="51" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend Auth Google → Google External (verify) -->
+    <mxCell id="83" value="verify token" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450;fontColor=#b85450;fontSize=10;dashed=1;" edge="1" source="36" target="50" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend Auth Apple → Apple External (verify) -->
+    <mxCell id="84" value="verify JWT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450;fontColor=#b85450;fontSize=10;dashed=1;" edge="1" source="37" target="51" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend Payments → YooKassa -->
+    <mxCell id="85" value="API + webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;fontColor=#82b366;fontSize=10;" edge="1" source="45" target="53" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Backend AI → Claude -->
+    <mxCell id="86" value="API calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;fontColor=#82b366;fontSize=10;" edge="1" source="43" target="54" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Flutter Tariffs → Backend Payments (via WebView) -->
+    <mxCell id="87" value="WebView confirmation_url" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;fontColor=#d6b656;fontSize=10;" edge="1" source="17" target="53" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
