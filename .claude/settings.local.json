@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter create:*)",
+      "Bash(where flutter:*)",
+      "Bash(flutter pub:*)",
+      "Bash(dart run:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter gen-l10n:*)",
+      "Bash(ls FOUND:*)",
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(xargs grep:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(node:*)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter.bat\" analyze:*)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze:*)"
+    ]
+  }
+}

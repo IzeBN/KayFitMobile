@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:kayfit/core/i18n/generated/app_localizations.dart';
+import 'core/locale/locale_provider.dart';
+import 'router.dart';
+import 'shared/theme/app_theme.dart';
+
+class KayfitApp extends ConsumerWidget {
+  const KayfitApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    final locale = ref.watch(localeProvider);
+
+    return MaterialApp.router(
+      title: 'Kayfit',
+      theme: AppTheme.light,
+      routerConfig: router,
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru'),
+        Locale('en'),
+      ],
+    );
+  }
+}
