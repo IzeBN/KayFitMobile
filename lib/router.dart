@@ -21,6 +21,10 @@ const _kOnboardingDoneKey = 'onboarding_done';
 // Loaded once at startup from SharedPreferences.
 final onboardingDoneProvider = StateProvider<bool>((ref) => false);
 
+/// Set to true after email auth when onboarding data was synced.
+/// Router redirects to /way-to-goal once; WayToGoalScreen clears it.
+final showWayToGoalProvider = StateProvider<bool>((ref) => false);
+
 /// Call after successful onboarding completion to mark it done.
 Future<void> markOnboardingDone(WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();
@@ -31,6 +35,7 @@ Future<void> markOnboardingDone(WidgetRef ref) async {
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ref.watch(authNotifierProvider);
   final onboardingDone = ref.watch(onboardingDoneProvider);
+  final showWayToGoal = ref.watch(showWayToGoalProvider);
 
   return GoRouter(
     initialLocation: '/',
@@ -54,6 +59,12 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Logged in
       if (loc == '/login' || loc == '/email-auth' || loc == '/onboarding') return '/';
+
+      // If coming from onboarding+auth flow, redirect to /way-to-goal once
+      if (showWayToGoal && loc != '/way-to-goal') {
+        return '/way-to-goal';
+      }
+
       return null;
     },
     routes: [

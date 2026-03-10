@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/auth/auth_provider.dart';
 import 'package:kayfit/core/auth/onboarding_sync.dart';
+import 'package:kayfit/core/i18n/generated/app_localizations.dart';
+import 'package:kayfit/features/dashboard/providers/dashboard_provider.dart';
+import 'package:kayfit/features/way_to_goal/providers/way_to_goal_provider.dart';
 import 'package:kayfit/router.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
 
@@ -17,7 +20,7 @@ class EmailAuthScreen extends ConsumerStatefulWidget {
 }
 
 class _EmailAuthScreenState extends ConsumerState<EmailAuthScreen> {
-  bool _isLogin = true;
+  bool _isLogin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +97,9 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                isLogin ? 'Вход по email' : 'Регистрация',
+                isLogin
+                    ? AppLocalizations.of(context)!.auth_email_login_title
+                    : AppLocalizations.of(context)!.auth_register_title,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -105,8 +110,8 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 isLogin
-                    ? 'Войдите в свой аккаунт Kayfit'
-                    : 'Создайте аккаунт, чтобы начать',
+                    ? AppLocalizations.of(context)!.auth_login_subtitle
+                    : AppLocalizations.of(context)!.auth_register_subtitle,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 15,
@@ -159,8 +164,8 @@ class _TabToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TabChip(label: 'Вход', active: isLogin, onTap: () => onToggle(true)),
-          _TabChip(label: 'Регистрация', active: !isLogin, onTap: () => onToggle(false)),
+          _TabChip(label: AppLocalizations.of(context)!.auth_tab_login, active: isLogin, onTap: () => onToggle(true)),
+          _TabChip(label: AppLocalizations.of(context)!.auth_tab_register, active: !isLogin, onTap: () => onToggle(false)),
         ],
       ),
     );
@@ -417,9 +422,14 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
   Future<void> _afterLogin() async {
     final token = await TokenStorage.getAccess();
     if (token == null || !mounted) return;
-    await syncOnboardingPending();
+    final hadPending = await syncOnboardingPending();
     await markOnboardingDone(ref);
     if (!mounted) return;
+    if (hadPending) {
+      ref.read(showWayToGoalProvider.notifier).state = true;
+      ref.invalidate(calculationResultProvider);
+      ref.invalidate(todayStatsProvider);
+    }
     await ref.read(authNotifierProvider.notifier).refreshUser();
   }
 
@@ -435,6 +445,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -446,12 +457,12 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
-            validator: _validateEmail,
+            validator: (v) => _validateEmail(v, l10n),
           ),
           const SizedBox(height: 14),
           _OBTextField(
             controller: _passwordCtrl,
-            label: 'Пароль',
+            label: l10n.auth_field_password,
             icon: Icons.lock_outline_rounded,
             textInputAction: TextInputAction.done,
             obscure: _obscure,
@@ -459,13 +470,13 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
             onToggleObscure: () => setState(() => _obscure = !_obscure),
             onEditingComplete: _submit,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Введите пароль';
+              if (v == null || v.isEmpty) return l10n.auth_err_enter_password;
               return null;
             },
           ),
           const SizedBox(height: 28),
           _GradientButton(
-            label: 'Войти',
+            label: l10n.auth_btn_login,
             loading: _loading,
             onTap: _submit,
           ),
@@ -533,9 +544,14 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
   Future<void> _afterLogin() async {
     final token = await TokenStorage.getAccess();
     if (token == null || !mounted) return;
-    await syncOnboardingPending();
+    final hadPending = await syncOnboardingPending();
     await markOnboardingDone(ref);
     if (!mounted) return;
+    if (hadPending) {
+      ref.read(showWayToGoalProvider.notifier).state = true;
+      ref.invalidate(calculationResultProvider);
+      ref.invalidate(todayStatsProvider);
+    }
     await ref.read(authNotifierProvider.notifier).refreshUser();
   }
 
@@ -551,6 +567,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Form(
       key: _formKey,
       child: Column(
@@ -562,12 +579,12 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
-            validator: _validateEmail,
+            validator: (v) => _validateEmail(v, l10n),
           ),
           const SizedBox(height: 14),
           _OBTextField(
             controller: _usernameCtrl,
-            label: 'Имя (необязательно)',
+            label: l10n.auth_field_name,
             icon: Icons.person_outline_rounded,
             autofillHints: const [AutofillHints.name],
             validator: (_) => null,
@@ -575,35 +592,35 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
           const SizedBox(height: 14),
           _OBTextField(
             controller: _passwordCtrl,
-            label: 'Пароль',
+            label: l10n.auth_field_password,
             icon: Icons.lock_outline_rounded,
             obscure: _obscurePass,
             autofillHints: const [AutofillHints.newPassword],
             onToggleObscure: () => setState(() => _obscurePass = !_obscurePass),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Введите пароль';
-              if (v.length < 8) return 'Минимум 8 символов';
+              if (v == null || v.isEmpty) return l10n.auth_err_enter_password;
+              if (v.length < 8) return l10n.auth_err_min_password;
               return null;
             },
           ),
           const SizedBox(height: 14),
           _OBTextField(
             controller: _confirmCtrl,
-            label: 'Повторите пароль',
+            label: l10n.auth_field_confirm_password,
             icon: Icons.lock_outline_rounded,
             textInputAction: TextInputAction.done,
             obscure: _obscureConfirm,
             onToggleObscure: () => setState(() => _obscureConfirm = !_obscureConfirm),
             onEditingComplete: _submit,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Повторите пароль';
-              if (v != _passwordCtrl.text) return 'Пароли не совпадают';
+              if (v == null || v.isEmpty) return l10n.auth_err_confirm_password;
+              if (v != _passwordCtrl.text) return l10n.auth_err_passwords_no_match;
               return null;
             },
           ),
           const SizedBox(height: 28),
           _GradientButton(
-            label: 'Создать аккаунт',
+            label: l10n.auth_btn_register,
             loading: _loading,
             onTap: _submit,
           ),
@@ -615,10 +632,10 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
-String? _validateEmail(String? v) {
-  if (v == null || v.trim().isEmpty) return 'Введите email';
+String? _validateEmail(String? v, AppLocalizations l10n) {
+  if (v == null || v.trim().isEmpty) return l10n.auth_err_enter_email;
   final re = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-  if (!re.hasMatch(v.trim())) return 'Некорректный email';
+  if (!re.hasMatch(v.trim())) return l10n.auth_err_invalid_email;
   return null;
 }
 

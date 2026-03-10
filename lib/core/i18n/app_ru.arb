@@ -33,6 +33,13 @@
   "dashboard_title": "Сегодня",
   "dashboard_addMeal": "Добавить приём пищи",
   "dashboard_noMeals": "Нет записей за сегодня",
+  "dashboard_personal_plan_title": "Ваш персональный план",
+  "dashboard_personal_plan_sub": "Цель: {kcal} ккал/день · Нажмите для просмотра",
+  "@dashboard_personal_plan_sub": {
+    "placeholders": {
+      "kcal": {"type": "int"}
+    }
+  },
   "dashboard_compulsive": "Компульсивных приёмов: {count}",
   "@dashboard_compulsive": {
     "placeholders": {
@@ -228,5 +235,136 @@
   "subscription_cancel_auto_renew_title": "Отмена автопродления",
   "subscription_cancel_auto_renew_confirm": "Вы уверены, что хотите отменить автопродление подписки?",
   "subscription_cancel_auto_renew_action": "Отменить",
-  "subscription_auto_renew_cancelled": "Автопродление отменено"
+  "subscription_auto_renew_cancelled": "Автопродление отменено",
+
+  "wg_plan_ready": "Ваш план готов!",
+  "wg_personal_calc": "Персональный расчёт на основе ваших данных",
+  "wg_kcal_day": "ккал / день",
+  "wg_macronutrients": "Макронутриенты",
+  "wg_days_to_goal": "До цели: {days} дней",
+  "@wg_days_to_goal": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "wg_target_weight_val": "Целевой вес: {kg} кг",
+  "@wg_target_weight_val": {
+    "placeholders": {
+      "kg": {"type": "String"}
+    }
+  },
+  "wg_weight_forecast": "Прогноз веса",
+  "wg_how_to_reach": "Как достичь цели",
+  "wg_feature_photo_title": "Фото блюда",
+  "wg_feature_photo_desc": "Сфотографируйте еду — ИИ распознает калории за секунды",
+  "wg_feature_voice_title": "Голосовой ввод",
+  "wg_feature_voice_desc": "Продиктуйте, что съели — приложение запишет",
+  "wg_feature_track_title": "Трекинг прогресса",
+  "wg_feature_track_desc": "Следите за КБЖУ и видьте результат каждый день",
+  "wg_start_diary": "Начать вести дневник",
+  "wg_now": "сейчас",
+
+  "auth_email_login_title": "Вход по email",
+  "auth_register_title": "Регистрация",
+  "auth_login_subtitle": "Войдите в свой аккаунт Kayfit",
+  "auth_register_subtitle": "Создайте аккаунт, чтобы начать",
+  "auth_tab_login": "Вход",
+  "auth_tab_register": "Регистрация",
+  "auth_field_password": "Пароль",
+  "auth_field_name": "Имя (необязательно)",
+  "auth_field_confirm_password": "Повторите пароль",
+  "auth_btn_login": "Войти",
+  "auth_btn_register": "Создать аккаунт",
+  "auth_err_enter_password": "Введите пароль",
+  "auth_err_min_password": "Минимум 8 символов",
+  "auth_err_confirm_password": "Повторите пароль",
+  "auth_err_passwords_no_match": "Пароли не совпадают",
+  "auth_err_enter_email": "Введите email",
+  "auth_err_invalid_email": "Некорректный email",
+  "auth_err_enter_value": "Введите значение",
+
+  "goals_title": "Цели КБЖУ",
+  "goals_saved": "Сохранено",
+  "goals_error": "Ошибка: {msg}",
+  "@goals_error": {
+    "placeholders": {
+      "msg": {"type": "String"}
+    }
+  },
+  "goals_err_enter_value": "Введите значение",
+  "goals_err_enter_int": "Введите целое число",
+
+  "dashboard_no_goals_title": "Цели не настроены",
+  "dashboard_no_goals_sub": "Пройдите «Путь к цели» чтобы получить персональный план питания",
+  "dashboard_remaining_title": "Осталось на сегодня",
+  "dashboard_remaining_over": "Превышение",
+
+  "edit_meal_title": "Редактировать блюдо",
+  "edit_meal_name_label": "Название",
+  "edit_meal_name_error": "Введите название",
+  "edit_meal_saved": "Сохранено",
+  "edit_meal_error": "Ошибка: {msg}",
+  "@edit_meal_error": {
+    "placeholders": {
+      "msg": {"type": "String"}
+    }
+  },
+  "edit_meal_err_enter_value": "Введите значение",
+  "edit_meal_err_invalid_number": "Введите корректное число",
+
+  "addMeal_subscription_needed": "Нужна подписка",
+  "addMeal_subscription_desc": "Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.",
+  "addMeal_choose_tariff": "Выбрать тариф",
+  "addMeal_close": "Закрыть",
+  "addMeal_kcal": "{cal} ккал",
+  "@addMeal_kcal": {
+    "placeholders": {
+      "cal": {"type": "String"}
+    }
+  },
+  "addMeal_subscription_snack": "Для этой функции нужна подписка",
+  "addMeal_weight_hint": "Вес (г)",
+
+  "settings_privacy_policy": "Политика конфиденциальности",
+  "settings_terms": "Пользовательское соглашение",
+  "settings_sub_promo": "Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.",
+  "settings_sale_ends": "Скидка заканчивается через:",
+  "settings_sub_active_badge": "✓ Активна",
+
+  "tariffs_title_full": "Подпишись и открой\nполный доступ",
+  "tariffs_tag1": "🥕 Рекомендации по питанию",
+  "tariffs_tag2": "📋 Сканер калорий",
+  "tariffs_tag3": "📋 Расчет нормы",
+  "tariffs_tag4": "😀 Трекер эмоций",
+  "tariffs_trial": "Пробный период",
+  "tariffs_monthly": "Месяц",
+  "tariffs_yearly": "Год",
+  "tariffs_quarterly": "3 месяца",
+  "tariffs_per_3days": "/ 3 дня",
+  "tariffs_per_day": "/ день",
+  "tariffs_per_3mo": "/ 3 мес",
+  "tariffs_trial_then": "Затем 2 990 за год",
+  "tariffs_monthly_billing": "Ежемесячная оплата",
+  "tariffs_yearly_save": "2 990 ₽ / Экономия 8 890 ₽",
+  "tariffs_best_value": "Оптимальный выбор",
+  "tariffs_no_discount": "Без скидки {price}",
+  "@tariffs_no_discount": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "tariffs_no_plans": "Тарифы пока не настроены",
+  "tariffs_cancel_anytime": "Подписку можно отменить в любой удобный момент в Личном кабинете",
+  "tariffs_optimal_months": "Оптимальный результат достигается через 3 месяца",
+  "tariffs_email_hint": "Email для чека",
+  "tariffs_email_error": "Введите корректный email",
+  "tariffs_pay_error": "Не удалось создать платёж. Попробуйте ещё раз.",
+  "tariffs_get_plan": "Получить мой план",
+  "tariffs_load_error": "Не удалось загрузить тарифы",
+  "tariffs_sale_ends": "СКИДКА ЗАКАНЧИВАЕТСЯ ЧЕРЕЗ",
+  "tariffs_benefit1": "🥗 Консультация с нутрициологом",
+  "tariffs_benefit2": "🎥 Видео рецепты",
+  "tariffs_benefit3": "🍽️ План питания",
+  "tariffs_benefit4": "📋 Гайд по питанию",
+  "tariffs_payment_title": "Оплата"
 }

@@ -30,6 +30,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
   final _textFocus = FocusNode();
   List<Map<String, dynamic>> _suggestions = [];
   final Set<int> _selected = {};
+  final Map<int, double?> _itemWeights = {};
+
+  // Language code, updated in build()
+  String _lang = 'en';
 
   // Voice
   final _recorder = AudioRecorder();
@@ -57,6 +61,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       setState(() {
         _suggestions = items;
         _selected.addAll(Iterable.generate(items.length));
+        _itemWeights.clear();
+        for (int i = 0; i < items.length; i++) {
+          _itemWeights[i] = (items[i]['weight_grams'] as num?)?.toDouble();
+        }
       });
     } catch (e) {
       _handleError(e, showPaywall: false); // текст — без paywall
@@ -86,10 +94,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       final form = FormData.fromMap({
         'audio': await MultipartFile.fromFile(_recordPath!, filename: 'voice.m4a'),
       });
-      final resp = await apiDio.post('/api/transcribe?language=ru', data: form);
+      final resp = await apiDio.post('/api/transcribe?language=$_lang', data: form);
       final text = resp.data['text'] as String? ?? '';
       if (text.isNotEmpty) {
-        await _parseText(text, 'ru');
+        await _parseText(text, _lang);
       }
     } catch (e) {
       _handleError(e);
@@ -100,14 +108,21 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
 
   Future<void> _pickAndRecognizePhoto() async {
     final picker = ImagePicker();
+    final lang = _lang; // capture before async gap
     final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
-    if (file == null) return;
+    if (file == null) {
+      // Camera cancelled — reset mode back to choose
+      if (mounted) setState(() => _mode = _InputMode.choose);
+      return;
+    }
+    if (!mounted) return;
     setState(() => _loading = true);
     try {
       final form = FormData.fromMap({
         'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
       });
-      final resp = await apiDio.post('/api/recognize_photo?language=ru', data: form);
+      final resp = await apiDio.post('/api/recognize_photo?language=$lang', data: form);
+      if (!mounted) return;
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
       if (error != null && error.isNotEmpty) {
@@ -117,6 +132,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
         setState(() {
           _suggestions = items;
           _selected.addAll(Iterable.generate(items.length));
+          _itemWeights.clear();
+          for (int i = 0; i < items.length; i++) {
+            _itemWeights[i] = (items[i]['weight_grams'] as num?)?.toDouble();
+          }
         });
       }
     } catch (e) {
@@ -133,7 +152,21 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       final items = _selected.map((i) {
         final s = _suggestions[i];
         final suggestions = s['suggestions'] as List<dynamic>?;
-        return suggestions != null && suggestions.isNotEmpty ? suggestions[0] : s;
+        final base = suggestions != null && suggestions.isNotEmpty
+            ? Map<String, dynamic>.from(suggestions[0] as Map<String, dynamic>)
+            : Map<String, dynamic>.from(s);
+        // Recalculate with actual weight if changed
+        final actualWeight = _itemWeights[i] ?? (s['weight_grams'] as num?)?.toDouble() ?? 100.0;
+        final cal100 = (base['calories_per_100g'] as num?)?.toDouble();
+        if (cal100 != null && actualWeight > 0) {
+          final k = actualWeight / 100.0;
+          base['calories'] = (cal100 * k).roundToDouble();
+          base['protein'] = ((base['protein_per_100g'] as num?)?.toDouble() ?? 0) * k;
+          base['fat'] = ((base['fat_per_100g'] as num?)?.toDouble() ?? 0) * k;
+          base['carbs'] = ((base['carbs_per_100g'] as num?)?.toDouble() ?? 0) * k;
+        }
+        base['weight_grams'] = actualWeight;
+        return base;
       }).toList();
 
       await apiDio.post('/api/meals/add_selected', data: {
@@ -156,7 +189,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       setState(() => _needsSubscription = true);
     } else {
       final msg = isPayment
-          ? 'Для этой функции нужна подписка'
+          ? AppLocalizations.of(context)!.addMeal_subscription_snack
           : '$e';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
@@ -167,6 +200,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    _lang = Localizations.localeOf(context).languageCode;
 
     return Container(
       decoration: const BoxDecoration(
@@ -192,6 +226,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                 ? _SuggestionsView(
                     suggestions: _suggestions,
                     selected: _selected,
+                    itemWeights: _itemWeights,
                     emotion: _emotion,
                     onToggle: (i) => setState(() {
                       if (_selected.contains(i)) {
@@ -200,6 +235,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                         _selected.add(i);
                       }
                     }),
+                    onWeightChange: (i, w) => setState(() => _itemWeights[i] = w),
                     onEmotionSelect: (e) => setState(() => _emotion = e),
                     onAdd: _addSelected,
                     l10n: l10n,
@@ -217,7 +253,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                         });
                       }
                     },
-                    onParseText: () => _parseText(_textController.text, 'ru'),
+                    onParseText: () => _parseText(_textController.text, _lang),
                     onStartRecording: _startRecording,
                     onStopRecording: _stopRecordingAndTranscribe,
                     onPickPhoto: _pickAndRecognizePhoto,
@@ -382,8 +418,10 @@ class _ModeButton extends StatelessWidget {
 class _SuggestionsView extends StatelessWidget {
   final List<Map<String, dynamic>> suggestions;
   final Set<int> selected;
+  final Map<int, double?> itemWeights;
   final String? emotion;
   final ValueChanged<int> onToggle;
+  final void Function(int, double?) onWeightChange;
   final ValueChanged<String> onEmotionSelect;
   final VoidCallback onAdd;
   final AppLocalizations l10n;
@@ -391,8 +429,10 @@ class _SuggestionsView extends StatelessWidget {
   const _SuggestionsView({
     required this.suggestions,
     required this.selected,
+    required this.itemWeights,
     required this.emotion,
     required this.onToggle,
+    required this.onWeightChange,
     required this.onEmotionSelect,
     required this.onAdd,
     required this.l10n,
@@ -400,6 +440,44 @@ class _SuggestionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final itemWidgets = suggestions.asMap().entries.map((e) {
+      final i = e.key;
+      final item = e.value;
+      final name = item['name'] as String? ?? '';
+      final sug = (item['suggestions'] as List<dynamic>?)?.isNotEmpty == true
+          ? item['suggestions'][0] as Map<String, dynamic>
+          : item;
+      final cal100 = (sug['calories_per_100g'] as num?)?.toDouble()
+          ?? (sug['calories'] as num?)?.toDouble()
+          ?? 0.0;
+      final currentWeight = itemWeights[i] ?? 100.0;
+      final displayCal = cal100 > 0
+          ? (cal100 * currentWeight / 100).toStringAsFixed(0)
+          : (sug['calories'] as num?)?.toStringAsFixed(0) ?? '?';
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxListTile(
+            value: selected.contains(i),
+            onChanged: (_) => onToggle(i),
+            title: Text(name),
+            subtitle: Text(l10n.addMeal_kcal(displayCal)),
+            activeColor: AppColors.accent,
+            contentPadding: EdgeInsets.zero,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 8, right: 16),
+            child: _WeightField(
+              initialWeight: itemWeights[i],
+              onChanged: (w) => onWeightChange(i, w),
+              l10n: l10n,
+            ),
+          ),
+        ],
+      );
+    }).toList();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,23 +485,18 @@ class _SuggestionsView extends StatelessWidget {
         Text(l10n.addMeal_selectItems,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        ...suggestions.asMap().entries.map((e) {
-          final i = e.key;
-          final item = e.value;
-          final name = item['name'] as String? ?? '';
-          final sug = item['suggestions'] as List<dynamic>?;
-          final first = sug != null && sug.isNotEmpty ? sug[0] as Map<String, dynamic> : item;
-          final cal = (first['calories'] as num?)?.toStringAsFixed(0) ?? '?';
-
-          return CheckboxListTile(
-            value: selected.contains(i),
-            onChanged: (_) => onToggle(i),
-            title: Text(name),
-            subtitle: Text('$cal ккал'),
-            activeColor: AppColors.accent,
-            contentPadding: EdgeInsets.zero,
-          );
-        }),
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.45,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: itemWidgets,
+            ),
+          ),
+        ),
         const Divider(),
         Text(l10n.addMeal_emotionTitle,
             style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -442,12 +515,79 @@ class _SuggestionsView extends StatelessWidget {
   }
 }
 
+class _WeightField extends StatefulWidget {
+  final double? initialWeight;
+  final void Function(double?) onChanged;
+  final AppLocalizations l10n;
+
+  const _WeightField({
+    required this.initialWeight,
+    required this.onChanged,
+    required this.l10n,
+  });
+
+  @override
+  State<_WeightField> createState() => _WeightFieldState();
+}
+
+class _WeightFieldState extends State<_WeightField> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(
+      text: widget.initialWeight != null
+          ? widget.initialWeight!.toStringAsFixed(0)
+          : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: TextField(
+        controller: _ctrl,
+        keyboardType: TextInputType.number,
+        textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          hintText: widget.l10n.addMeal_weight_hint,
+          suffixText: 'г',
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: OBColors.pink, width: 2),
+          ),
+        ),
+        onChanged: (v) {
+          final parsed = double.tryParse(v);
+          widget.onChanged(parsed);
+        },
+      ),
+    );
+  }
+}
+
 class _PaywallView extends StatelessWidget {
   final VoidCallback onTap;
   const _PaywallView({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -463,15 +603,15 @@ class _PaywallView extends StatelessWidget {
           child: const Text('⭐', style: TextStyle(fontSize: 28)),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Нужна подписка',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        Text(
+          l10n.addMeal_subscription_needed,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.',
+        Text(
+          l10n.addMeal_subscription_desc,
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
         ),
         const SizedBox(height: 24),
         GestureDetector(
@@ -485,16 +625,16 @@ class _PaywallView extends StatelessWidget {
               boxShadow: OBColors.buttonShadow,
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'Выбрать тариф',
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+            child: Text(
+              l10n.addMeal_choose_tariff,
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
         ),
         const SizedBox(height: 12),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Закрыть', style: TextStyle(color: AppColors.textMuted)),
+          child: Text(l10n.addMeal_close, style: const TextStyle(color: AppColors.textMuted)),
         ),
       ],
     );

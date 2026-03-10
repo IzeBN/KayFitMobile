@@ -15,7 +15,28 @@
       "Bash(python:*)",
       "Bash(node:*)",
       "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter.bat\" analyze:*)",
-      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze:*)"
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze:*)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -10)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | grep -v auth_provider)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -15)",
+      "Bash(grep -n \"class OnboardingSubmitRequest\\\\|OnboardingSubmitRequest\\\\|class.*Request\" \"C:\\\\Data\\\\projects\\\\Calories\\\\backend\\\\app\"/*.py 2>/dev/null | head -20)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -20)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | grep -E \"error|onboarding_screen|way_to_goal\")",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n 2>&1)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub lib/core/auth/auth_provider.dart 2>&1)",
+      "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n --project-dir \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub --project-dir \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n 2>&1 && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -20)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze --no-pub 2>&1 | tail -8)",
+      "Bash(\"C:/Program Files/flutter/bin/flutter\" analyze lib/features/dashboard/screens/dashboard_screen.dart 2>&1 | tail -20)",
+      "Bash(\"C:/Program Files/flutter/bin/flutter\" analyze lib/core/i18n/ 2>&1 | tail -5)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" emulators 2>&1)",
+      "Bash(where sdkmanager:*)",
+      "Read(//c/Data/projects/FitKeepMobile/$LOCALAPPDATA/Android/**)",
+      "Bash(\"C:/Program Files/flutter/bin/flutter\" analyze lib/features/add_meal/screens/add_meal_sheet.dart 2>&1 | tail -5)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze lib/features/dashboard/screens/dashboard_screen.dart 2>&1)",
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze lib/features/dashboard/providers/dashboard_provider.dart 2>&1)"
     ]
   }
 }

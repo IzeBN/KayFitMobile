@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+// import 'package:google_sign_in/google_sign_in.dart'; // TODO: enable when configured
+// import 'package:sign_in_with_apple/sign_in_with_apple.dart'; // TODO: enable when configured
 import 'package:go_router/go_router.dart';
-import '../../../core/api/api_client.dart';
-import '../../../core/auth/auth_provider.dart';
-import '../../../core/auth/onboarding_sync.dart';
+// TODO: restore when Google/Apple re-enabled:
+// import '../../../core/api/api_client.dart';
+// import '../../../core/auth/auth_provider.dart';
+// import '../../../core/auth/onboarding_sync.dart';
+// import '../../../router.dart';
+// import '../../../shared/widgets/loading_indicator.dart';
 import '../../../core/locale/locale_provider.dart';
-import '../../../router.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/widgets/loading_indicator.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -20,85 +21,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  bool _loading = false;
-
-  Future<void> _signInGoogle() async {
-    setState(() => _loading = true);
-    try {
-      final gs = GoogleSignIn(scopes: ['email', 'profile']);
-      final account = await gs.signIn();
-      if (account == null) return;
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null) throw Exception('Google id_token is null');
-      final resp = await apiDio.post('/api/v1/auth/google', data: {'id_token': idToken});
-      await _saveTokens(resp.data as Map<String, dynamic>);
-      await _afterLogin();
-    } catch (e) {
-      _showError('$e');
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _signInApple() async {
-    setState(() => _loading = true);
-    try {
-      final cred = await SignInWithApple.getAppleIDCredential(
-        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
-      );
-      final body = <String, dynamic>{
-        'identity_token': cred.identityToken,
-        'user_id': cred.userIdentifier,
-        if (cred.givenName != null)
-          'name': '${cred.givenName} ${cred.familyName ?? ''}'.trim(),
-      };
-      final resp = await apiDio.post('/api/v1/auth/apple', data: body);
-      await _saveTokens(resp.data as Map<String, dynamic>);
-      await _afterLogin();
-    } catch (e) {
-      _showError('$e');
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _afterLogin() async {
-    final token = await TokenStorage.getAccess();
-    if (token == null) {
-      _showError('Ошибка авторизации. Попробуйте снова.');
-      return;
-    }
-    if (!mounted) return;
-    // Sync BEFORE refreshUser() — after refreshUser the router redirects away
-    // and this widget gets disposed (mounted=false).
-    // 1. Send all onboarding data to backend BEFORE updating auth state.
-    await syncOnboardingPending();
-    // 2. Mark onboarding done in local storage.
-    await markOnboardingDone(ref);
-    if (!mounted) return;
-    // 3. Refresh auth state — router sees isLoggedIn=true on /login
-    //    and automatically redirects to '/'.
-    await ref.read(authNotifierProvider.notifier).refreshUser();
-  }
-
-  Future<void> _saveTokens(Map<String, dynamic> data) async {
-    await TokenStorage.save(
-      data['access_token'] as String,
-      data['refresh_token'] as String,
-    );
-  }
-
-  void _showError(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.accentOver,
-      ),
-    );
-  }
+  // TODO: re-add _loading, _afterLogin, _saveTokens, _showError when Google/Apple re-enabled
 
   @override
   Widget build(BuildContext context) {
@@ -108,9 +31,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: OBColors.bg,
-      body: LoadingOverlay(
-        isLoading: _loading,
-        child: Column(
+      body: Column(
           children: [
             _buildHeader(context, isRu),
             Expanded(
@@ -127,22 +48,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _SocialButton(
-                      icon: Icons.g_mobiledata_rounded,
-                      label: l10n.auth_google,
-                      iconColor: const Color(0xFF4285F4),
-                      borderColor: OBColors.border,
-                      onTap: _signInGoogle,
-                    ),
-                    const SizedBox(height: 12),
-                    _SocialButton(
-                      icon: Icons.apple,
-                      label: l10n.auth_apple,
-                      iconColor: Colors.black,
-                      borderColor: OBColors.border,
-                      onTap: _signInApple,
-                    ),
-                    const SizedBox(height: 12),
+                    // TODO: enable Google/Apple when configured
+                    // _SocialButton(
+                    //   icon: Icons.g_mobiledata_rounded,
+                    //   label: l10n.auth_google,
+                    //   iconColor: const Color(0xFF4285F4),
+                    //   borderColor: OBColors.border,
+                    //   onTap: _signInGoogle,
+                    // ),
+                    // const SizedBox(height: 12),
+                    // _SocialButton(
+                    //   icon: Icons.apple,
+                    //   label: l10n.auth_apple,
+                    //   iconColor: Colors.black,
+                    //   borderColor: OBColors.border,
+                    //   onTap: _signInApple,
+                    // ),
+                    // const SizedBox(height: 12),
                     _SocialButton(
                       icon: Icons.mail_outline_rounded,
                       label: isRu ? 'Войти по email' : 'Sign in with Email',
@@ -165,7 +87,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ],
-        ),
       ),
     );
   }

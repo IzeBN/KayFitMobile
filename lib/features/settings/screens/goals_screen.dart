@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
@@ -53,15 +54,17 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
         'carbs': int.parse(_carbsCtrl.text),
       });
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Сохранено')),
+          SnackBar(content: Text(l10n.goals_saved)),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e')),
+          SnackBar(content: Text(l10n.goals_error(e.toString()))),
         );
       }
     } finally {
@@ -80,8 +83,9 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Цели КБЖУ')),
+      appBar: AppBar(title: Text(l10n.goals_title)),
       body: _loading
           ? const Center(child: LoadingIndicator())
           : Form(
@@ -91,30 +95,38 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
                 children: [
                   _MacroField(
                     controller: _caloriesCtrl,
-                    label: 'Калории',
-                    suffix: 'ккал',
+                    label: l10n.macro_calories,
+                    suffix: l10n.macro_kcal,
                     color: AppColors.accent,
+                    errEnterValue: l10n.goals_err_enter_value,
+                    errEnterInt: l10n.goals_err_enter_int,
                   ),
                   const SizedBox(height: 12),
                   _MacroField(
                     controller: _proteinCtrl,
-                    label: 'Белки',
-                    suffix: 'г',
+                    label: l10n.macro_protein,
+                    suffix: l10n.macro_g,
                     color: AppColors.accent,
+                    errEnterValue: l10n.goals_err_enter_value,
+                    errEnterInt: l10n.goals_err_enter_int,
                   ),
                   const SizedBox(height: 12),
                   _MacroField(
                     controller: _fatCtrl,
-                    label: 'Жиры',
-                    suffix: 'г',
+                    label: l10n.macro_fat,
+                    suffix: l10n.macro_g,
                     color: AppColors.warm,
+                    errEnterValue: l10n.goals_err_enter_value,
+                    errEnterInt: l10n.goals_err_enter_int,
                   ),
                   const SizedBox(height: 12),
                   _MacroField(
                     controller: _carbsCtrl,
-                    label: 'Углеводы',
-                    suffix: 'г',
+                    label: l10n.macro_carbs,
+                    suffix: l10n.macro_g,
                     color: AppColors.support,
+                    errEnterValue: l10n.goals_err_enter_value,
+                    errEnterInt: l10n.goals_err_enter_int,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
@@ -128,7 +140,7 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Сохранить'),
+                        : Text(l10n.common_save),
                   ),
                 ],
               ),
@@ -142,12 +154,16 @@ class _MacroField extends StatelessWidget {
   final String label;
   final String suffix;
   final Color color;
+  final String errEnterValue;
+  final String errEnterInt;
 
   const _MacroField({
     required this.controller,
     required this.label,
     required this.suffix,
     required this.color,
+    required this.errEnterValue,
+    required this.errEnterInt,
   });
 
   @override
@@ -161,9 +177,9 @@ class _MacroField extends StatelessWidget {
         suffixStyle: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
       validator: (v) {
-        if (v == null || v.isEmpty) return 'Введите значение';
+        if (v == null || v.isEmpty) return errEnterValue;
         final n = int.tryParse(v);
-        if (n == null || n < 0) return 'Введите целое число';
+        if (n == null || n < 0) return errEnterInt;
         return null;
       },
     );

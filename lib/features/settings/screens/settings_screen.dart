@@ -12,6 +12,7 @@ import '../../../core/auth/auth_provider.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import 'document_screen.dart';
 
 part 'settings_screen.g.dart';
 
@@ -187,7 +188,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   )
                 : _NoSubCard(
                     l10n: l10n,
-                    isRu: isRu,
                     showTimer: showTimer,
                     timeLeft: _timeLeft,
                     onGoTariffs: () => context.push('/tariffs'),
@@ -209,6 +209,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.language,
                 label: l10n.settings_language,
                 onTap: () => _showLangDialog(context, l10n, isRu),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          _SettingsCard(
+            children: [
+              _Item(
+                icon: Icons.privacy_tip_outlined,
+                label: l10n.settings_privacy_policy,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DocumentScreen(type: DocumentType.privacyPolicy),
+                  ),
+                ),
+              ),
+              _Divider(),
+              _Item(
+                icon: Icons.description_outlined,
+                label: l10n.settings_terms,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DocumentScreen(type: DocumentType.termsOfService),
+                  ),
+                ),
               ),
             ],
           ),
@@ -307,8 +335,8 @@ class _ActiveSubCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text('✓ Активна',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                child: Text(l10n.settings_sub_active_badge,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
               ),
               const Spacer(),
               if (amount != null)
@@ -355,13 +383,12 @@ class _ActiveSubCard extends StatelessWidget {
 
 class _NoSubCard extends StatelessWidget {
   final AppLocalizations l10n;
-  final bool isRu;
   final bool showTimer;
   final Duration timeLeft;
   final VoidCallback onGoTariffs;
 
   const _NoSubCard({
-    required this.l10n, required this.isRu, required this.showTimer,
+    required this.l10n, required this.showTimer,
     required this.timeLeft, required this.onGoTariffs,
   });
 
@@ -389,7 +416,7 @@ class _NoSubCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            isRu ? 'Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.' : 'Subscribe to unlock AI recognition, voice and photo.',
+            l10n.settings_sub_promo,
             style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
           ),
           if (showTimer) ...[
@@ -406,7 +433,7 @@ class _NoSubCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      isRu ? 'Скидка заканчивается через:' : 'Sale ends in:',
+                      l10n.settings_sale_ends,
                       style: const TextStyle(color: OBColors.pink, fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),

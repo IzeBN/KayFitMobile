@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../shared/models/user_profile.dart';
 import '../api/api_client.dart';
+import '../notifications/notification_service.dart';
 import 'onboarding_sync.dart';
 
 part 'auth_provider.g.dart';
@@ -33,11 +34,10 @@ class AuthNotifier extends _$AuthNotifier {
       final user = await _fetchMe(token);
       if (user != null) {
         state = AsyncValue.data(user);
-        // Retry any pending onboarding sync that may have failed during login
-        // (e.g. network was down). Fire-and-forget — auth state is already set.
         syncOnboardingPending().catchError(
           (e) => debugPrint('[auth] onboarding retry error: $e'),
         );
+        NotificationService.registerTokenAfterLogin();
         return;
       }
 
@@ -60,6 +60,7 @@ class AuthNotifier extends _$AuthNotifier {
             syncOnboardingPending().catchError(
               (e) => debugPrint('[auth] onboarding retry error: $e'),
             );
+            NotificationService.registerTokenAfterLogin();
             return;
           }
         } catch (e) {
@@ -97,8 +98,13 @@ class AuthNotifier extends _$AuthNotifier {
     await checkSession();
   }
 
-  /// Sign out: invalidate refresh token on server, clear local storage.
+  /// Sign out: invalidate refresh token on server, clear local storage,
+  /// unregister FCM push token.
   Future<void> logout() async {
+    // Unregister FCM token before clearing auth — the request needs the
+    // Bearer token that is still valid at this point.
+    await NotificationService.unregisterToken();
+
     try {
       final refreshToken = await TokenStorage.getRefresh();
       if (refreshToken != null) {

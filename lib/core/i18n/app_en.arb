@@ -33,6 +33,13 @@
   "dashboard_title": "Today",
   "dashboard_addMeal": "Add meal",
   "dashboard_noMeals": "No entries for today",
+  "dashboard_personal_plan_title": "Your personal plan",
+  "dashboard_personal_plan_sub": "Goal: {kcal} kcal/day · Tap to view",
+  "@dashboard_personal_plan_sub": {
+    "placeholders": {
+      "kcal": {"type": "int"}
+    }
+  },
   "dashboard_compulsive": "Compulsive meals: {count}",
   "@dashboard_compulsive": {
     "placeholders": {
@@ -228,5 +235,136 @@
   "subscription_cancel_auto_renew_title": "Cancel auto-renewal",
   "subscription_cancel_auto_renew_confirm": "Are you sure you want to cancel subscription auto-renewal?",
   "subscription_cancel_auto_renew_action": "Cancel",
-  "subscription_auto_renew_cancelled": "Auto-renewal cancelled"
+  "subscription_auto_renew_cancelled": "Auto-renewal cancelled",
+
+  "wg_plan_ready": "Your plan is ready!",
+  "wg_personal_calc": "Personal calculation based on your data",
+  "wg_kcal_day": "kcal / day",
+  "wg_macronutrients": "Macronutrients",
+  "wg_days_to_goal": "Days to goal: {days}",
+  "@wg_days_to_goal": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "wg_target_weight_val": "Target weight: {kg} kg",
+  "@wg_target_weight_val": {
+    "placeholders": {
+      "kg": {"type": "String"}
+    }
+  },
+  "wg_weight_forecast": "Weight forecast",
+  "wg_how_to_reach": "How to reach your goal",
+  "wg_feature_photo_title": "Food photo",
+  "wg_feature_photo_desc": "Take a photo — AI recognizes calories in seconds",
+  "wg_feature_voice_title": "Voice input",
+  "wg_feature_voice_desc": "Dictate what you ate — the app will record it",
+  "wg_feature_track_title": "Progress tracking",
+  "wg_feature_track_desc": "Track your macros and see results every day",
+  "wg_start_diary": "Start your food diary",
+  "wg_now": "now",
+
+  "auth_email_login_title": "Email login",
+  "auth_register_title": "Registration",
+  "auth_login_subtitle": "Sign in to your Kayfit account",
+  "auth_register_subtitle": "Create an account to get started",
+  "auth_tab_login": "Login",
+  "auth_tab_register": "Register",
+  "auth_field_password": "Password",
+  "auth_field_name": "Name (optional)",
+  "auth_field_confirm_password": "Confirm password",
+  "auth_btn_login": "Sign in",
+  "auth_btn_register": "Create account",
+  "auth_err_enter_password": "Enter password",
+  "auth_err_min_password": "Minimum 8 characters",
+  "auth_err_confirm_password": "Confirm your password",
+  "auth_err_passwords_no_match": "Passwords do not match",
+  "auth_err_enter_email": "Enter email",
+  "auth_err_invalid_email": "Invalid email",
+  "auth_err_enter_value": "Enter a value",
+
+  "goals_title": "Macro goals",
+  "goals_saved": "Saved",
+  "goals_error": "Error: {msg}",
+  "@goals_error": {
+    "placeholders": {
+      "msg": {"type": "String"}
+    }
+  },
+  "goals_err_enter_value": "Enter a value",
+  "goals_err_enter_int": "Enter a whole number",
+
+  "dashboard_no_goals_title": "Goals not set",
+  "dashboard_no_goals_sub": "Complete \"Path to Goal\" to get a personalized nutrition plan",
+  "dashboard_remaining_title": "Remaining today",
+  "dashboard_remaining_over": "Over limit",
+
+  "edit_meal_title": "Edit meal",
+  "edit_meal_name_label": "Name",
+  "edit_meal_name_error": "Enter a name",
+  "edit_meal_saved": "Saved",
+  "edit_meal_error": "Error: {msg}",
+  "@edit_meal_error": {
+    "placeholders": {
+      "msg": {"type": "String"}
+    }
+  },
+  "edit_meal_err_enter_value": "Enter a value",
+  "edit_meal_err_invalid_number": "Enter a valid number",
+
+  "addMeal_subscription_needed": "Subscription required",
+  "addMeal_subscription_desc": "Food recognition is available on a paid plan. Subscribe to use AI features.",
+  "addMeal_choose_tariff": "Choose a plan",
+  "addMeal_close": "Close",
+  "addMeal_kcal": "{cal} kcal",
+  "@addMeal_kcal": {
+    "placeholders": {
+      "cal": {"type": "String"}
+    }
+  },
+  "addMeal_subscription_snack": "A subscription is required for this feature",
+  "addMeal_weight_hint": "Weight (g)",
+
+  "settings_privacy_policy": "Privacy Policy",
+  "settings_terms": "Terms of Service",
+  "settings_sub_promo": "Subscribe to unlock AI recognition, voice and photo.",
+  "settings_sale_ends": "Sale ends in:",
+  "settings_sub_active_badge": "✓ Active",
+
+  "tariffs_title_full": "Subscribe and unlock\nfull access",
+  "tariffs_tag1": "🥕 Nutrition recommendations",
+  "tariffs_tag2": "📋 Calorie scanner",
+  "tariffs_tag3": "📋 Macro calculation",
+  "tariffs_tag4": "😀 Emotion tracker",
+  "tariffs_trial": "Free trial",
+  "tariffs_monthly": "Monthly",
+  "tariffs_yearly": "Yearly",
+  "tariffs_quarterly": "3 months",
+  "tariffs_per_3days": "/ 3 days",
+  "tariffs_per_day": "/ day",
+  "tariffs_per_3mo": "/ 3 mo",
+  "tariffs_trial_then": "Then 2,990 ₽/year",
+  "tariffs_monthly_billing": "Monthly billing",
+  "tariffs_yearly_save": "2,990 ₽ / Save 8,890 ₽",
+  "tariffs_best_value": "Best value",
+  "tariffs_no_discount": "Without discount {price}",
+  "@tariffs_no_discount": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "tariffs_no_plans": "No plans available",
+  "tariffs_cancel_anytime": "Cancel anytime in your account settings",
+  "tariffs_optimal_months": "Optimal results are achieved after 3 months",
+  "tariffs_email_hint": "Email for receipt",
+  "tariffs_email_error": "Enter a valid email",
+  "tariffs_pay_error": "Payment failed. Please try again.",
+  "tariffs_get_plan": "Get my plan",
+  "tariffs_load_error": "Failed to load tariffs",
+  "tariffs_sale_ends": "SALE ENDS IN",
+  "tariffs_benefit1": "🥗 Nutritionist consultation",
+  "tariffs_benefit2": "🎥 Video recipes",
+  "tariffs_benefit3": "🍽️ Meal plan",
+  "tariffs_benefit4": "📋 Nutrition guide",
+  "tariffs_payment_title": "Payment"
 }

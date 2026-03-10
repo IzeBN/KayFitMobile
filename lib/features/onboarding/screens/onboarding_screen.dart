@@ -165,7 +165,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     _weight = w;
     final tw = double.tryParse(_targetWeightCtrl.text);
-    _targetWeight = (tw != null && tw >= 30 && tw <= 300) ? tw : null;
+    if (tw == null || tw < 30 || tw > 300) {
+      setState(() => _error = Localizations.localeOf(context).languageCode == 'ru'
+          ? 'Введите целевой вес (30–300 кг)'
+          : 'Enter target weight (30–300 kg)');
+      return;
+    }
+    _targetWeight = tw;
     _savePending();
     _goNext();
   }

@@ -266,6 +266,18 @@ abstract class AppLocalizations {
   /// **'Нет записей за сегодня'**
   String get dashboard_noMeals;
 
+  /// No description provided for @dashboard_personal_plan_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ваш персональный план'**
+  String get dashboard_personal_plan_title;
+
+  /// No description provided for @dashboard_personal_plan_sub.
+  ///
+  /// In ru, this message translates to:
+  /// **'Цель: {kcal} ккал/день · Нажмите для просмотра'**
+  String dashboard_personal_plan_sub(int kcal);
+
   /// No description provided for @dashboard_compulsive.
   ///
   /// In ru, this message translates to:
@@ -1201,6 +1213,564 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Автопродление отменено'**
   String get subscription_auto_renew_cancelled;
+
+  /// No description provided for @wg_plan_ready.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ваш план готов!'**
+  String get wg_plan_ready;
+
+  /// No description provided for @wg_personal_calc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Персональный расчёт на основе ваших данных'**
+  String get wg_personal_calc;
+
+  /// No description provided for @wg_kcal_day.
+  ///
+  /// In ru, this message translates to:
+  /// **'ккал / день'**
+  String get wg_kcal_day;
+
+  /// No description provided for @wg_macronutrients.
+  ///
+  /// In ru, this message translates to:
+  /// **'Макронутриенты'**
+  String get wg_macronutrients;
+
+  /// No description provided for @wg_days_to_goal.
+  ///
+  /// In ru, this message translates to:
+  /// **'До цели: {days} дней'**
+  String wg_days_to_goal(int days);
+
+  /// No description provided for @wg_target_weight_val.
+  ///
+  /// In ru, this message translates to:
+  /// **'Целевой вес: {kg} кг'**
+  String wg_target_weight_val(String kg);
+
+  /// No description provided for @wg_weight_forecast.
+  ///
+  /// In ru, this message translates to:
+  /// **'Прогноз веса'**
+  String get wg_weight_forecast;
+
+  /// No description provided for @wg_how_to_reach.
+  ///
+  /// In ru, this message translates to:
+  /// **'Как достичь цели'**
+  String get wg_how_to_reach;
+
+  /// No description provided for @wg_feature_photo_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Фото блюда'**
+  String get wg_feature_photo_title;
+
+  /// No description provided for @wg_feature_photo_desc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сфотографируйте еду — ИИ распознает калории за секунды'**
+  String get wg_feature_photo_desc;
+
+  /// No description provided for @wg_feature_voice_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Голосовой ввод'**
+  String get wg_feature_voice_title;
+
+  /// No description provided for @wg_feature_voice_desc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Продиктуйте, что съели — приложение запишет'**
+  String get wg_feature_voice_desc;
+
+  /// No description provided for @wg_feature_track_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Трекинг прогресса'**
+  String get wg_feature_track_title;
+
+  /// No description provided for @wg_feature_track_desc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Следите за КБЖУ и видьте результат каждый день'**
+  String get wg_feature_track_desc;
+
+  /// No description provided for @wg_start_diary.
+  ///
+  /// In ru, this message translates to:
+  /// **'Начать вести дневник'**
+  String get wg_start_diary;
+
+  /// No description provided for @wg_now.
+  ///
+  /// In ru, this message translates to:
+  /// **'сейчас'**
+  String get wg_now;
+
+  /// No description provided for @auth_email_login_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вход по email'**
+  String get auth_email_login_title;
+
+  /// No description provided for @auth_register_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Регистрация'**
+  String get auth_register_title;
+
+  /// No description provided for @auth_login_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Войдите в свой аккаунт Kayfit'**
+  String get auth_login_subtitle;
+
+  /// No description provided for @auth_register_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Создайте аккаунт, чтобы начать'**
+  String get auth_register_subtitle;
+
+  /// No description provided for @auth_tab_login.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вход'**
+  String get auth_tab_login;
+
+  /// No description provided for @auth_tab_register.
+  ///
+  /// In ru, this message translates to:
+  /// **'Регистрация'**
+  String get auth_tab_register;
+
+  /// No description provided for @auth_field_password.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пароль'**
+  String get auth_field_password;
+
+  /// No description provided for @auth_field_name.
+  ///
+  /// In ru, this message translates to:
+  /// **'Имя (необязательно)'**
+  String get auth_field_name;
+
+  /// No description provided for @auth_field_confirm_password.
+  ///
+  /// In ru, this message translates to:
+  /// **'Повторите пароль'**
+  String get auth_field_confirm_password;
+
+  /// No description provided for @auth_btn_login.
+  ///
+  /// In ru, this message translates to:
+  /// **'Войти'**
+  String get auth_btn_login;
+
+  /// No description provided for @auth_btn_register.
+  ///
+  /// In ru, this message translates to:
+  /// **'Создать аккаунт'**
+  String get auth_btn_register;
+
+  /// No description provided for @auth_err_enter_password.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите пароль'**
+  String get auth_err_enter_password;
+
+  /// No description provided for @auth_err_min_password.
+  ///
+  /// In ru, this message translates to:
+  /// **'Минимум 8 символов'**
+  String get auth_err_min_password;
+
+  /// No description provided for @auth_err_confirm_password.
+  ///
+  /// In ru, this message translates to:
+  /// **'Повторите пароль'**
+  String get auth_err_confirm_password;
+
+  /// No description provided for @auth_err_passwords_no_match.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пароли не совпадают'**
+  String get auth_err_passwords_no_match;
+
+  /// No description provided for @auth_err_enter_email.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите email'**
+  String get auth_err_enter_email;
+
+  /// No description provided for @auth_err_invalid_email.
+  ///
+  /// In ru, this message translates to:
+  /// **'Некорректный email'**
+  String get auth_err_invalid_email;
+
+  /// No description provided for @auth_err_enter_value.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите значение'**
+  String get auth_err_enter_value;
+
+  /// No description provided for @goals_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Цели КБЖУ'**
+  String get goals_title;
+
+  /// No description provided for @goals_saved.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранено'**
+  String get goals_saved;
+
+  /// No description provided for @goals_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ошибка: {msg}'**
+  String goals_error(String msg);
+
+  /// No description provided for @goals_err_enter_value.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите значение'**
+  String get goals_err_enter_value;
+
+  /// No description provided for @goals_err_enter_int.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите целое число'**
+  String get goals_err_enter_int;
+
+  /// No description provided for @dashboard_no_goals_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Цели не настроены'**
+  String get dashboard_no_goals_title;
+
+  /// No description provided for @dashboard_no_goals_sub.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пройдите «Путь к цели» чтобы получить персональный план питания'**
+  String get dashboard_no_goals_sub;
+
+  /// No description provided for @dashboard_remaining_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Осталось на сегодня'**
+  String get dashboard_remaining_title;
+
+  /// No description provided for @dashboard_remaining_over.
+  ///
+  /// In ru, this message translates to:
+  /// **'Превышение'**
+  String get dashboard_remaining_over;
+
+  /// No description provided for @edit_meal_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Редактировать блюдо'**
+  String get edit_meal_title;
+
+  /// No description provided for @edit_meal_name_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Название'**
+  String get edit_meal_name_label;
+
+  /// No description provided for @edit_meal_name_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите название'**
+  String get edit_meal_name_error;
+
+  /// No description provided for @edit_meal_saved.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранено'**
+  String get edit_meal_saved;
+
+  /// No description provided for @edit_meal_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ошибка: {msg}'**
+  String edit_meal_error(String msg);
+
+  /// No description provided for @edit_meal_err_enter_value.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите значение'**
+  String get edit_meal_err_enter_value;
+
+  /// No description provided for @edit_meal_err_invalid_number.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите корректное число'**
+  String get edit_meal_err_invalid_number;
+
+  /// No description provided for @addMeal_subscription_needed.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нужна подписка'**
+  String get addMeal_subscription_needed;
+
+  /// No description provided for @addMeal_subscription_desc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.'**
+  String get addMeal_subscription_desc;
+
+  /// No description provided for @addMeal_choose_tariff.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выбрать тариф'**
+  String get addMeal_choose_tariff;
+
+  /// No description provided for @addMeal_close.
+  ///
+  /// In ru, this message translates to:
+  /// **'Закрыть'**
+  String get addMeal_close;
+
+  /// No description provided for @addMeal_kcal.
+  ///
+  /// In ru, this message translates to:
+  /// **'{cal} ккал'**
+  String addMeal_kcal(String cal);
+
+  /// No description provided for @addMeal_subscription_snack.
+  ///
+  /// In ru, this message translates to:
+  /// **'Для этой функции нужна подписка'**
+  String get addMeal_subscription_snack;
+
+  /// No description provided for @addMeal_weight_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вес (г)'**
+  String get addMeal_weight_hint;
+
+  /// No description provided for @settings_privacy_policy.
+  ///
+  /// In ru, this message translates to:
+  /// **'Политика конфиденциальности'**
+  String get settings_privacy_policy;
+
+  /// No description provided for @settings_terms.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пользовательское соглашение'**
+  String get settings_terms;
+
+  /// No description provided for @settings_sub_promo.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.'**
+  String get settings_sub_promo;
+
+  /// No description provided for @settings_sale_ends.
+  ///
+  /// In ru, this message translates to:
+  /// **'Скидка заканчивается через:'**
+  String get settings_sale_ends;
+
+  /// No description provided for @settings_sub_active_badge.
+  ///
+  /// In ru, this message translates to:
+  /// **'✓ Активна'**
+  String get settings_sub_active_badge;
+
+  /// No description provided for @tariffs_title_full.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подпишись и открой\nполный доступ'**
+  String get tariffs_title_full;
+
+  /// No description provided for @tariffs_tag1.
+  ///
+  /// In ru, this message translates to:
+  /// **'🥕 Рекомендации по питанию'**
+  String get tariffs_tag1;
+
+  /// No description provided for @tariffs_tag2.
+  ///
+  /// In ru, this message translates to:
+  /// **'📋 Сканер калорий'**
+  String get tariffs_tag2;
+
+  /// No description provided for @tariffs_tag3.
+  ///
+  /// In ru, this message translates to:
+  /// **'📋 Расчет нормы'**
+  String get tariffs_tag3;
+
+  /// No description provided for @tariffs_tag4.
+  ///
+  /// In ru, this message translates to:
+  /// **'😀 Трекер эмоций'**
+  String get tariffs_tag4;
+
+  /// No description provided for @tariffs_trial.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пробный период'**
+  String get tariffs_trial;
+
+  /// No description provided for @tariffs_monthly.
+  ///
+  /// In ru, this message translates to:
+  /// **'Месяц'**
+  String get tariffs_monthly;
+
+  /// No description provided for @tariffs_yearly.
+  ///
+  /// In ru, this message translates to:
+  /// **'Год'**
+  String get tariffs_yearly;
+
+  /// No description provided for @tariffs_quarterly.
+  ///
+  /// In ru, this message translates to:
+  /// **'3 месяца'**
+  String get tariffs_quarterly;
+
+  /// No description provided for @tariffs_per_3days.
+  ///
+  /// In ru, this message translates to:
+  /// **'/ 3 дня'**
+  String get tariffs_per_3days;
+
+  /// No description provided for @tariffs_per_day.
+  ///
+  /// In ru, this message translates to:
+  /// **'/ день'**
+  String get tariffs_per_day;
+
+  /// No description provided for @tariffs_per_3mo.
+  ///
+  /// In ru, this message translates to:
+  /// **'/ 3 мес'**
+  String get tariffs_per_3mo;
+
+  /// No description provided for @tariffs_trial_then.
+  ///
+  /// In ru, this message translates to:
+  /// **'Затем 2 990 за год'**
+  String get tariffs_trial_then;
+
+  /// No description provided for @tariffs_monthly_billing.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ежемесячная оплата'**
+  String get tariffs_monthly_billing;
+
+  /// No description provided for @tariffs_yearly_save.
+  ///
+  /// In ru, this message translates to:
+  /// **'2 990 ₽ / Экономия 8 890 ₽'**
+  String get tariffs_yearly_save;
+
+  /// No description provided for @tariffs_best_value.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оптимальный выбор'**
+  String get tariffs_best_value;
+
+  /// No description provided for @tariffs_no_discount.
+  ///
+  /// In ru, this message translates to:
+  /// **'Без скидки {price}'**
+  String tariffs_no_discount(String price);
+
+  /// No description provided for @tariffs_no_plans.
+  ///
+  /// In ru, this message translates to:
+  /// **'Тарифы пока не настроены'**
+  String get tariffs_no_plans;
+
+  /// No description provided for @tariffs_cancel_anytime.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подписку можно отменить в любой удобный момент в Личном кабинете'**
+  String get tariffs_cancel_anytime;
+
+  /// No description provided for @tariffs_optimal_months.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оптимальный результат достигается через 3 месяца'**
+  String get tariffs_optimal_months;
+
+  /// No description provided for @tariffs_email_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Email для чека'**
+  String get tariffs_email_hint;
+
+  /// No description provided for @tariffs_email_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите корректный email'**
+  String get tariffs_email_error;
+
+  /// No description provided for @tariffs_pay_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось создать платёж. Попробуйте ещё раз.'**
+  String get tariffs_pay_error;
+
+  /// No description provided for @tariffs_get_plan.
+  ///
+  /// In ru, this message translates to:
+  /// **'Получить мой план'**
+  String get tariffs_get_plan;
+
+  /// No description provided for @tariffs_load_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось загрузить тарифы'**
+  String get tariffs_load_error;
+
+  /// No description provided for @tariffs_sale_ends.
+  ///
+  /// In ru, this message translates to:
+  /// **'СКИДКА ЗАКАНЧИВАЕТСЯ ЧЕРЕЗ'**
+  String get tariffs_sale_ends;
+
+  /// No description provided for @tariffs_benefit1.
+  ///
+  /// In ru, this message translates to:
+  /// **'🥗 Консультация с нутрициологом'**
+  String get tariffs_benefit1;
+
+  /// No description provided for @tariffs_benefit2.
+  ///
+  /// In ru, this message translates to:
+  /// **'🎥 Видео рецепты'**
+  String get tariffs_benefit2;
+
+  /// No description provided for @tariffs_benefit3.
+  ///
+  /// In ru, this message translates to:
+  /// **'🍽️ План питания'**
+  String get tariffs_benefit3;
+
+  /// No description provided for @tariffs_benefit4.
+  ///
+  /// In ru, this message translates to:
+  /// **'📋 Гайд по питанию'**
+  String get tariffs_benefit4;
+
+  /// No description provided for @tariffs_payment_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оплата'**
+  String get tariffs_payment_title;
 }
 
 class _AppLocalizationsDelegate

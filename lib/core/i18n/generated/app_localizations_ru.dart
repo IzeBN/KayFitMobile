@@ -93,6 +93,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboard_noMeals => 'Нет записей за сегодня';
 
   @override
+  String get dashboard_personal_plan_title => 'Ваш персональный план';
+
+  @override
+  String dashboard_personal_plan_sub(int kcal) {
+    return 'Цель: $kcal ккал/день · Нажмите для просмотра';
+  }
+
+  @override
   String dashboard_compulsive(int count) {
     return 'Компульсивных приёмов: $count';
   }
@@ -580,4 +588,304 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get subscription_auto_renew_cancelled => 'Автопродление отменено';
+
+  @override
+  String get wg_plan_ready => 'Ваш план готов!';
+
+  @override
+  String get wg_personal_calc => 'Персональный расчёт на основе ваших данных';
+
+  @override
+  String get wg_kcal_day => 'ккал / день';
+
+  @override
+  String get wg_macronutrients => 'Макронутриенты';
+
+  @override
+  String wg_days_to_goal(int days) {
+    return 'До цели: $days дней';
+  }
+
+  @override
+  String wg_target_weight_val(String kg) {
+    return 'Целевой вес: $kg кг';
+  }
+
+  @override
+  String get wg_weight_forecast => 'Прогноз веса';
+
+  @override
+  String get wg_how_to_reach => 'Как достичь цели';
+
+  @override
+  String get wg_feature_photo_title => 'Фото блюда';
+
+  @override
+  String get wg_feature_photo_desc =>
+      'Сфотографируйте еду — ИИ распознает калории за секунды';
+
+  @override
+  String get wg_feature_voice_title => 'Голосовой ввод';
+
+  @override
+  String get wg_feature_voice_desc =>
+      'Продиктуйте, что съели — приложение запишет';
+
+  @override
+  String get wg_feature_track_title => 'Трекинг прогресса';
+
+  @override
+  String get wg_feature_track_desc =>
+      'Следите за КБЖУ и видьте результат каждый день';
+
+  @override
+  String get wg_start_diary => 'Начать вести дневник';
+
+  @override
+  String get wg_now => 'сейчас';
+
+  @override
+  String get auth_email_login_title => 'Вход по email';
+
+  @override
+  String get auth_register_title => 'Регистрация';
+
+  @override
+  String get auth_login_subtitle => 'Войдите в свой аккаунт Kayfit';
+
+  @override
+  String get auth_register_subtitle => 'Создайте аккаунт, чтобы начать';
+
+  @override
+  String get auth_tab_login => 'Вход';
+
+  @override
+  String get auth_tab_register => 'Регистрация';
+
+  @override
+  String get auth_field_password => 'Пароль';
+
+  @override
+  String get auth_field_name => 'Имя (необязательно)';
+
+  @override
+  String get auth_field_confirm_password => 'Повторите пароль';
+
+  @override
+  String get auth_btn_login => 'Войти';
+
+  @override
+  String get auth_btn_register => 'Создать аккаунт';
+
+  @override
+  String get auth_err_enter_password => 'Введите пароль';
+
+  @override
+  String get auth_err_min_password => 'Минимум 8 символов';
+
+  @override
+  String get auth_err_confirm_password => 'Повторите пароль';
+
+  @override
+  String get auth_err_passwords_no_match => 'Пароли не совпадают';
+
+  @override
+  String get auth_err_enter_email => 'Введите email';
+
+  @override
+  String get auth_err_invalid_email => 'Некорректный email';
+
+  @override
+  String get auth_err_enter_value => 'Введите значение';
+
+  @override
+  String get goals_title => 'Цели КБЖУ';
+
+  @override
+  String get goals_saved => 'Сохранено';
+
+  @override
+  String goals_error(String msg) {
+    return 'Ошибка: $msg';
+  }
+
+  @override
+  String get goals_err_enter_value => 'Введите значение';
+
+  @override
+  String get goals_err_enter_int => 'Введите целое число';
+
+  @override
+  String get dashboard_no_goals_title => 'Цели не настроены';
+
+  @override
+  String get dashboard_no_goals_sub =>
+      'Пройдите «Путь к цели» чтобы получить персональный план питания';
+
+  @override
+  String get dashboard_remaining_title => 'Осталось на сегодня';
+
+  @override
+  String get dashboard_remaining_over => 'Превышение';
+
+  @override
+  String get edit_meal_title => 'Редактировать блюдо';
+
+  @override
+  String get edit_meal_name_label => 'Название';
+
+  @override
+  String get edit_meal_name_error => 'Введите название';
+
+  @override
+  String get edit_meal_saved => 'Сохранено';
+
+  @override
+  String edit_meal_error(String msg) {
+    return 'Ошибка: $msg';
+  }
+
+  @override
+  String get edit_meal_err_enter_value => 'Введите значение';
+
+  @override
+  String get edit_meal_err_invalid_number => 'Введите корректное число';
+
+  @override
+  String get addMeal_subscription_needed => 'Нужна подписка';
+
+  @override
+  String get addMeal_subscription_desc =>
+      'Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.';
+
+  @override
+  String get addMeal_choose_tariff => 'Выбрать тариф';
+
+  @override
+  String get addMeal_close => 'Закрыть';
+
+  @override
+  String addMeal_kcal(String cal) {
+    return '$cal ккал';
+  }
+
+  @override
+  String get addMeal_subscription_snack => 'Для этой функции нужна подписка';
+
+  @override
+  String get addMeal_weight_hint => 'Вес (г)';
+
+  @override
+  String get settings_privacy_policy => 'Политика конфиденциальности';
+
+  @override
+  String get settings_terms => 'Пользовательское соглашение';
+
+  @override
+  String get settings_sub_promo =>
+      'Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.';
+
+  @override
+  String get settings_sale_ends => 'Скидка заканчивается через:';
+
+  @override
+  String get settings_sub_active_badge => '✓ Активна';
+
+  @override
+  String get tariffs_title_full => 'Подпишись и открой\nполный доступ';
+
+  @override
+  String get tariffs_tag1 => '🥕 Рекомендации по питанию';
+
+  @override
+  String get tariffs_tag2 => '📋 Сканер калорий';
+
+  @override
+  String get tariffs_tag3 => '📋 Расчет нормы';
+
+  @override
+  String get tariffs_tag4 => '😀 Трекер эмоций';
+
+  @override
+  String get tariffs_trial => 'Пробный период';
+
+  @override
+  String get tariffs_monthly => 'Месяц';
+
+  @override
+  String get tariffs_yearly => 'Год';
+
+  @override
+  String get tariffs_quarterly => '3 месяца';
+
+  @override
+  String get tariffs_per_3days => '/ 3 дня';
+
+  @override
+  String get tariffs_per_day => '/ день';
+
+  @override
+  String get tariffs_per_3mo => '/ 3 мес';
+
+  @override
+  String get tariffs_trial_then => 'Затем 2 990 за год';
+
+  @override
+  String get tariffs_monthly_billing => 'Ежемесячная оплата';
+
+  @override
+  String get tariffs_yearly_save => '2 990 ₽ / Экономия 8 890 ₽';
+
+  @override
+  String get tariffs_best_value => 'Оптимальный выбор';
+
+  @override
+  String tariffs_no_discount(String price) {
+    return 'Без скидки $price';
+  }
+
+  @override
+  String get tariffs_no_plans => 'Тарифы пока не настроены';
+
+  @override
+  String get tariffs_cancel_anytime =>
+      'Подписку можно отменить в любой удобный момент в Личном кабинете';
+
+  @override
+  String get tariffs_optimal_months =>
+      'Оптимальный результат достигается через 3 месяца';
+
+  @override
+  String get tariffs_email_hint => 'Email для чека';
+
+  @override
+  String get tariffs_email_error => 'Введите корректный email';
+
+  @override
+  String get tariffs_pay_error =>
+      'Не удалось создать платёж. Попробуйте ещё раз.';
+
+  @override
+  String get tariffs_get_plan => 'Получить мой план';
+
+  @override
+  String get tariffs_load_error => 'Не удалось загрузить тарифы';
+
+  @override
+  String get tariffs_sale_ends => 'СКИДКА ЗАКАНЧИВАЕТСЯ ЧЕРЕЗ';
+
+  @override
+  String get tariffs_benefit1 => '🥗 Консультация с нутрициологом';
+
+  @override
+  String get tariffs_benefit2 => '🎥 Видео рецепты';
+
+  @override
+  String get tariffs_benefit3 => '🍽️ План питания';
+
+  @override
+  String get tariffs_benefit4 => '📋 Гайд по питанию';
+
+  @override
+  String get tariffs_payment_title => 'Оплата';
 }

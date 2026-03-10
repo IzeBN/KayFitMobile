@@ -1,6 +1,9 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/i18n/generated/app_localizations.dart';
+import '../../../router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/way_to_goal_provider.dart';
@@ -10,7 +13,15 @@ class WayToGoalScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Clear the redirect flag so the router doesn't keep sending the user here
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.read(showWayToGoalProvider)) {
+        ref.read(showWayToGoalProvider.notifier).state = false;
+      }
+    });
+
     final result = ref.watch(calculationResultProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: OBColors.bg,
@@ -19,8 +30,9 @@ class WayToGoalScreen extends ConsumerWidget {
         error: (e, _) => _ErrorView(
           message: e.toString(),
           onRetry: () => ref.invalidate(calculationResultProvider),
+          l10n: l10n,
         ),
-        data: (calc) => _ResultView(calc: calc),
+        data: (calc) => _ResultView(calc: calc, l10n: l10n),
       ),
     );
   }
@@ -28,7 +40,8 @@ class WayToGoalScreen extends ConsumerWidget {
 
 class _ResultView extends StatelessWidget {
   final dynamic calc;
-  const _ResultView({required this.calc});
+  final AppLocalizations l10n;
+  const _ResultView({required this.calc, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +66,9 @@ class _ResultView extends StatelessWidget {
                   style: TextStyle(fontSize: 40),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Ваш план готов!',
-                  style: TextStyle(
+                Text(
+                  l10n.wg_plan_ready,
+                  style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -64,7 +77,7 @@ class _ResultView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Персональный расчёт на основе ваших данных',
+                  l10n.wg_personal_calc,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.85),
@@ -90,9 +103,9 @@ class _ResultView extends StatelessWidget {
                           letterSpacing: -2,
                         ),
                       ),
-                      const Text(
-                        'ккал / день',
-                        style: TextStyle(
+                      Text(
+                        l10n.wg_kcal_day,
+                        style: const TextStyle(
                           fontSize: 15,
                           color: AppColors.textMuted,
                           fontWeight: FontWeight.w500,
@@ -117,9 +130,9 @@ class _ResultView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Макронутриенты',
-                  style: TextStyle(
+                Text(
+                  l10n.wg_macronutrients,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.text,
@@ -128,11 +141,11 @@ class _ResultView extends StatelessWidget {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    _MacroChip(label: 'Белки', value: calc.protein, color: AppColors.accent, bgColor: AppColors.accentSoft),
+                    _MacroChip(label: l10n.macro_protein, value: calc.protein, color: AppColors.accent, bgColor: AppColors.accentSoft),
                     const SizedBox(width: 8),
-                    _MacroChip(label: 'Жиры', value: calc.fat, color: AppColors.warm, bgColor: AppColors.warmSoft),
+                    _MacroChip(label: l10n.macro_fat, value: calc.fat, color: AppColors.warm, bgColor: AppColors.warmSoft),
                     const SizedBox(width: 8),
-                    _MacroChip(label: 'Углеводы', value: calc.carbs, color: AppColors.support, bgColor: AppColors.supportSoft),
+                    _MacroChip(label: l10n.macro_carbs, value: calc.carbs, color: AppColors.support, bgColor: AppColors.supportSoft),
                   ],
                 ),
               ],
@@ -152,19 +165,23 @@ class _ResultView extends StatelessWidget {
                   if (calc.daysToGoal != null)
                     _InfoRow(
                       icon: Icons.calendar_today_outlined,
-                      text: 'До цели: ${calc.daysToGoal} дней',
+                      text: l10n.wg_days_to_goal(calc.daysToGoal as int),
                     ),
                   if (calc.daysToGoal != null && calc.targetWeight != null)
                     const SizedBox(height: 10),
                   if (calc.targetWeight != null)
                     _InfoRow(
                       icon: Icons.flag_outlined,
-                      text: 'Целевой вес: ${calc.targetWeight!.toStringAsFixed(1)} кг',
+                      text: l10n.wg_target_weight_val((calc.targetWeight as double).toStringAsFixed(1)),
                     ),
                 ],
               ),
             ),
           ],
+
+          // Weight progress chart (always attempt — widget hides itself if no data)
+          const SizedBox(height: 12),
+          _WeightChart(calc: calc, l10n: l10n),
 
           const SizedBox(height: 12),
 
@@ -178,16 +195,16 @@ class _ResultView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Как достичь цели',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
+                Text(
+                  l10n.wg_how_to_reach,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
                 ),
                 const SizedBox(height: 14),
-                _FeatureRow(emoji: '📸', title: 'Фото блюда', desc: 'Сфотографируйте еду — ИИ распознает калории за секунды'),
+                _FeatureRow(emoji: '📸', title: l10n.wg_feature_photo_title, desc: l10n.wg_feature_photo_desc),
                 const SizedBox(height: 12),
-                _FeatureRow(emoji: '🎤', title: 'Голосовой ввод', desc: 'Продиктуйте, что съели — приложение запишет'),
+                _FeatureRow(emoji: '🎤', title: l10n.wg_feature_voice_title, desc: l10n.wg_feature_voice_desc),
                 const SizedBox(height: 12),
-                _FeatureRow(emoji: '📊', title: 'Трекинг прогресса', desc: 'Следите за КБЖУ и видьте результат каждый день'),
+                _FeatureRow(emoji: '📊', title: l10n.wg_feature_track_title, desc: l10n.wg_feature_track_desc),
               ],
             ),
           ),
@@ -206,9 +223,9 @@ class _ResultView extends StatelessWidget {
                 boxShadow: OBColors.buttonShadow,
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'Начать вести дневник',
-                style: TextStyle(
+              child: Text(
+                l10n.wg_start_diary,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -314,10 +331,176 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+class _WeightChart extends StatelessWidget {
+  final dynamic calc;
+  final AppLocalizations l10n;
+  const _WeightChart({required this.calc, required this.l10n});
+
+  List<FlSpot> _buildSpots() {
+    // If API provides chartData, use it: [{day, weight}]
+    if (calc.chartData != null && (calc.chartData as List).isNotEmpty) {
+      final list = calc.chartData as List;
+      final spots = <FlSpot>[];
+      for (final item in list) {
+        if (item is Map) {
+          final day = (item['day'] as num?)?.toDouble();
+          final weight = (item['weight'] as num?)?.toDouble();
+          if (day != null && weight != null) {
+            spots.add(FlSpot(day, weight));
+          }
+        }
+      }
+      if (spots.isNotEmpty) return spots;
+    }
+
+    final targetW = calc.targetWeight as double?;
+    final deficit = (calc.tdee as double) - (calc.targetCalories as double);
+
+    // If we have daysToGoal and targetWeight, do a precise projection
+    if (calc.daysToGoal != null && targetW != null) {
+      final days = (calc.daysToGoal as int).toDouble();
+      final totalKgLoss = deficit > 0 ? (deficit * days / 7700.0) : 0.0;
+      final startW = targetW + totalKgLoss;
+      const steps = 6;
+      final spots = <FlSpot>[];
+      for (var i = 0; i <= steps; i++) {
+        final t = i / steps;
+        spots.add(FlSpot(days * t, startW - totalKgLoss * t));
+      }
+      return spots;
+    }
+
+    // Fallback: estimate projection from targetWeight alone
+    if (targetW != null && deficit > 0) {
+      const projDays = 90.0;
+      final totalKgLoss = deficit * projDays / 7700.0;
+      final startW = targetW + totalKgLoss;
+      const steps = 6;
+      final spots = <FlSpot>[];
+      for (var i = 0; i <= steps; i++) {
+        final t = i / steps;
+        spots.add(FlSpot(projDays * t, startW - totalKgLoss * t));
+      }
+      return spots;
+    }
+
+    // No weight data available — hide chart
+    return [];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spots = _buildSpots();
+    if (spots.isEmpty) return const SizedBox.shrink();
+
+    final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    final yPad = (maxY - minY).clamp(0.5, double.infinity) * 0.2;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 18, 18, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
+            child: Text(
+              l10n.wg_weight_forecast,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+            ),
+          ),
+          SizedBox(
+            height: 160,
+            child: LineChart(
+              LineChartData(
+                minY: minY - yPad,
+                maxY: maxY + yPad,
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: AppColors.border,
+                    strokeWidth: 1,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (v, meta) => Text(
+                        v.toStringAsFixed(1),
+                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                      ),
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 20,
+                      getTitlesWidget: (v, meta) {
+                        final day = v.toInt();
+                        if (day == 0) return Text(l10n.wg_now, style: const TextStyle(fontSize: 9, color: AppColors.textMuted));
+                        final maxDay = spots.last.x.toInt();
+                        if (day == maxDay) {
+                          return Text('${day}d', style: const TextStyle(fontSize: 9, color: AppColors.textMuted));
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    color: OBColors.pink,
+                    barWidth: 3,
+                    dotData: FlDotData(
+                      show: true,
+                      checkToShowDot: (spot, _) =>
+                          spot.x == spots.first.x || spot.x == spots.last.x,
+                      getDotPainter: (a, b, c, d) => FlDotCirclePainter(
+                        radius: 4,
+                        color: OBColors.pink,
+                        strokeWidth: 2,
+                        strokeColor: Colors.white,
+                      ),
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          OBColors.pink.withValues(alpha: 0.2),
+                          OBColors.pink.withValues(alpha: 0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
+  final AppLocalizations l10n;
+  const _ErrorView({required this.message, required this.onRetry, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +522,7 @@ class _ErrorView extends StatelessWidget {
                   gradient: OBColors.gradient,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Text('Повторить', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                child: Text(l10n.common_retry, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               ),
             ),
           ],

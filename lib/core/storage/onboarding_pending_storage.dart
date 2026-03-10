@@ -8,7 +8,6 @@ class OnboardingPendingData {
   final double? weight;
   final double? targetWeight;
   final String trainingDays; // comma-separated or "none"
-  final String? reward;
 
   const OnboardingPendingData({
     this.age,
@@ -17,7 +16,6 @@ class OnboardingPendingData {
     this.weight,
     this.targetWeight,
     this.trainingDays = '',
-    this.reward,
   });
 
   OnboardingPendingData copyWith({
@@ -27,7 +25,6 @@ class OnboardingPendingData {
     double? weight,
     double? targetWeight,
     String? trainingDays,
-    String? reward,
   }) =>
       OnboardingPendingData(
         age: age ?? this.age,
@@ -36,7 +33,6 @@ class OnboardingPendingData {
         weight: weight ?? this.weight,
         targetWeight: targetWeight ?? this.targetWeight,
         trainingDays: trainingDays ?? this.trainingDays,
-        reward: reward ?? this.reward,
       );
 
   Map<String, dynamic> toJson() => {
@@ -46,7 +42,6 @@ class OnboardingPendingData {
         if (weight != null) 'weight': weight,
         if (targetWeight != null) 'target_weight': targetWeight,
         'training_days': trainingDays,
-        if (reward != null) 'reward': reward,
       };
 
   factory OnboardingPendingData.fromJson(Map<String, dynamic> json) =>
@@ -57,7 +52,6 @@ class OnboardingPendingData {
         weight: (json['weight'] as num?)?.toDouble(),
         targetWeight: (json['target_weight'] as num?)?.toDouble(),
         trainingDays: json['training_days'] as String? ?? '',
-        reward: json['reward'] as String?,
       );
 }
 

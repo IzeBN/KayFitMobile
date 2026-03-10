@@ -14,17 +14,21 @@ import '../storage/onboarding_pending_storage.dart';
 ///   1. Right after any successful login/register (before refreshUser).
 ///   2. On app start if the user is already authenticated (to handle
 ///      cases where sync failed last time due to network issues).
-Future<void> syncOnboardingPending() async {
+Future<bool> syncOnboardingPending() async {
   final pending = await OnboardingPendingStorage.read();
   if (pending == null) {
-    debugPrint('[onboarding_sync] No pending data — nothing to sync');
-    return;
+    debugPrint('[onboarding_sync] No pending data — triggering answer backfill');
+    // Still call answers endpoint so the backend backfills missing answers from profile
+    try {
+      await apiDio.get('/api/onboarding/answers');
+    } catch (_) {}
+    return false;
   }
 
   debugPrint('[onboarding_sync] Syncing pending onboarding data: '
       'age=${pending.age} height=${pending.height} weight=${pending.weight} '
       'targetWeight=${pending.targetWeight} gender=${pending.gender} '
-      'trainingDays=${pending.trainingDays} reward=${pending.reward}');
+      'trainingDays=${pending.trainingDays}');
 
   // Build request body — only include non-null/non-empty fields
   final body = <String, dynamic>{};
@@ -36,7 +40,6 @@ Future<void> syncOnboardingPending() async {
     body['gender'] = pending.gender;
   }
   if (pending.trainingDays.isNotEmpty) body['training_days'] = pending.trainingDays;
-  if (pending.reward != null && pending.reward!.isNotEmpty) body['reward'] = pending.reward;
 
   try {
     await apiDio.post('/api/onboarding/submit', data: body);
@@ -55,4 +58,5 @@ Future<void> syncOnboardingPending() async {
   } catch (e) {
     debugPrint('[onboarding_sync] Unexpected sync error (will retry on next start): $e');
   }
+  return true;
 }

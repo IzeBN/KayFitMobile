@@ -93,6 +93,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_noMeals => 'No entries for today';
 
   @override
+  String get dashboard_personal_plan_title => 'Your personal plan';
+
+  @override
+  String dashboard_personal_plan_sub(int kcal) {
+    return 'Goal: $kcal kcal/day · Tap to view';
+  }
+
+  @override
   String dashboard_compulsive(int count) {
     return 'Compulsive meals: $count';
   }
@@ -581,4 +589,304 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscription_auto_renew_cancelled => 'Auto-renewal cancelled';
+
+  @override
+  String get wg_plan_ready => 'Your plan is ready!';
+
+  @override
+  String get wg_personal_calc => 'Personal calculation based on your data';
+
+  @override
+  String get wg_kcal_day => 'kcal / day';
+
+  @override
+  String get wg_macronutrients => 'Macronutrients';
+
+  @override
+  String wg_days_to_goal(int days) {
+    return 'Days to goal: $days';
+  }
+
+  @override
+  String wg_target_weight_val(String kg) {
+    return 'Target weight: $kg kg';
+  }
+
+  @override
+  String get wg_weight_forecast => 'Weight forecast';
+
+  @override
+  String get wg_how_to_reach => 'How to reach your goal';
+
+  @override
+  String get wg_feature_photo_title => 'Food photo';
+
+  @override
+  String get wg_feature_photo_desc =>
+      'Take a photo — AI recognizes calories in seconds';
+
+  @override
+  String get wg_feature_voice_title => 'Voice input';
+
+  @override
+  String get wg_feature_voice_desc =>
+      'Dictate what you ate — the app will record it';
+
+  @override
+  String get wg_feature_track_title => 'Progress tracking';
+
+  @override
+  String get wg_feature_track_desc =>
+      'Track your macros and see results every day';
+
+  @override
+  String get wg_start_diary => 'Start your food diary';
+
+  @override
+  String get wg_now => 'now';
+
+  @override
+  String get auth_email_login_title => 'Email login';
+
+  @override
+  String get auth_register_title => 'Registration';
+
+  @override
+  String get auth_login_subtitle => 'Sign in to your Kayfit account';
+
+  @override
+  String get auth_register_subtitle => 'Create an account to get started';
+
+  @override
+  String get auth_tab_login => 'Login';
+
+  @override
+  String get auth_tab_register => 'Register';
+
+  @override
+  String get auth_field_password => 'Password';
+
+  @override
+  String get auth_field_name => 'Name (optional)';
+
+  @override
+  String get auth_field_confirm_password => 'Confirm password';
+
+  @override
+  String get auth_btn_login => 'Sign in';
+
+  @override
+  String get auth_btn_register => 'Create account';
+
+  @override
+  String get auth_err_enter_password => 'Enter password';
+
+  @override
+  String get auth_err_min_password => 'Minimum 8 characters';
+
+  @override
+  String get auth_err_confirm_password => 'Confirm your password';
+
+  @override
+  String get auth_err_passwords_no_match => 'Passwords do not match';
+
+  @override
+  String get auth_err_enter_email => 'Enter email';
+
+  @override
+  String get auth_err_invalid_email => 'Invalid email';
+
+  @override
+  String get auth_err_enter_value => 'Enter a value';
+
+  @override
+  String get goals_title => 'Macro goals';
+
+  @override
+  String get goals_saved => 'Saved';
+
+  @override
+  String goals_error(String msg) {
+    return 'Error: $msg';
+  }
+
+  @override
+  String get goals_err_enter_value => 'Enter a value';
+
+  @override
+  String get goals_err_enter_int => 'Enter a whole number';
+
+  @override
+  String get dashboard_no_goals_title => 'Goals not set';
+
+  @override
+  String get dashboard_no_goals_sub =>
+      'Complete \"Path to Goal\" to get a personalized nutrition plan';
+
+  @override
+  String get dashboard_remaining_title => 'Remaining today';
+
+  @override
+  String get dashboard_remaining_over => 'Over limit';
+
+  @override
+  String get edit_meal_title => 'Edit meal';
+
+  @override
+  String get edit_meal_name_label => 'Name';
+
+  @override
+  String get edit_meal_name_error => 'Enter a name';
+
+  @override
+  String get edit_meal_saved => 'Saved';
+
+  @override
+  String edit_meal_error(String msg) {
+    return 'Error: $msg';
+  }
+
+  @override
+  String get edit_meal_err_enter_value => 'Enter a value';
+
+  @override
+  String get edit_meal_err_invalid_number => 'Enter a valid number';
+
+  @override
+  String get addMeal_subscription_needed => 'Subscription required';
+
+  @override
+  String get addMeal_subscription_desc =>
+      'Food recognition is available on a paid plan. Subscribe to use AI features.';
+
+  @override
+  String get addMeal_choose_tariff => 'Choose a plan';
+
+  @override
+  String get addMeal_close => 'Close';
+
+  @override
+  String addMeal_kcal(String cal) {
+    return '$cal kcal';
+  }
+
+  @override
+  String get addMeal_subscription_snack =>
+      'A subscription is required for this feature';
+
+  @override
+  String get addMeal_weight_hint => 'Weight (g)';
+
+  @override
+  String get settings_privacy_policy => 'Privacy Policy';
+
+  @override
+  String get settings_terms => 'Terms of Service';
+
+  @override
+  String get settings_sub_promo =>
+      'Subscribe to unlock AI recognition, voice and photo.';
+
+  @override
+  String get settings_sale_ends => 'Sale ends in:';
+
+  @override
+  String get settings_sub_active_badge => '✓ Active';
+
+  @override
+  String get tariffs_title_full => 'Subscribe and unlock\nfull access';
+
+  @override
+  String get tariffs_tag1 => '🥕 Nutrition recommendations';
+
+  @override
+  String get tariffs_tag2 => '📋 Calorie scanner';
+
+  @override
+  String get tariffs_tag3 => '📋 Macro calculation';
+
+  @override
+  String get tariffs_tag4 => '😀 Emotion tracker';
+
+  @override
+  String get tariffs_trial => 'Free trial';
+
+  @override
+  String get tariffs_monthly => 'Monthly';
+
+  @override
+  String get tariffs_yearly => 'Yearly';
+
+  @override
+  String get tariffs_quarterly => '3 months';
+
+  @override
+  String get tariffs_per_3days => '/ 3 days';
+
+  @override
+  String get tariffs_per_day => '/ day';
+
+  @override
+  String get tariffs_per_3mo => '/ 3 mo';
+
+  @override
+  String get tariffs_trial_then => 'Then 2,990 ₽/year';
+
+  @override
+  String get tariffs_monthly_billing => 'Monthly billing';
+
+  @override
+  String get tariffs_yearly_save => '2,990 ₽ / Save 8,890 ₽';
+
+  @override
+  String get tariffs_best_value => 'Best value';
+
+  @override
+  String tariffs_no_discount(String price) {
+    return 'Without discount $price';
+  }
+
+  @override
+  String get tariffs_no_plans => 'No plans available';
+
+  @override
+  String get tariffs_cancel_anytime =>
+      'Cancel anytime in your account settings';
+
+  @override
+  String get tariffs_optimal_months =>
+      'Optimal results are achieved after 3 months';
+
+  @override
+  String get tariffs_email_hint => 'Email for receipt';
+
+  @override
+  String get tariffs_email_error => 'Enter a valid email';
+
+  @override
+  String get tariffs_pay_error => 'Payment failed. Please try again.';
+
+  @override
+  String get tariffs_get_plan => 'Get my plan';
+
+  @override
+  String get tariffs_load_error => 'Failed to load tariffs';
+
+  @override
+  String get tariffs_sale_ends => 'SALE ENDS IN';
+
+  @override
+  String get tariffs_benefit1 => '🥗 Nutritionist consultation';
+
+  @override
+  String get tariffs_benefit2 => '🎥 Video recipes';
+
+  @override
+  String get tariffs_benefit3 => '🍽️ Meal plan';
+
+  @override
+  String get tariffs_benefit4 => '📋 Nutrition guide';
+
+  @override
+  String get tariffs_payment_title => 'Payment';
 }

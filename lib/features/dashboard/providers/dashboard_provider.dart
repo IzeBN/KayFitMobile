@@ -10,15 +10,28 @@ Future<MacroStats> todayStats(TodayStatsRef ref) async {
   try {
     final resp = await apiDio.get('/api/stats');
     final data = resp.data as Map<String, dynamic>;
+
+    // Backend returns nested: {calories: {current, goal}, protein: {current, goal}, ...}
+    double cur(String key) {
+      final m = data[key];
+      if (m is Map) return (m['current'] as num?)?.toDouble() ?? 0;
+      return (data['${key}_eaten'] as num?)?.toDouble() ?? 0;
+    }
+    double gol(String key) {
+      final m = data[key];
+      if (m is Map) return (m['goal'] as num?)?.toDouble() ?? 0;
+      return (data['${key}_goal'] as num?)?.toDouble() ?? 0;
+    }
+
     return MacroStats(
-      caloriesEaten: (data['calories_eaten'] as num?)?.toDouble() ?? 0,
-      caloriesGoal: (data['calories_goal'] as num?)?.toDouble() ?? 0,
-      proteinEaten: (data['protein_eaten'] as num?)?.toDouble() ?? 0,
-      proteinGoal: (data['protein_goal'] as num?)?.toDouble() ?? 0,
-      fatEaten: (data['fat_eaten'] as num?)?.toDouble() ?? 0,
-      fatGoal: (data['fat_goal'] as num?)?.toDouble() ?? 0,
-      carbsEaten: (data['carbs_eaten'] as num?)?.toDouble() ?? 0,
-      carbsGoal: (data['carbs_goal'] as num?)?.toDouble() ?? 0,
+      caloriesEaten: cur('calories'),
+      caloriesGoal: gol('calories'),
+      proteinEaten: cur('protein'),
+      proteinGoal: gol('protein'),
+      fatEaten: cur('fat'),
+      fatGoal: gol('fat'),
+      carbsEaten: cur('carbs'),
+      carbsGoal: gol('carbs'),
       compulsiveCount: (data['compulsive_count'] as num?)?.toInt() ?? 0,
     );
   } catch (_) {

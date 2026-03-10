@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
@@ -60,15 +61,17 @@ class _EditMealScreenState extends State<EditMealScreen> {
         'carbs': double.parse(_carbsCtrl.text),
       });
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Сохранено')),
+          SnackBar(content: Text(l10n.edit_meal_saved)),
         );
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e')),
+          SnackBar(content: Text(l10n.edit_meal_error(e.toString()))),
         );
       }
     } finally {
@@ -88,8 +91,9 @@ class _EditMealScreenState extends State<EditMealScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Редактировать блюдо')),
+      appBar: AppBar(title: Text(l10n.edit_meal_title)),
       body: _loading
           ? const Center(child: LoadingIndicator())
           : Form(
@@ -99,37 +103,45 @@ class _EditMealScreenState extends State<EditMealScreen> {
                 children: [
                   TextFormField(
                     controller: _nameCtrl,
-                    decoration: const InputDecoration(labelText: 'Название'),
+                    decoration: InputDecoration(labelText: l10n.edit_meal_name_label),
                     validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Введите название' : null,
+                        v == null || v.trim().isEmpty ? l10n.edit_meal_name_error : null,
                   ),
                   const SizedBox(height: 12),
                   _DoubleField(
                     controller: _caloriesCtrl,
-                    label: 'Калории',
-                    suffix: 'ккал',
+                    label: l10n.macro_calories,
+                    suffix: l10n.macro_kcal,
                     color: AppColors.accent,
+                    errEnterValue: l10n.edit_meal_err_enter_value,
+                    errInvalidNumber: l10n.edit_meal_err_invalid_number,
                   ),
                   const SizedBox(height: 12),
                   _DoubleField(
                     controller: _proteinCtrl,
-                    label: 'Белки',
-                    suffix: 'г',
+                    label: l10n.macro_protein,
+                    suffix: l10n.macro_g,
                     color: AppColors.accent,
+                    errEnterValue: l10n.edit_meal_err_enter_value,
+                    errInvalidNumber: l10n.edit_meal_err_invalid_number,
                   ),
                   const SizedBox(height: 12),
                   _DoubleField(
                     controller: _fatCtrl,
-                    label: 'Жиры',
-                    suffix: 'г',
+                    label: l10n.macro_fat,
+                    suffix: l10n.macro_g,
                     color: AppColors.warm,
+                    errEnterValue: l10n.edit_meal_err_enter_value,
+                    errInvalidNumber: l10n.edit_meal_err_invalid_number,
                   ),
                   const SizedBox(height: 12),
                   _DoubleField(
                     controller: _carbsCtrl,
-                    label: 'Углеводы',
-                    suffix: 'г',
+                    label: l10n.macro_carbs,
+                    suffix: l10n.macro_g,
                     color: AppColors.support,
+                    errEnterValue: l10n.edit_meal_err_enter_value,
+                    errInvalidNumber: l10n.edit_meal_err_invalid_number,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
@@ -143,7 +155,7 @@ class _EditMealScreenState extends State<EditMealScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Сохранить'),
+                        : Text(l10n.common_save),
                   ),
                 ],
               ),
@@ -157,12 +169,16 @@ class _DoubleField extends StatelessWidget {
   final String label;
   final String suffix;
   final Color color;
+  final String errEnterValue;
+  final String errInvalidNumber;
 
   const _DoubleField({
     required this.controller,
     required this.label,
     required this.suffix,
     required this.color,
+    required this.errEnterValue,
+    required this.errInvalidNumber,
   });
 
   @override
@@ -176,9 +192,9 @@ class _DoubleField extends StatelessWidget {
         suffixStyle: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
       validator: (v) {
-        if (v == null || v.isEmpty) return 'Введите значение';
+        if (v == null || v.isEmpty) return errEnterValue;
         final n = double.tryParse(v);
-        if (n == null || n < 0) return 'Введите корректное число';
+        if (n == null || n < 0) return errInvalidNumber;
         return null;
       },
     );
