@@ -6,7 +6,7 @@ part of 'way_to_goal_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$calculationResultHash() => r'c53570670abec68242ee4ce058e5bd53492772df';
+String _$calculationResultHash() => r'fd3b6b8b1b40b099beabeef87d5f83cc118fd8f3';
 
 /// See also [calculationResult].
 @ProviderFor(calculationResult)

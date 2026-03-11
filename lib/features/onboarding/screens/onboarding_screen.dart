@@ -7,11 +7,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../core/storage/onboarding_pending_storage.dart';
 import '../../../router.dart';
+import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../way_to_goal/widgets/plan_result_view.dart';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
 enum _Step {
@@ -22,9 +25,8 @@ enum _Step {
   weight,    // 5
   training,  // 6
   method,    // 7
-  demo,      // 8
-  result,    // 9
-  auth,      // 10 → navigates to /login
+  result,    // 8
+  auth,      // 9 → navigates to /login
 }
 
 const _ageOptions = [
@@ -44,21 +46,38 @@ double _getActivityCoef(String trainingDays) {
   return 1.2;
 }
 
-({int kcal, int protein, int fat, int carbs}) _calcPreview({
+CalculationResult _calcPreview({
   required int age,
   required double weight,
   required double height,
   required String gender,
   required String trainingDays,
+  double? targetWeight,
 }) {
   final offset = gender == 'male' ? 5.0 : -161.0;
   final bmr = 10 * weight + 6.25 * height - 5 * age + offset;
   final tdee = bmr * _getActivityCoef(trainingDays);
-  final target = (tdee - 500).clamp(1200, 9999);
-  final protein = (weight * 1.6).round();
-  final fat = (weight * 0.9).round();
-  final carbs = ((target - protein * 4 - fat * 9) / 4).round().clamp(0, 9999);
-  return (kcal: target.round(), protein: protein, fat: fat, carbs: carbs);
+  final target = (tdee - 500).clamp(1200.0, 9999.0);
+  final protein = (weight * 1.6);
+  final fat = (weight * 0.9);
+  final carbs = ((target - protein * 4 - fat * 9) / 4).clamp(0.0, 9999.0);
+  int? daysToGoal;
+  if (targetWeight != null && targetWeight < weight) {
+    final deficit = tdee - target;
+    if (deficit > 0) {
+      daysToGoal = ((weight - targetWeight) * 7700 / deficit).round();
+    }
+  }
+  return CalculationResult(
+    bmr: bmr,
+    tdee: tdee,
+    targetCalories: target,
+    protein: protein,
+    fat: fat,
+    carbs: carbs,
+    daysToGoal: daysToGoal,
+    targetWeight: targetWeight,
+  );
 }
 
 // ─── Main screen ───────────────────────────────────────────────────────────────
@@ -166,9 +185,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _weight = w;
     final tw = double.tryParse(_targetWeightCtrl.text);
     if (tw == null || tw < 30 || tw > 300) {
-      setState(() => _error = Localizations.localeOf(context).languageCode == 'ru'
-          ? 'Введите целевой вес (30–300 кг)'
-          : 'Enter target weight (30–300 kg)');
+      setState(() => _error = l10n.ob_err_target_weight);
       return;
     }
     _targetWeight = tw;
@@ -223,12 +240,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   // ── Result calculation ──────────────────────────────────────────────────────
-  ({int kcal, int protein, int fat, int carbs}) get _preview => _calcPreview(
+  CalculationResult get _preview => _calcPreview(
         age: _age ?? 30,
         weight: _weight ?? 65,
         height: _height ?? 165,
         gender: _gender.isEmpty ? 'female' : _gender,
         trainingDays: _trainingDays.join(','),
+        targetWeight: _targetWeight,
       );
 
   // ── Progress ────────────────────────────────────────────────────────────────
@@ -339,9 +357,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case _Step.method:
         action = _goNext;
         label = l10n.common_next;
-      case _Step.demo:
-        action = _goNext;
-        label = l10n.ob_footer_great;
       case _Step.result:
         action = _goNext;
         label = l10n.ob_footer_login;
@@ -394,8 +409,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         );
       case _Step.method:
         return _MethodStep(l10n: l10n);
-      case _Step.demo:
-        return _DemoStep(l10n: l10n);
       case _Step.result:
         return _ResultStep(l10n: l10n, preview: _preview);
       case _Step.auth:
@@ -594,9 +607,7 @@ class _LandingStep extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        locale.languageCode == 'ru'
-                            ? 'Уже есть аккаунт? Войти'
-                            : 'Already have an account? Sign in',
+                        AppLocalizations.of(context)!.ob_already_account,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -929,14 +940,14 @@ class _WeightCard extends StatelessWidget {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               filled: false,
               hintText: '70',
-              hintStyle: TextStyle(fontSize: 32, color: AppColors.border),
-              suffixText: 'кг',
+              hintStyle: const TextStyle(fontSize: 32, color: AppColors.border),
+              suffixText: AppLocalizations.of(context)!.ob_weight_unit,
             ),
             onChanged: onChanged,
           ),
@@ -1039,9 +1050,12 @@ class _MethodStep extends StatefulWidget {
   State<_MethodStep> createState() => _MethodStepState();
 }
 
-class _MethodStepState extends State<_MethodStep> {
+enum _DemoLoadingType { none, voice, photo, text }
+
+class _MethodStepState extends State<_MethodStep> with SingleTickerProviderStateMixin {
   _DemoMode _active = _DemoMode.none;
-  bool _loading = false;
+  _DemoLoadingType _loadingType = _DemoLoadingType.none;
+  bool get _loading => _loadingType != _DemoLoadingType.none;
 
   // Text demo
   final _textCtrl = TextEditingController();
@@ -1066,7 +1080,7 @@ class _MethodStepState extends State<_MethodStep> {
 
   Future<void> _parseText(String text) async {
     if (text.trim().isEmpty) return;
-    setState(() { _loading = true; _error = null; _items = []; });
+    setState(() { _loadingType = _DemoLoadingType.text; _error = null; _items = []; });
     try {
       final resp = await apiDio.post('/api/onboarding/parse_meal', data: {
         'text': text,
@@ -1079,21 +1093,21 @@ class _MethodStepState extends State<_MethodStep> {
     } catch (e) {
       setState(() => _error = '$e');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _DemoLoadingType.none);
     }
   }
 
-  Future<void> _pickPhoto() async {
+  Future<void> _pickPhoto(ImageSource source) async {
     setState(() { _active = _DemoMode.photo; _items = []; _error = null; });
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final file = await picker.pickImage(source: source, imageQuality: 80);
     if (file == null) { setState(() => _active = _DemoMode.none); return; }
-    setState(() => _loading = true);
+    setState(() => _loadingType = _DemoLoadingType.photo);
     try {
       final form = FormData.fromMap({
         'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
       });
-      final resp = await apiDio.post('/api/onboarding/recognize_photo?language=ru', data: form);
+      final resp = await apiDio.post('/api/onboarding/recognize_photo?language=$_lang', data: form);
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
       if (error != null && error.isNotEmpty) {
@@ -1104,13 +1118,16 @@ class _MethodStepState extends State<_MethodStep> {
     } catch (e) {
       setState(() => _error = '$e');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _DemoLoadingType.none);
     }
   }
 
   Future<void> _startVoice() async {
-    if (!await _recorder.hasPermission()) {
-      setState(() => _error = 'Нет доступа к микрофону');
+    final status = await Permission.microphone.request();
+    if (!mounted) return;
+    if (!status.isGranted) {
+      setState(() => _error = widget.l10n.ob_method_mic_denied);
+      if (status.isPermanentlyDenied) openAppSettings();
       return;
     }
     final dir = await getTemporaryDirectory();
@@ -1119,12 +1136,12 @@ class _MethodStepState extends State<_MethodStep> {
       const RecordConfig(encoder: AudioEncoder.aacLc),
       path: _recordPath!,
     );
-    setState(() => _isRecording = true);
+    if (mounted) setState(() => _isRecording = true);
   }
 
   Future<void> _stopVoice() async {
     await _recorder.stop();
-    setState(() { _isRecording = false; _loading = true; _items = []; _error = null; });
+    setState(() { _isRecording = false; _loadingType = _DemoLoadingType.voice; _items = []; _error = null; });
     try {
       final form = FormData.fromMap({
         'audio': await MultipartFile.fromFile(_recordPath!, filename: 'voice.m4a'),
@@ -1138,7 +1155,7 @@ class _MethodStepState extends State<_MethodStep> {
     } catch (e) {
       setState(() => _error = '$e');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _DemoLoadingType.none);
     }
   }
 
@@ -1151,225 +1168,272 @@ class _MethodStepState extends State<_MethodStep> {
     });
   }
 
+  Future<void> _showPhotoSourcePicker() async {
+    final l10n = widget.l10n;
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.addMeal_photo,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 16),
+            _OBSourceOption(
+              icon: Icons.camera_alt_rounded,
+              label: l10n.addMeal_takePhoto,
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            const SizedBox(height: 8),
+            _OBSourceOption(
+              icon: Icons.photo_library_rounded,
+              label: l10n.addMeal_choosePhoto,
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            const SizedBox(height: 4),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.common_cancel,
+                  style: const TextStyle(color: AppColors.textMuted)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    _pickPhoto(source);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.ob_method_title,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-          const SizedBox(height: 8),
-          Text(l10n.ob_method_sub,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4)),
-          const SizedBox(height: 20),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.ob_method_title,
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+              const SizedBox(height: 8),
+              Text(l10n.ob_method_sub,
+                  style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4)),
+              const SizedBox(height: 20),
 
-          // Method tiles
-          _MethodTile(
-            icon: '📸',
-            title: l10n.ob_method_photo_title,
-            desc: l10n.ob_method_photo_desc,
-            active: _active == _DemoMode.photo,
-            onTap: _loading ? null : _pickPhoto,
-          ),
-          const SizedBox(height: 10),
-          _MethodTile(
-            icon: '🎤',
-            title: l10n.ob_method_voice_title,
-            desc: _active == _DemoMode.voice && _isRecording
-                ? 'Идёт запись... Нажмите ещё раз чтобы остановить'
-                : l10n.ob_method_voice_desc,
-            active: _active == _DemoMode.voice,
-            recording: _isRecording,
-            onTap: _loading ? null : () {
-              if (_active != _DemoMode.voice) {
-                setState(() { _active = _DemoMode.voice; _items = []; _error = null; });
-                _startVoice();
-              } else if (_isRecording) {
-                _stopVoice();
-              } else {
-                _startVoice();
-              }
-            },
-          ),
-          const SizedBox(height: 10),
-          _MethodTile(
-            icon: '⌨️',
-            title: l10n.ob_method_text_title,
-            desc: l10n.ob_method_text_desc,
-            active: _active == _DemoMode.text,
-            onTap: _loading ? null : () => setState(() {
-              _active = _DemoMode.text;
-              _items = [];
-              _error = null;
-            }),
-          ),
+              // Method tiles
+              _MethodTile(
+                icon: '📸',
+                title: l10n.ob_method_photo_title,
+                desc: l10n.ob_method_photo_desc,
+                active: _active == _DemoMode.photo,
+                onTap: _loading ? null : () {
+                  setState(() { _active = _DemoMode.photo; _items = []; _error = null; });
+                  _showPhotoSourcePicker();
+                },
+              ),
+              const SizedBox(height: 10),
+              _MethodTile(
+                icon: '🎤',
+                title: l10n.ob_method_voice_title,
+                desc: _active == _DemoMode.voice && _isRecording
+                    ? l10n.ob_method_recording
+                    : l10n.ob_method_voice_desc,
+                active: _active == _DemoMode.voice,
+                recording: _isRecording,
+                onTap: _loading ? null : () {
+                  if (_active != _DemoMode.voice) {
+                    setState(() { _active = _DemoMode.voice; _items = []; _error = null; });
+                    _startVoice();
+                  } else if (_isRecording) {
+                    _stopVoice();
+                  } else {
+                    _startVoice();
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              _MethodTile(
+                icon: '⌨️',
+                title: l10n.ob_method_text_title,
+                desc: l10n.ob_method_text_desc,
+                active: _active == _DemoMode.text,
+                onTap: _loading ? null : () => setState(() {
+                  _active = _DemoMode.text;
+                  _items = [];
+                  _error = null;
+                }),
+              ),
 
-          // Text input area
-          if (_active == _DemoMode.text) ...[
-            const SizedBox(height: 16),
-            TextField(
-              controller: _textCtrl,
-              autofocus: true,
-              maxLines: 2,
-              style: const TextStyle(fontSize: 15),
-              decoration: InputDecoration(
-                hintText: 'Например: гречка 200г, куриная грудка 150г',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: OBColors.border),
+              // Text input area
+              if (_active == _DemoMode.text) ...[
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _textCtrl,
+                  autofocus: true,
+                  maxLines: 2,
+                  style: const TextStyle(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: l10n.ob_method_text_hint,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: OBColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: OBColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: OBColors.pink, width: 2),
+                    ),
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: OBColors.border),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: _loadingType == _DemoLoadingType.text ? null : () => _parseText(_textCtrl.text),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: OBColors.gradient,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: _loadingType == _DemoLoadingType.text
+                        ? const SizedBox(width: 20, height: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : Text(l10n.ob_method_recognize,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: OBColors.pink, width: 2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: _loading ? null : () => _parseText(_textCtrl.text),
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: OBColors.gradient,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: _loading
-                    ? const SizedBox(width: 20, height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Распознать',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
-              ),
-            ),
-          ],
+              ],
 
-          // Loading indicator for photo/voice
-          if (_loading && _active != _DemoMode.text) ...[
-            const SizedBox(height: 20),
-            const Center(child: CircularProgressIndicator(color: OBColors.pink)),
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                _active == _DemoMode.photo ? 'Распознаю блюдо...' : 'Транскрибирую...',
-                style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
-              ),
-            ),
-          ],
-
-          // Error
-          if (_error != null) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.accentOverSoft,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: AppColors.accentOver, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(_error!, style: const TextStyle(fontSize: 13, color: AppColors.accentOver))),
-                  GestureDetector(onTap: _reset, child: const Icon(Icons.close, size: 16, color: AppColors.textMuted)),
-                ],
-              ),
-            ),
-          ],
-
-          // Results
-          if (_items.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: OBColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              // Error
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentOverSoft,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
-                      const Text('✅', style: TextStyle(fontSize: 16)),
+                      const Icon(Icons.error_outline, color: AppColors.accentOver, size: 18),
                       const SizedBox(width: 8),
-                      const Text('Распознано:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: _reset,
-                        child: const Text('Сбросить', style: TextStyle(color: OBColors.pink, fontSize: 13)),
+                      Expanded(child: Text(_error!, style: const TextStyle(fontSize: 13, color: AppColors.accentOver))),
+                      GestureDetector(onTap: _reset, child: const Icon(Icons.close, size: 16, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ],
+
+              // Results
+              if (_items.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: OBColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text('✅', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 8),
+                          Text(l10n.ob_method_recognized,
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: _reset,
+                            child: Text(l10n.ob_method_reset,
+                                style: const TextStyle(color: OBColors.pink, fontSize: 13)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ..._items.map((item) {
+                        final sug = item['suggestions'] as List<dynamic>?;
+                        final first = (sug != null && sug.isNotEmpty)
+                            ? sug[0] as Map<String, dynamic>
+                            : item;
+                        final name = first['name'] as String? ?? item['name'] as String? ?? '';
+                        final cal = (first['calories'] as num?)?.toStringAsFixed(0) ?? '?';
+                        final protein = (first['protein'] as num?)?.toStringAsFixed(0);
+                        final fat = (first['fat'] as num?)?.toStringAsFixed(0);
+                        final carbs = (first['carbs'] as num?)?.toStringAsFixed(0);
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 8, height: 8,
+                                decoration: const BoxDecoration(color: OBColors.pink, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(child: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+                              Text(l10n.ob_method_kcal(cal),
+                                  style: const TextStyle(fontSize: 13, color: OBColors.pink, fontWeight: FontWeight.w700)),
+                              if (protein != null) ...[
+                                const SizedBox(width: 6),
+                                Text(l10n.ob_method_macros(protein, fat ?? '0', carbs ?? '0'),
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                              ],
+                            ],
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: OBColors.pinkSoft,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('🎉', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.ob_method_ai_success,
+                          style: const TextStyle(color: OBColors.pink, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  ..._items.map((item) {
-                    final sug = item['suggestions'] as List<dynamic>?;
-                    final first = (sug != null && sug.isNotEmpty)
-                        ? sug[0] as Map<String, dynamic>
-                        : item;
-                    final name = first['name'] as String? ?? item['name'] as String? ?? '';
-                    final cal = (first['calories'] as num?)?.toStringAsFixed(0) ?? '?';
-                    final protein = (first['protein'] as num?)?.toStringAsFixed(0);
-                    final fat = (first['fat'] as num?)?.toStringAsFixed(0);
-                    final carbs = (first['carbs'] as num?)?.toStringAsFixed(0);
+                ),
+              ],
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8, height: 8,
-                            decoration: const BoxDecoration(color: OBColors.pink, shape: BoxShape.circle),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
-                          Text('$cal ккал',
-                              style: const TextStyle(fontSize: 13, color: OBColors.pink, fontWeight: FontWeight.w700)),
-                          if (protein != null) ...[
-                            const SizedBox(width: 6),
-                            Text('Б$protein Ж$fat У$carbs',
-                                style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                          ],
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: OBColors.pinkSoft,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Text('🎉', style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'ИИ всё распознал! Нажмите «Далее» чтобы продолжить.',
-                      style: TextStyle(color: OBColors.pink, fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
+              const SizedBox(height: 80),
+            ],
+          ),
+        ),
+
+        // Animated recognition overlay for voice/photo
+        if (_loadingType == _DemoLoadingType.voice || _loadingType == _DemoLoadingType.photo)
+          _OBRecognizingOverlay(
+            type: _loadingType,
+            l10n: widget.l10n,
+          ),
+      ],
     );
   }
 }
@@ -1480,186 +1544,16 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
   }
 }
 
-// ─── Step 8: Demo result ───────────────────────────────────────────────────────
-class _DemoStep extends StatelessWidget {
-  final AppLocalizations l10n;
-  const _DemoStep({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      child: Column(
-        children: [
-          Text(l10n.ob_demo_perks_title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 24),
-          _PerkTile(icon: '📸', text: l10n.ob_demo_perk1, color: AppColors.accentSoft),
-          const SizedBox(height: 12),
-          _PerkTile(icon: '🎤', text: l10n.ob_demo_perk2, color: AppColors.warmSoft),
-          const SizedBox(height: 12),
-          _PerkTile(icon: '📊', text: l10n.ob_demo_perk3, color: AppColors.supportSoft),
-          const SizedBox(height: 12),
-          _PerkTile(icon: '🤖', text: l10n.ob_demo_perk4, color: AppColors.accentSoft),
-        ],
-      ),
-    );
-  }
-}
-
-class _PerkTile extends StatelessWidget {
-  final String icon;
-  final String text;
-  final Color color;
-
-  const _PerkTile({required this.icon, required this.text, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Row(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 28)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 15, height: 1.3)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Step 9: Result ────────────────────────────────────────────────────────────
+// ─── Step 8: Result ────────────────────────────────────────────────────────────
 class _ResultStep extends StatelessWidget {
   final AppLocalizations l10n;
-  final ({int kcal, int protein, int fat, int carbs}) preview;
+  final CalculationResult preview;
 
   const _ResultStep({required this.l10n, required this.preview});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            child: Column(
-              children: [
-                Text(l10n.ob_result_title,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.white)),
-                const SizedBox(height: 4),
-                Text(l10n.ob_result_sub,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
-                const SizedBox(height: 20),
-                Text(
-                  '${preview.kcal}',
-                  style: const TextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    height: 1,
-                    letterSpacing: -2,
-                  ),
-                ),
-                Text(l10n.ob_result_kcalday,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 15)),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(l10n.ob_result_accuracy,
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _MacroResultCard(
-                  label: l10n.macro_protein, value: preview.protein, color: AppColors.accent),
-              const SizedBox(width: 8),
-              _MacroResultCard(
-                  label: l10n.macro_fat, value: preview.fat, color: AppColors.warm),
-              const SizedBox(width: 8),
-              _MacroResultCard(
-                  label: l10n.macro_carbs, value: preview.carbs, color: AppColors.support),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              boxShadow: AppShadow.sm,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.ob_result_next_title,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: 8),
-                Text(l10n.ob_result_next_text,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.5)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MacroResultCard extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color color;
-
-  const _MacroResultCard({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          boxShadow: AppShadow.sm,
-        ),
-        child: Column(
-          children: [
-            Text(
-              '${value}г', // ignore: unnecessary_brace_in_string_interps
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color),
-            ),
-            const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-          ],
-        ),
-      ),
-    );
+    return PlanResultView(calc: preview, l10n: l10n);
   }
 }
 
@@ -1783,6 +1677,222 @@ class _OptionButton extends StatelessWidget {
             color: selected ? OBColors.pink : AppColors.text,
           ),
           textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Onboarding recognition overlay ───────────────────────────────────────────
+
+class _OBRecognizingOverlay extends StatefulWidget {
+  final _DemoLoadingType type;
+  final AppLocalizations l10n;
+  const _OBRecognizingOverlay({required this.type, required this.l10n});
+
+  @override
+  State<_OBRecognizingOverlay> createState() => _OBRecognizingOverlayState();
+}
+
+class _OBRecognizingOverlayState extends State<_OBRecognizingOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isVoice = widget.type == _DemoLoadingType.voice;
+    final label = isVoice
+        ? widget.l10n.ob_recognizing_voice
+        : widget.l10n.ob_recognizing_photo;
+
+    return Container(
+      color: OBColors.bg.withValues(alpha: 0.97),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isVoice)
+            _OBWaveAnimation(controller: _ctrl)
+          else
+            _OBScanAnimation(controller: _ctrl),
+          const SizedBox(height: 28),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text),
+          ),
+          const SizedBox(height: 8),
+          _OBDotLoading(controller: _ctrl),
+        ],
+      ),
+    );
+  }
+}
+
+class _OBWaveAnimation extends StatelessWidget {
+  final AnimationController controller;
+  const _OBWaveAnimation({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    const barCount = 7;
+    const barWidth = 7.0;
+    const maxH = 50.0;
+    const minH = 8.0;
+    const gap = 6.0;
+
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final t = controller.value;
+        return Container(
+          width: 80,
+          height: 80,
+          decoration: const BoxDecoration(color: OBColors.pinkSoft, shape: BoxShape.circle),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(barCount, (i) {
+              final phase = (i / barCount) * 6.2832;
+              final v = t * 6.2832 + phase;
+              final sine = 0.5 + 0.5 * _approxSin(v);
+              final h = minH + (maxH - minH) * sine;
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: gap / 2),
+                child: Container(
+                  width: barWidth,
+                  height: h,
+                  decoration: BoxDecoration(
+                    color: OBColors.pink,
+                    borderRadius: BorderRadius.circular(barWidth / 2),
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+
+  double _approxSin(double x) {
+    final v = (x / 6.2832) - (x / 6.2832).floorToDouble();
+    return v < 0.5 ? 4 * v * (1 - 2 * v) : -1 + 4 * v * (1 - v);
+  }
+}
+
+class _OBScanAnimation extends StatelessWidget {
+  final AnimationController controller;
+  const _OBScanAnimation({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final pulse = 0.4 + 0.3 * (0.5 + 0.5 * _approxCos(controller.value * 6.2832));
+        return SizedBox(
+          width: 90,
+          height: 90,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: pulse,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: const BoxDecoration(color: OBColors.pinkSoft, shape: BoxShape.circle),
+                ),
+              ),
+              Transform.rotate(
+                angle: controller.value * 6.2832,
+                child: CustomPaint(size: const Size(88, 88), painter: _OBArcPainter()),
+              ),
+              const Icon(Icons.camera_alt_rounded, color: OBColors.pink, size: 32),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  double _approxCos(double x) {
+    final v = (x / 6.2832) - (x / 6.2832).floorToDouble();
+    return 1 - 8 * v * (1 - v);
+  }
+}
+
+class _OBArcPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = OBColors.pink
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(Rect.fromLTWH(0, 0, size.width, size.height), 0, 1.8, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter o) => false;
+}
+
+class _OBDotLoading extends StatelessWidget {
+  final AnimationController controller;
+  const _OBDotLoading({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final count = ((controller.value * 3).floor() % 4);
+        return Text(
+          '●' * count + '○' * (3 - count),
+          style: const TextStyle(fontSize: 12, color: OBColors.pink, letterSpacing: 4),
+        );
+      },
+    );
+  }
+}
+
+class _OBSourceOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _OBSourceOption({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: OBColors.border),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: OBColors.pink),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(fontSize: 16)),
+          ],
         ),
       ),
     );

@@ -296,6 +296,24 @@ abstract class AppLocalizations {
   /// **'История пуста'**
   String get journal_empty;
 
+  /// No description provided for @journal_ai_banner_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'ИИ-нутрициолог'**
+  String get journal_ai_banner_title;
+
+  /// No description provided for @journal_ai_banner_sub.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поможет с выбором блюд и расчётом КБЖУ на день'**
+  String get journal_ai_banner_sub;
+
+  /// No description provided for @journal_ai_banner_btn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Спросить'**
+  String get journal_ai_banner_btn;
+
   /// No description provided for @settings_title.
   ///
   /// In ru, this message translates to:
@@ -854,6 +872,12 @@ abstract class AppLocalizations {
   /// **'Введите корректный вес (30–300 кг)'**
   String get ob_err_weight;
 
+  /// No description provided for @ob_err_target_weight.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите целевой вес (30–300 кг)'**
+  String get ob_err_target_weight;
+
   /// No description provided for @ob_err_training.
   ///
   /// In ru, this message translates to:
@@ -895,6 +919,84 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Начать'**
   String get ob_getStarted;
+
+  /// No description provided for @ob_already_account.
+  ///
+  /// In ru, this message translates to:
+  /// **'Уже есть аккаунт? Войти'**
+  String get ob_already_account;
+
+  /// No description provided for @ob_weight_unit.
+  ///
+  /// In ru, this message translates to:
+  /// **'кг'**
+  String get ob_weight_unit;
+
+  /// No description provided for @ob_method_recording.
+  ///
+  /// In ru, this message translates to:
+  /// **'Идёт запись… Нажмите ещё раз чтобы остановить'**
+  String get ob_method_recording;
+
+  /// No description provided for @ob_method_text_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: гречка 200г, куриная грудка 150г'**
+  String get ob_method_text_hint;
+
+  /// No description provided for @ob_method_recognize.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознать'**
+  String get ob_method_recognize;
+
+  /// No description provided for @ob_method_recognized.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознано:'**
+  String get ob_method_recognized;
+
+  /// No description provided for @ob_method_reset.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сбросить'**
+  String get ob_method_reset;
+
+  /// No description provided for @ob_method_mic_denied.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет доступа к микрофону'**
+  String get ob_method_mic_denied;
+
+  /// No description provided for @ob_method_ai_success.
+  ///
+  /// In ru, this message translates to:
+  /// **'ИИ всё распознал! Нажмите «Далее» чтобы продолжить.'**
+  String get ob_method_ai_success;
+
+  /// No description provided for @ob_method_kcal.
+  ///
+  /// In ru, this message translates to:
+  /// **'{cal} ккал'**
+  String ob_method_kcal(String cal);
+
+  /// No description provided for @ob_method_macros.
+  ///
+  /// In ru, this message translates to:
+  /// **'Б{p} Ж{f} У{c}'**
+  String ob_method_macros(String p, String f, String c);
+
+  /// No description provided for @ob_recognizing_voice.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознаём голос…'**
+  String get ob_recognizing_voice;
+
+  /// No description provided for @ob_recognizing_photo.
+  ///
+  /// In ru, this message translates to:
+  /// **'Анализируем фото…'**
+  String get ob_recognizing_photo;
 
   /// No description provided for @auth_title.
   ///
@@ -1556,6 +1658,30 @@ abstract class AppLocalizations {
   /// **'Вес (г)'**
   String get addMeal_weight_hint;
 
+  /// No description provided for @addMeal_recognizing_voice.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознаём голос...'**
+  String get addMeal_recognizing_voice;
+
+  /// No description provided for @addMeal_recognizing_photo.
+  ///
+  /// In ru, this message translates to:
+  /// **'Анализируем фото...'**
+  String get addMeal_recognizing_photo;
+
+  /// No description provided for @addMeal_mic_denied.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет доступа к микрофону'**
+  String get addMeal_mic_denied;
+
+  /// No description provided for @addMeal_open_settings.
+  ///
+  /// In ru, this message translates to:
+  /// **'Настройки'**
+  String get addMeal_open_settings;
+
   /// No description provided for @settings_privacy_policy.
   ///
   /// In ru, this message translates to:
@@ -1771,6 +1897,48 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Оплата'**
   String get tariffs_payment_title;
+
+  /// No description provided for @nav_chat.
+  ///
+  /// In ru, this message translates to:
+  /// **'ИИ Чат'**
+  String get nav_chat;
+
+  /// No description provided for @chat_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'ИИ Нутрициолог'**
+  String get chat_title;
+
+  /// No description provided for @chat_input_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Спросите о питании...'**
+  String get chat_input_hint;
+
+  /// No description provided for @chat_clear.
+  ///
+  /// In ru, this message translates to:
+  /// **'Очистить чат'**
+  String get chat_clear;
+
+  /// No description provided for @chat_clear_confirm.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить всю историю чата?'**
+  String get chat_clear_confirm;
+
+  /// No description provided for @chat_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось отправить сообщение'**
+  String get chat_error;
+
+  /// No description provided for @chat_empty.
+  ///
+  /// In ru, this message translates to:
+  /// **'Спросите меня о питании, диете или прогрессе!'**
+  String get chat_empty;
 }
 
 class _AppLocalizationsDelegate

@@ -15,7 +15,7 @@ _$MealImpl _$$MealImplFromJson(Map<String, dynamic> json) => _$MealImpl(
   carbs: (json['carbs'] as num).toDouble(),
   weight: (json['weight'] as num?)?.toDouble(),
   emotion: json['emotion'] as String?,
-  createdAt: json['createdAt'] as String?,
+  createdAt: json['time'] as String?,
 );
 
 Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
@@ -28,5 +28,5 @@ Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
       'carbs': instance.carbs,
       'weight': instance.weight,
       'emotion': instance.emotion,
-      'createdAt': instance.createdAt,
+      'time': instance.createdAt,
     };

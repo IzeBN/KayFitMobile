@@ -29,6 +29,7 @@ mixin _$Meal {
   double get carbs => throw _privateConstructorUsedError;
   double? get weight => throw _privateConstructorUsedError;
   String? get emotion => throw _privateConstructorUsedError;
+  @JsonKey(name: 'time')
   String? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this Meal to a JSON map.
@@ -54,7 +55,7 @@ abstract class $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    String? createdAt,
+    @JsonKey(name: 'time') String? createdAt,
   });
 }
 
@@ -144,7 +145,7 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    String? createdAt,
+    @JsonKey(name: 'time') String? createdAt,
   });
 }
 
@@ -225,7 +226,7 @@ class _$MealImpl implements _Meal {
     required this.carbs,
     this.weight,
     this.emotion,
-    this.createdAt,
+    @JsonKey(name: 'time') this.createdAt,
   });
 
   factory _$MealImpl.fromJson(Map<String, dynamic> json) =>
@@ -248,6 +249,7 @@ class _$MealImpl implements _Meal {
   @override
   final String? emotion;
   @override
+  @JsonKey(name: 'time')
   final String? createdAt;
 
   @override
@@ -312,7 +314,7 @@ abstract class _Meal implements Meal {
     required final double carbs,
     final double? weight,
     final String? emotion,
-    final String? createdAt,
+    @JsonKey(name: 'time') final String? createdAt,
   }) = _$MealImpl;
 
   factory _Meal.fromJson(Map<String, dynamic> json) = _$MealImpl.fromJson;
@@ -334,6 +336,7 @@ abstract class _Meal implements Meal {
   @override
   String? get emotion;
   @override
+  @JsonKey(name: 'time')
   String? get createdAt;
 
   /// Create a copy of Meal

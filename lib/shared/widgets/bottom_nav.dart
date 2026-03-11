@@ -9,7 +9,8 @@ class ScaffoldWithBottomNav extends StatelessWidget {
 
   int _locationToIndex(String location) {
     if (location.startsWith('/journal')) return 1;
-    if (location.startsWith('/settings')) return 2;
+    if (location.startsWith('/chat')) return 2;
+    if (location.startsWith('/settings')) return 3;
     return 0;
   }
 
@@ -53,10 +54,17 @@ class ScaffoldWithBottomNav extends StatelessWidget {
                   onTap: () => context.go('/journal'),
                 ),
                 _NavItem(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  activeIcon: Icons.chat_bubble_rounded,
+                  label: l10n.nav_chat,
+                  active: current == 2,
+                  onTap: () => context.go('/chat'),
+                ),
+                _NavItem(
                   icon: Icons.person_outline_rounded,
                   activeIcon: Icons.person_rounded,
                   label: l10n.nav_settings,
-                  active: current == 2,
+                  active: current == 3,
                   onTap: () => context.go('/settings'),
                 ),
               ],

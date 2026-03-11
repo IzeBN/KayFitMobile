@@ -49,6 +49,9 @@
 
   "journal_title": "Journal",
   "journal_empty": "History is empty",
+  "journal_ai_banner_title": "AI Nutritionist",
+  "journal_ai_banner_sub": "Will help choose meals and calculate daily macros",
+  "journal_ai_banner_btn": "Ask",
 
   "settings_title": "Settings",
   "settings_profile": "Profile",
@@ -169,6 +172,7 @@
 
   "ob_err_height": "Enter a valid height (100–250 cm)",
   "ob_err_weight": "Enter a valid weight (30–300 kg)",
+  "ob_err_target_weight": "Enter target weight (30–300 kg)",
   "ob_err_training": "Select at least one option",
 
   "ob_footer_saving": "Saving...",
@@ -178,6 +182,31 @@
 
   "ob_continue": "Continue",
   "ob_getStarted": "Get started",
+  "ob_already_account": "Already have an account? Sign in",
+  "ob_weight_unit": "kg",
+  "ob_method_recording": "Recording… Tap again to stop",
+  "ob_method_text_hint": "E.g.: oatmeal 200g, chicken breast 150g",
+  "ob_method_recognize": "Recognize",
+  "ob_method_recognized": "Recognized:",
+  "ob_method_reset": "Reset",
+  "ob_method_mic_denied": "Microphone access denied",
+  "ob_method_ai_success": "AI recognized everything! Tap \"Next\" to continue.",
+  "ob_method_kcal": "{cal} kcal",
+  "@ob_method_kcal": {
+    "placeholders": {
+      "cal": {"type": "String"}
+    }
+  },
+  "ob_method_macros": "P{p} F{f} C{c}",
+  "@ob_method_macros": {
+    "placeholders": {
+      "p": {"type": "String"},
+      "f": {"type": "String"},
+      "c": {"type": "String"}
+    }
+  },
+  "ob_recognizing_voice": "Recognizing voice…",
+  "ob_recognizing_photo": "Analyzing photo…",
 
   "auth_title": "Sign in to Kayfit",
   "auth_subtitle": "Choose a sign-in method",
@@ -324,6 +353,10 @@
   },
   "addMeal_subscription_snack": "A subscription is required for this feature",
   "addMeal_weight_hint": "Weight (g)",
+  "addMeal_recognizing_voice": "Recognizing voice...",
+  "addMeal_recognizing_photo": "Analyzing photo...",
+  "addMeal_mic_denied": "Microphone access denied",
+  "addMeal_open_settings": "Settings",
 
   "settings_privacy_policy": "Privacy Policy",
   "settings_terms": "Terms of Service",
@@ -366,5 +399,14 @@
   "tariffs_benefit2": "🎥 Video recipes",
   "tariffs_benefit3": "🍽️ Meal plan",
   "tariffs_benefit4": "📋 Nutrition guide",
-  "tariffs_payment_title": "Payment"
+  "tariffs_payment_title": "Payment",
+
+  "nav_chat": "AI Chat",
+  
+  "chat_title": "AI Nutritionist",
+  "chat_input_hint": "Ask about nutrition...",
+  "chat_clear": "Clear chat",
+  "chat_clear_confirm": "Delete all chat history?",
+  "chat_error": "Failed to send message",
+  "chat_empty": "Ask me anything about nutrition, your diet, or progress!"
 }

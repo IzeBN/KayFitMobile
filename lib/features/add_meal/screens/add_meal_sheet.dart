@@ -4,17 +4,19 @@ import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/emotion_picker.dart';
-import '../../../shared/widgets/loading_indicator.dart';
 import 'package:dio/dio.dart';
 
 enum _InputMode { choose, text, voice, photo }
+enum _LoadingType { none, voice, photo, parsing }
 
 class AddMealSheet extends ConsumerStatefulWidget {
-  const AddMealSheet({super.key});
+  final DateTime? mealDate;
+
+  const AddMealSheet({super.key, this.mealDate});
 
   @override
   ConsumerState<AddMealSheet> createState() => _AddMealSheetState();
@@ -23,8 +25,7 @@ class AddMealSheet extends ConsumerStatefulWidget {
 class _AddMealSheetState extends ConsumerState<AddMealSheet> {
   _InputMode _mode = _InputMode.choose;
   String? _emotion;
-  bool _loading = false;
-  bool _needsSubscription = false;
+  _LoadingType _loadingType = _LoadingType.none;
 
   final _textController = TextEditingController();
   final _textFocus = FocusNode();
@@ -48,8 +49,8 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
     super.dispose();
   }
 
-  Future<void> _parseText(String text, String lang) async {
-    setState(() => _loading = true);
+  Future<void> _parseText(String text, String lang, {bool manageLoading = true}) async {
+    if (manageLoading) setState(() => _loadingType = _LoadingType.parsing);
     try {
       final resp = await apiDio.post('/api/parse_meal_suggestions', data: {
         'text': text,
@@ -58,37 +59,59 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       final items = (resp.data['items'] as List<dynamic>)
           .map((e) => e as Map<String, dynamic>)
           .toList();
-      setState(() {
-        _suggestions = items;
-        _selected.addAll(Iterable.generate(items.length));
-        _itemWeights.clear();
-        for (int i = 0; i < items.length; i++) {
-          _itemWeights[i] = (items[i]['weight_grams'] as num?)?.toDouble();
-        }
-      });
+      if (mounted) {
+        setState(() {
+          _suggestions = items;
+          _selected.addAll(Iterable.generate(items.length));
+          _itemWeights.clear();
+          for (int i = 0; i < items.length; i++) {
+            _itemWeights[i] = (items[i]['weight_grams'] as num?)?.toDouble();
+          }
+        });
+      }
     } catch (e) {
-      _handleError(e, showPaywall: false); // текст — без paywall
+      _handleError(e);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (manageLoading && mounted) setState(() => _loadingType = _LoadingType.none);
     }
   }
 
   Future<void> _startRecording() async {
-    if (!await _recorder.hasPermission()) return;
+    // Explicitly request microphone permission
+    final status = await Permission.microphone.request();
+    if (!mounted) return;
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.addMeal_mic_denied),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.accentOver,
+          action: status.isPermanentlyDenied
+              ? SnackBarAction(
+                  label: AppLocalizations.of(context)!.addMeal_open_settings,
+                  textColor: Colors.white,
+                  onPressed: openAppSettings,
+                )
+              : null,
+        ),
+      );
+      setState(() => _mode = _InputMode.choose);
+      return;
+    }
     final dir = await getTemporaryDirectory();
     _recordPath = '${dir.path}/meal_voice.m4a';
     await _recorder.start(
       const RecordConfig(encoder: AudioEncoder.aacLc),
       path: _recordPath!,
     );
-    setState(() => _isRecording = true);
+    if (mounted) setState(() => _isRecording = true);
   }
 
   Future<void> _stopRecordingAndTranscribe() async {
     await _recorder.stop();
     setState(() {
       _isRecording = false;
-      _loading = true;
+      _loadingType = _LoadingType.voice;
     });
     try {
       final form = FormData.fromMap({
@@ -97,26 +120,26 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       final resp = await apiDio.post('/api/transcribe?language=$_lang', data: form);
       final text = resp.data['text'] as String? ?? '';
       if (text.isNotEmpty) {
-        await _parseText(text, _lang);
+        await _parseText(text, _lang, manageLoading: false);
       }
     } catch (e) {
       _handleError(e);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _LoadingType.none);
     }
   }
 
-  Future<void> _pickAndRecognizePhoto() async {
+  Future<void> _pickAndRecognizePhoto(ImageSource source) async {
     final picker = ImagePicker();
     final lang = _lang; // capture before async gap
-    final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final file = await picker.pickImage(source: source, imageQuality: 80);
     if (file == null) {
       // Camera cancelled — reset mode back to choose
       if (mounted) setState(() => _mode = _InputMode.choose);
       return;
     }
     if (!mounted) return;
-    setState(() => _loading = true);
+    setState(() => _loadingType = _LoadingType.photo);
     try {
       final form = FormData.fromMap({
         'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
@@ -141,13 +164,13 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
     } catch (e) {
       _handleError(e);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _LoadingType.none);
     }
   }
 
   Future<void> _addSelected() async {
     if (_selected.isEmpty || _emotion == null) return;
-    setState(() => _loading = true);
+    setState(() => _loadingType = _LoadingType.parsing);
     try {
       final items = _selected.map((i) {
         final s = _suggestions[i];
@@ -172,29 +195,28 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       await apiDio.post('/api/meals/add_selected', data: {
         'emotion': _emotion,
         'items': items,
+        if (widget.mealDate != null)
+          'date': '${widget.mealDate!.year.toString().padLeft(4, '0')}-'
+              '${widget.mealDate!.month.toString().padLeft(2, '0')}-'
+              '${widget.mealDate!.day.toString().padLeft(2, '0')}',
       });
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _handleError(e);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loadingType = _LoadingType.none);
     }
   }
 
-  /// [showPaywall] — true для фото/голоса, false для текста.
-  void _handleError(Object e, {bool showPaywall = true}) {
+  void _handleError(Object e) {
     if (!mounted) return;
     final isPayment = e is DioException && e.error is PaymentRequiredException;
-    if (isPayment && showPaywall) {
-      setState(() => _needsSubscription = true);
-    } else {
-      final msg = isPayment
-          ? AppLocalizations.of(context)!.addMeal_subscription_snack
-          : '$e';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
-      );
-    }
+    final msg = isPayment
+        ? AppLocalizations.of(context)!.addMeal_subscription_snack
+        : '$e';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
   }
 
   @override
@@ -207,9 +229,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
-      child: LoadingOverlay(
-        isLoading: _loading,
-        child: SafeArea(
+      child: Stack(
+        children: [
+          SafeArea(
           child: Padding(
             padding: EdgeInsets.only(
               left: 16,
@@ -217,12 +239,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
               top: 16,
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
             ),
-            child: _needsSubscription
-                ? _PaywallView(onTap: () {
-                    Navigator.pop(context);
-                    context.push('/tariffs');
-                  })
-                : _suggestions.isNotEmpty
+            child: _suggestions.isNotEmpty
                 ? _SuggestionsView(
                     suggestions: _suggestions,
                     selected: _selected,
@@ -256,11 +273,21 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                     onParseText: () => _parseText(_textController.text, _lang),
                     onStartRecording: _startRecording,
                     onStopRecording: _stopRecordingAndTranscribe,
-                    onPickPhoto: _pickAndRecognizePhoto,
+                    onPickPhoto: _pickAndRecognizePhoto,  // now takes ImageSource
                     l10n: l10n,
                   ),
           ),
-        ),
+          ),  // SafeArea
+          // Recognition animation overlay
+          if (_loadingType == _LoadingType.voice || _loadingType == _LoadingType.photo)
+            _RecognizingOverlay(type: _loadingType, l10n: l10n),
+          // Simple overlay for text parsing / saving
+          if (_loadingType == _LoadingType.parsing)
+            const ColoredBox(
+              color: Colors.black26,
+              child: Center(child: CircularProgressIndicator(color: AppColors.accent)),
+            ),
+        ],
       ),
     );
   }
@@ -275,7 +302,7 @@ class _InputView extends StatelessWidget {
   final VoidCallback onParseText;
   final VoidCallback onStartRecording;
   final VoidCallback onStopRecording;
-  final VoidCallback onPickPhoto;
+  final ValueChanged<ImageSource> onPickPhoto;
   final AppLocalizations l10n;
 
   const _InputView({
@@ -310,17 +337,21 @@ class _InputView extends StatelessWidget {
           _ModeButton(
             icon: Icons.mic,
             label: l10n.addMeal_voice,
-            requiresSubscription: true,
             onTap: () => onModeSelect(_InputMode.voice),
           ),
           const SizedBox(height: 8),
           _ModeButton(
             icon: Icons.camera_alt,
             label: l10n.addMeal_photo,
-            requiresSubscription: true,
-            onTap: () {
+            onTap: () async {
+              final source = await showModalBottomSheet<ImageSource>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (_) => _PhotoSourceSheet(l10n: l10n),
+              );
+              if (source == null) return;
               onModeSelect(_InputMode.photo);
-              onPickPhoto();
+              onPickPhoto(source);
             },
           ),
         ],
@@ -380,13 +411,11 @@ class _ModeButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final bool requiresSubscription;
 
   const _ModeButton({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.requiresSubscription = false,
   });
 
   @override
@@ -406,8 +435,6 @@ class _ModeButton extends StatelessWidget {
             Icon(icon, color: AppColors.accent),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
-            if (requiresSubscription)
-              const Icon(Icons.lock_outline, size: 16, color: AppColors.textMuted),
           ],
         ),
       ),
@@ -559,7 +586,7 @@ class _WeightFieldState extends State<_WeightField> {
         textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           hintText: widget.l10n.addMeal_weight_hint,
-          suffixText: 'г',
+          suffixText: widget.l10n.macro_g,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -581,62 +608,301 @@ class _WeightFieldState extends State<_WeightField> {
   }
 }
 
-class _PaywallView extends StatelessWidget {
-  final VoidCallback onTap;
-  const _PaywallView({required this.onTap});
+// TODO: SUBSCRIPTION_REQUIRED — _PaywallView removed
+
+// ─── Recognition overlay with animated visuals ────────────────────────────────
+
+class _RecognizingOverlay extends StatefulWidget {
+  final _LoadingType type;
+  final AppLocalizations l10n;
+
+  const _RecognizingOverlay({required this.type, required this.l10n});
+
+  @override
+  State<_RecognizingOverlay> createState() => _RecognizingOverlayState();
+}
+
+class _RecognizingOverlayState extends State<_RecognizingOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 8),
-        Container(
-          width: 56,
-          height: 56,
+    final isVoice = widget.type == _LoadingType.voice;
+    final label = isVoice
+        ? widget.l10n.addMeal_recognizing_voice
+        : widget.l10n.addMeal_recognizing_photo;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.97),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+      ),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isVoice)
+            _WaveAnimation(controller: _ctrl)
+          else
+            _ScanAnimation(controller: _ctrl),
+          const SizedBox(height: 28),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: AppColors.text,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _DotLoading(controller: _ctrl),
+        ],
+      ),
+    );
+  }
+}
+
+// Equalizer bars for voice
+class _WaveAnimation extends StatelessWidget {
+  final AnimationController controller;
+  const _WaveAnimation({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    const barCount = 7;
+    const barWidth = 7.0;
+    const maxHeight = 56.0;
+    const minHeight = 8.0;
+    const spacing = 6.0;
+
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final t = controller.value;
+        return Container(
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            gradient: OBColors.gradient,
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.accentSoft,
+            shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: const Text('⭐', style: TextStyle(fontSize: 28)),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          l10n.addMeal_subscription_needed,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.addMeal_subscription_desc,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
-        ),
-        const SizedBox(height: 24),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            height: 54,
-            decoration: BoxDecoration(
-              gradient: OBColors.gradient,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: OBColors.buttonShadow,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(barCount, (i) {
+              // Each bar oscillates at different phase
+              final phase = (i / barCount) * 2 * 3.14159;
+              final sine = (0.5 + 0.5 * _sin(t * 2 * 3.14159 + phase));
+              final height = minHeight + (maxHeight - minHeight) * sine;
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: spacing / 2),
+                child: AnimatedContainer(
+                  duration: Duration.zero,
+                  width: barWidth,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(barWidth / 2),
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+
+  double _sin(double x) => (x - x.truncate() < 0.5)
+      ? 4 * (x - x.truncate()) * (1 - 2 * (x - x.truncate()))
+      : -1 + 4 * (x - x.truncate()) * (1 - (x - x.truncate()));
+}
+
+// Scanning ring for photo
+class _ScanAnimation extends StatelessWidget {
+  final AnimationController controller;
+  const _ScanAnimation({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        return SizedBox(
+          width: 90,
+          height: 90,
+          child: Stack(
             alignment: Alignment.center,
+            children: [
+              // Pulsing soft background
+              Opacity(
+                opacity: 0.4 + 0.3 * (0.5 + 0.5 * _cos(controller.value * 2 * 3.14159)),
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accentSoft,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              // Rotating arc
+              Transform.rotate(
+                angle: controller.value * 2 * 3.14159,
+                child: CustomPaint(
+                  size: const Size(88, 88),
+                  painter: _ArcPainter(),
+                ),
+              ),
+              // Center icon
+              const Icon(Icons.camera_alt_rounded, color: AppColors.accent, size: 32),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  double _cos(double x) {
+    final v = x - x.truncate();
+    return 1 - 8 * v * (1 - v);
+  }
+}
+
+class _ArcPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.accent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawArc(rect, 0, 1.8, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// Animated dots label
+class _DotLoading extends StatelessWidget {
+  final AnimationController controller;
+  const _DotLoading({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final count = ((controller.value * 3).floor() % 4);
+        return Text(
+          '●' * count + '○' * (3 - count),
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.accent,
+            letterSpacing: 4,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PhotoSourceSheet extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _PhotoSourceSheet({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+      ),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.addMeal_photo,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 16),
+          _SourceOption(
+            icon: Icons.camera_alt_rounded,
+            label: l10n.addMeal_takePhoto,
+            onTap: () => Navigator.pop(context, ImageSource.camera),
+          ),
+          const SizedBox(height: 8),
+          _SourceOption(
+            icon: Icons.photo_library_rounded,
+            label: l10n.addMeal_choosePhoto,
+            onTap: () => Navigator.pop(context, ImageSource.gallery),
+          ),
+          const SizedBox(height: 4),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
             child: Text(
-              l10n.addMeal_choose_tariff,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+              l10n.common_cancel,
+              style: const TextStyle(color: AppColors.textMuted),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SourceOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SourceOption({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.addMeal_close, style: const TextStyle(color: AppColors.textMuted)),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.accent),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(fontSize: 16)),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

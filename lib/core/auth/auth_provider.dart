@@ -35,7 +35,7 @@ class AuthNotifier extends _$AuthNotifier {
       if (user != null) {
         state = AsyncValue.data(user);
         syncOnboardingPending().catchError(
-          (e) => debugPrint('[auth] onboarding retry error: $e'),
+          (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
         );
         NotificationService.registerTokenAfterLogin();
         return;
@@ -58,7 +58,7 @@ class AuthNotifier extends _$AuthNotifier {
           if (refreshedUser != null) {
             state = AsyncValue.data(refreshedUser);
             syncOnboardingPending().catchError(
-              (e) => debugPrint('[auth] onboarding retry error: $e'),
+              (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
             );
             NotificationService.registerTokenAfterLogin();
             return;

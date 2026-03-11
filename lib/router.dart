@@ -13,6 +13,7 @@ import 'features/auth/screens/email_auth_screen.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/tariffs/screens/tariffs_screen.dart';
 import 'features/way_to_goal/screens/way_to_goal_screen.dart';
+import 'features/chat/screens/chat_screen.dart';
 import 'shared/widgets/bottom_nav.dart';
 
 const _kOnboardingDoneKey = 'onboarding_done';
@@ -113,6 +114,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/journal',
             builder: (context, state) => const JournalScreen(),
+          ),
+          GoRoute(
+            path: '/chat',
+            builder: (context, state) => const ChatScreen(),
           ),
           GoRoute(
             path: '/settings',

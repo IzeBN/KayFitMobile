@@ -112,6 +112,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_empty => 'History is empty';
 
   @override
+  String get journal_ai_banner_title => 'AI Nutritionist';
+
+  @override
+  String get journal_ai_banner_sub =>
+      'Will help choose meals and calculate daily macros';
+
+  @override
+  String get journal_ai_banner_btn => 'Ask';
+
+  @override
   String get settings_title => 'Settings';
 
   @override
@@ -409,6 +419,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ob_err_weight => 'Enter a valid weight (30–300 kg)';
 
   @override
+  String get ob_err_target_weight => 'Enter target weight (30–300 kg)';
+
+  @override
   String get ob_err_training => 'Select at least one option';
 
   @override
@@ -428,6 +441,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ob_getStarted => 'Get started';
+
+  @override
+  String get ob_already_account => 'Already have an account? Sign in';
+
+  @override
+  String get ob_weight_unit => 'kg';
+
+  @override
+  String get ob_method_recording => 'Recording… Tap again to stop';
+
+  @override
+  String get ob_method_text_hint => 'E.g.: oatmeal 200g, chicken breast 150g';
+
+  @override
+  String get ob_method_recognize => 'Recognize';
+
+  @override
+  String get ob_method_recognized => 'Recognized:';
+
+  @override
+  String get ob_method_reset => 'Reset';
+
+  @override
+  String get ob_method_mic_denied => 'Microphone access denied';
+
+  @override
+  String get ob_method_ai_success =>
+      'AI recognized everything! Tap \"Next\" to continue.';
+
+  @override
+  String ob_method_kcal(String cal) {
+    return '$cal kcal';
+  }
+
+  @override
+  String ob_method_macros(String p, String f, String c) {
+    return 'P$p F$f C$c';
+  }
+
+  @override
+  String get ob_recognizing_voice => 'Recognizing voice…';
+
+  @override
+  String get ob_recognizing_photo => 'Analyzing photo…';
 
   @override
   String get auth_title => 'Sign in to Kayfit';
@@ -778,6 +835,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMeal_weight_hint => 'Weight (g)';
 
   @override
+  String get addMeal_recognizing_voice => 'Recognizing voice...';
+
+  @override
+  String get addMeal_recognizing_photo => 'Analyzing photo...';
+
+  @override
+  String get addMeal_mic_denied => 'Microphone access denied';
+
+  @override
+  String get addMeal_open_settings => 'Settings';
+
+  @override
   String get settings_privacy_policy => 'Privacy Policy';
 
   @override
@@ -889,4 +958,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tariffs_payment_title => 'Payment';
+
+  @override
+  String get nav_chat => 'AI Chat';
+
+  @override
+  String get chat_title => 'AI Nutritionist';
+
+  @override
+  String get chat_input_hint => 'Ask about nutrition...';
+
+  @override
+  String get chat_clear => 'Clear chat';
+
+  @override
+  String get chat_clear_confirm => 'Delete all chat history?';
+
+  @override
+  String get chat_error => 'Failed to send message';
+
+  @override
+  String get chat_empty =>
+      'Ask me anything about nutrition, your diet, or progress!';
 }

@@ -112,6 +112,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_empty => 'История пуста';
 
   @override
+  String get journal_ai_banner_title => 'ИИ-нутрициолог';
+
+  @override
+  String get journal_ai_banner_sub =>
+      'Поможет с выбором блюд и расчётом КБЖУ на день';
+
+  @override
+  String get journal_ai_banner_btn => 'Спросить';
+
+  @override
   String get settings_title => 'Настройки';
 
   @override
@@ -407,6 +417,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ob_err_weight => 'Введите корректный вес (30–300 кг)';
 
   @override
+  String get ob_err_target_weight => 'Введите целевой вес (30–300 кг)';
+
+  @override
   String get ob_err_training => 'Выберите хотя бы один вариант';
 
   @override
@@ -426,6 +439,52 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ob_getStarted => 'Начать';
+
+  @override
+  String get ob_already_account => 'Уже есть аккаунт? Войти';
+
+  @override
+  String get ob_weight_unit => 'кг';
+
+  @override
+  String get ob_method_recording =>
+      'Идёт запись… Нажмите ещё раз чтобы остановить';
+
+  @override
+  String get ob_method_text_hint =>
+      'Например: гречка 200г, куриная грудка 150г';
+
+  @override
+  String get ob_method_recognize => 'Распознать';
+
+  @override
+  String get ob_method_recognized => 'Распознано:';
+
+  @override
+  String get ob_method_reset => 'Сбросить';
+
+  @override
+  String get ob_method_mic_denied => 'Нет доступа к микрофону';
+
+  @override
+  String get ob_method_ai_success =>
+      'ИИ всё распознал! Нажмите «Далее» чтобы продолжить.';
+
+  @override
+  String ob_method_kcal(String cal) {
+    return '$cal ккал';
+  }
+
+  @override
+  String ob_method_macros(String p, String f, String c) {
+    return 'Б$p Ж$f У$c';
+  }
+
+  @override
+  String get ob_recognizing_voice => 'Распознаём голос…';
+
+  @override
+  String get ob_recognizing_photo => 'Анализируем фото…';
 
   @override
   String get auth_title => 'Войти в Kayfit';
@@ -776,6 +835,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addMeal_weight_hint => 'Вес (г)';
 
   @override
+  String get addMeal_recognizing_voice => 'Распознаём голос...';
+
+  @override
+  String get addMeal_recognizing_photo => 'Анализируем фото...';
+
+  @override
+  String get addMeal_mic_denied => 'Нет доступа к микрофону';
+
+  @override
+  String get addMeal_open_settings => 'Настройки';
+
+  @override
   String get settings_privacy_policy => 'Политика конфиденциальности';
 
   @override
@@ -888,4 +959,25 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get tariffs_payment_title => 'Оплата';
+
+  @override
+  String get nav_chat => 'ИИ Чат';
+
+  @override
+  String get chat_title => 'ИИ Нутрициолог';
+
+  @override
+  String get chat_input_hint => 'Спросите о питании...';
+
+  @override
+  String get chat_clear => 'Очистить чат';
+
+  @override
+  String get chat_clear_confirm => 'Удалить всю историю чата?';
+
+  @override
+  String get chat_error => 'Не удалось отправить сообщение';
+
+  @override
+  String get chat_empty => 'Спросите меня о питании, диете или прогрессе!';
 }
