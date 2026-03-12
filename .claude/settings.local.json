@@ -47,7 +47,8 @@
       "Bash(\"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze \"C:\\\\Data\\\\projects\\\\FitKeepMobile\\\\lib\\\\features\\\\onboarding\\\\screens\\\\onboarding_screen.dart\" 2>&1)",
       "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" pub run build_runner build --delete-conflicting-outputs 2>&1 | tail -5)",
       "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n 2>&1 && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" analyze 2>&1 | tail -3)",
-      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n 2>&1 | tail -3)"
+      "Bash(cd \"C:\\\\Data\\\\projects\\\\FitKeepMobile\" && \"C:\\\\Program Files\\\\flutter\\\\bin\\\\flutter\" gen-l10n 2>&1 | tail -3)",
+      "Bash(find \"C:\\\\Users\\\\izeb\\\\AppData\\\\Local\\\\Pub\\\\Cache\\\\hosted\\\\pub.dev\" -name \"*.dart\" -path \"*appmetrica*\" 2>/dev/null | head -20)"
     ]
   }
 }

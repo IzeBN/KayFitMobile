@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
@@ -81,6 +82,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _isSending = true;
     });
     _scrollToBottom();
+    AnalyticsService.chatMessageSent(_messages.length);
 
     try {
       final resp = await apiDio.post(
@@ -94,6 +96,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         _messages.removeLast(); // remove typing indicator
         _messages.add(reply);
       });
+      AnalyticsService.chatResponseReceived(_messages.length);
       _scrollToBottom();
     } catch (_) {
       setState(() {

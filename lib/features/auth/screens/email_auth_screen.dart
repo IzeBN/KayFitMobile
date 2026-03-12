@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/auth/auth_provider.dart';
 import 'package:kayfit/core/auth/onboarding_sync.dart';
@@ -396,6 +397,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _loading = true);
+    AnalyticsService.loginAttempted('email');
     try {
       final resp = await apiDio.post(
         '/api/v1/auth/login',
@@ -409,10 +411,14 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
         data['access_token'] as String,
         data['refresh_token'] as String,
       );
+      AnalyticsService.loginSuccess('email');
       await _afterLogin();
     } on DioException catch (e) {
-      _showError(_extractDetail(e));
+      final reason = _extractDetail(e);
+      AnalyticsService.loginFailed('email', reason);
+      _showError(reason);
     } catch (e) {
+      AnalyticsService.loginFailed('email', '$e');
       _showError('$e');
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -431,6 +437,8 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
       ref.invalidate(todayStatsProvider);
     }
     await ref.read(authNotifierProvider.notifier).refreshUser();
+    AnalyticsService.setUserId(_emailCtrl.text.trim());
+    AnalyticsService.setUserProfile(email: _emailCtrl.text.trim());
   }
 
   void _showError(String msg) {
@@ -517,6 +525,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _loading = true);
+    AnalyticsService.registerAttempted();
     try {
       final body = <String, dynamic>{
         'email': _emailCtrl.text.trim(),
@@ -531,10 +540,14 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
         data['access_token'] as String,
         data['refresh_token'] as String,
       );
+      AnalyticsService.registerSuccess();
       await _afterLogin();
     } on DioException catch (e) {
-      _showError(_extractDetail(e));
+      final reason = _extractDetail(e);
+      AnalyticsService.registerFailed(reason);
+      _showError(reason);
     } catch (e) {
+      AnalyticsService.registerFailed('$e');
       _showError('$e');
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -553,6 +566,11 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
       ref.invalidate(todayStatsProvider);
     }
     await ref.read(authNotifierProvider.notifier).refreshUser();
+    AnalyticsService.setUserId(_emailCtrl.text.trim());
+    AnalyticsService.setUserProfile(
+      email: _emailCtrl.text.trim(),
+      name: _usernameCtrl.text.trim().isNotEmpty ? _usernameCtrl.text.trim() : null,
+    );
   }
 
   void _showError(String msg) {

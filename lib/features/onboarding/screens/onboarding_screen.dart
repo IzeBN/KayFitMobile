@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
@@ -108,6 +109,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _showSkipDialog = false;
 
   @override
+  void initState() {
+    super.initState();
+    AnalyticsService.onboardingStepViewed(_Step.landing.name);
+  }
+
+  @override
   void dispose() {
     _heightCtrl.dispose();
     _weightCtrl.dispose();
@@ -117,6 +124,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Navigation ──────────────────────────────────────────────────────────────
   void _goNext() {
+    AnalyticsService.onboardingStepCompleted(_step.name);
     setState(() {
       _error = null;
       _showSkipDialog = false;
@@ -124,6 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final idx = steps.indexOf(_step);
       if (idx < steps.length - 1) {
         _step = steps[idx + 1];
+        AnalyticsService.onboardingStepViewed(_step.name);
       }
     });
   }
@@ -236,6 +245,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       targetWeight: _targetWeight,
       trainingDays: td,
     ));
+    AnalyticsService.onboardingCompleted();
+    AnalyticsService.setUserProfile(
+      gender: _gender.isNotEmpty ? _gender : null,
+      age: _age,
+    );
     if (mounted) context.go('/login');
   }
 

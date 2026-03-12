@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/locale/locale_provider.dart';
@@ -153,7 +154,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.logout,
                 label: l10n.settings_logout,
                 color: AppColors.accentOver,
-                onTap: () => ref.read(authNotifierProvider.notifier).logout(),
+                onTap: () {
+                AnalyticsService.loggedOut();
+                ref.read(authNotifierProvider.notifier).logout();
+              },
               ),
             ],
           ),
@@ -180,6 +184,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               flag: '🇷🇺', label: 'Русский', selected: isRu,
               onTap: () {
                 ref.read(localeProvider.notifier).setLocale(const Locale('ru'));
+                AnalyticsService.languageChanged('ru');
                 Navigator.pop(context);
               },
             ),
@@ -188,6 +193,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               flag: '🇬🇧', label: 'English', selected: !isRu,
               onTap: () {
                 ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                AnalyticsService.languageChanged('en');
                 Navigator.pop(context);
               },
             ),

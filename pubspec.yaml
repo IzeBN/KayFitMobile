@@ -62,6 +62,10 @@ dependencies:
   firebase_messaging: ^15.0.0
   flutter_local_notifications: ^17.0.0
 
+  # Analytics
+  appmetrica_plugin: ^3.4.0
+  decimal: ^3.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

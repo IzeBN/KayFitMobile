@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -112,6 +113,12 @@ class _TariffsScreenState extends ConsumerState<TariffsScreen> {
   Duration _timeLeft = Duration.zero;
 
   @override
+  void initState() {
+    super.initState();
+    AnalyticsService.tariffsViewed();
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _emailCtrl.dispose();
@@ -168,13 +175,19 @@ class _TariffsScreenState extends ConsumerState<TariffsScreen> {
     }
   }
 
-  Future<void> _pay(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _pay(BuildContext context, AppLocalizations l10n, {Map<String, dynamic>? tariff}) async {
     final email = _emailCtrl.text.trim().toLowerCase();
     if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
       setState(() => _payError = l10n.tariffs_email_error);
       return;
     }
     if (_selectedId == null) return;
+    if (tariff != null) {
+      AnalyticsService.subscriptionPurchaseStarted(
+        tariff['code'] as String? ?? '',
+        (tariff['price'] as num?)?.toDouble() ?? 0,
+      );
+    }
     setState(() {
       _paying = true;
       _payError = null;
@@ -312,7 +325,13 @@ class _TariffsScreenState extends ConsumerState<TariffsScreen> {
                               tariff: t,
                               l10n: l10n,
                               selected: t['id'] == _selectedId,
-                              onTap: () => setState(() => _selectedId = t['id'] as int?),
+                              onTap: () {
+                                setState(() => _selectedId = t['id'] as int?);
+                                AnalyticsService.tariffSelected(
+                                  t['code'] as String? ?? '',
+                                  (t['price'] as num?)?.toDouble() ?? 0,
+                                );
+                              },
                             ),
                           )),
 
@@ -387,7 +406,10 @@ class _TariffsScreenState extends ConsumerState<TariffsScreen> {
                             child: GestureDetector(
                               onTap: (_paying || _selectedId == null)
                                   ? null
-                                  : () => _pay(context, l10n),
+                                  : () {
+                                      final selectedTariff = tariffs.where((t) => t['id'] == _selectedId).firstOrNull;
+                                      _pay(context, l10n, tariff: selectedTariff);
+                                    },
                               child: AnimatedOpacity(
                                 duration: const Duration(milliseconds: 150),
                                 opacity:

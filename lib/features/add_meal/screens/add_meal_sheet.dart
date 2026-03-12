@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
@@ -40,6 +41,13 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
   final _recorder = AudioRecorder();
   bool _isRecording = false;
   String? _recordPath;
+  DateTime? _recordStart;
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.mealAddOpened();
+  }
 
   @override
   void dispose() {
@@ -68,6 +76,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
             _itemWeights[i] = (items[i]['weight_grams'] as num?)?.toDouble();
           }
         });
+        AnalyticsService.mealParsed(items.length, _mode.name);
       }
     } catch (e) {
       _handleError(e);
@@ -104,11 +113,17 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       const RecordConfig(encoder: AudioEncoder.aacLc),
       path: _recordPath!,
     );
+    _recordStart = DateTime.now();
+    AnalyticsService.mealVoiceRecordStarted();
     if (mounted) setState(() => _isRecording = true);
   }
 
   Future<void> _stopRecordingAndTranscribe() async {
     await _recorder.stop();
+    final durationSeconds = _recordStart != null
+        ? DateTime.now().difference(_recordStart!).inSeconds
+        : 0;
+    AnalyticsService.mealVoiceRecordStopped(durationSeconds);
     setState(() {
       _isRecording = false;
       _loadingType = _LoadingType.voice;
@@ -138,6 +153,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
       if (mounted) setState(() => _mode = _InputMode.choose);
       return;
     }
+    AnalyticsService.mealPhotoTaken();
     if (!mounted) return;
     setState(() => _loadingType = _LoadingType.photo);
     try {
@@ -200,8 +216,19 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
               '${widget.mealDate!.month.toString().padLeft(2, '0')}-'
               '${widget.mealDate!.day.toString().padLeft(2, '0')}',
       });
+      final totalCal = items.fold<double>(
+        0,
+        (sum, it) => sum + ((it['calories'] as num?)?.toDouble() ?? 0),
+      ).round();
+      AnalyticsService.mealSaved(
+        itemCount: items.length,
+        mode: _mode.name,
+        emotion: _emotion,
+        totalCalories: totalCal,
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      AnalyticsService.mealSaveFailed('$e');
       _handleError(e);
     } finally {
       if (mounted) setState(() => _loadingType = _LoadingType.none);
@@ -253,7 +280,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                       }
                     }),
                     onWeightChange: (i, w) => setState(() => _itemWeights[i] = w),
-                    onEmotionSelect: (e) => setState(() => _emotion = e),
+                    onEmotionSelect: (e) {
+                      setState(() => _emotion = e);
+                      AnalyticsService.emotionSelected(e);
+                    },
                     onAdd: _addSelected,
                     l10n: l10n,
                   )
@@ -264,6 +294,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet> {
                     isRecording: _isRecording,
                     onModeSelect: (m) {
                       setState(() => _mode = m);
+                      AnalyticsService.mealInputModeSelected(m.name);
                       if (m == _InputMode.text) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           _textFocus.requestFocus();
