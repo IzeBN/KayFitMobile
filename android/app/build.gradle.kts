@@ -18,6 +18,11 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    // Suppress obsolete Java source/target compatibility warnings from plugins
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("-Xlint:-options")
+    }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }

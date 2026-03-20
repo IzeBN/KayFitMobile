@@ -66,6 +66,9 @@ dependencies:
   appmetrica_plugin: ^3.4.0
   decimal: ^3.0.2
 
+  # App Review
+  in_app_review: ^2.0.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../shared/models/user_profile.dart';
 import '../api/api_client.dart';
 import '../notifications/notification_service.dart';
+import '../ai_consent/ai_consent_provider.dart';
 import 'onboarding_sync.dart';
 
 part 'auth_provider.g.dart';
@@ -38,6 +39,8 @@ class AuthNotifier extends _$AuthNotifier {
           (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
         );
         NotificationService.registerTokenAfterLogin();
+        // Load AI consent status from server
+        ref.read(aiConsentProvider.notifier).load();
         return;
       }
 
@@ -61,6 +64,8 @@ class AuthNotifier extends _$AuthNotifier {
               (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
             );
             NotificationService.registerTokenAfterLogin();
+            // Load AI consent status from server
+            ref.read(aiConsentProvider.notifier).load();
             return;
           }
         } catch (e) {
@@ -113,6 +118,15 @@ class AuthNotifier extends _$AuthNotifier {
           data: {'refresh_token': refreshToken},
         );
       }
+    } catch (_) {}
+    await TokenStorage.clear();
+    state = const AsyncValue.data(null);
+  }
+
+  /// Permanently delete the user account and all associated data.
+  Future<void> deleteAccount() async {
+    try {
+      await apiDio.delete('/api/v1/auth/account');
     } catch (_) {}
     await TokenStorage.clear();
     state = const AsyncValue.data(null);

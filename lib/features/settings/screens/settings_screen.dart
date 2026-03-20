@@ -1,41 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dio/dio.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'document_screen.dart';
-
-part 'settings_screen.g.dart';
-
-// ─── Provider ──────────────────────────────────────────────────────────────────
-
-@riverpod
-Future<Map<String, dynamic>?> settingsSubscription(SettingsSubscriptionRef ref) async {
-  try {
-    final resp = await apiDio.get('/api/payments/subscription');
-    if (resp.data == null) return null;
-    return resp.data as Map<String, dynamic>;
-  } on DioException catch (e) {
-    if (e.response?.statusCode == 404 || e.response?.statusCode == 204) return null;
-    rethrow;
-  }
-}
-
-@riverpod
-Future<Map<String, dynamic>?> settingsTariffsPaywall(SettingsTariffsPaywallRef ref) async {
-  try {
-    final resp = await apiDio.get('/api/payments/tariffs');
-    return resp.data as Map<String, dynamic>;
-  } catch (_) {
-    return null;
-  }
-}
 
 // ─── Screen ────────────────────────────────────────────────────────────────────
 
@@ -46,153 +17,272 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _staggerCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _staggerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _staggerCtrl.dispose();
+    super.dispose();
+  }
+
+  Animation<double> _fadeFor(int i) => CurvedAnimation(
+        parent: _staggerCtrl,
+        curve: Interval(
+          (i * 0.12).clamp(0.0, 0.7),
+          ((i * 0.12) + 0.35).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic,
+        ),
+      );
+
+  Animation<Offset> _slideFor(int i) => Tween<Offset>(
+        begin: const Offset(0.08, 0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(
+        parent: _staggerCtrl,
+        curve: Interval(
+          (i * 0.12).clamp(0.0, 0.7),
+          ((i * 0.12) + 0.35).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic,
+        ),
+      ));
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authNotifierProvider).value;
-    // final subAsync = ref.watch(settingsSubscriptionProvider);
-    // final paywallAsync = ref.watch(settingsTariffsPaywallProvider);
     final isRu = Localizations.localeOf(context).languageCode == 'ru';
 
-    // TODO: SUBSCRIPTION_REQUIRED — timer block commented out
-    // paywallAsync.whenData((d) { ... });
-    // final showTimer = _saleEndsAt != null && _timeLeft > Duration.zero;
-    // _startTimer(endsAt);
+    final sections = <Widget>[
+      if (user != null) _UserCard(user: user),
+      const SizedBox(height: 8),
+      _SectionCard(children: [
+        _NavItem(
+          icon: Icons.flag_rounded,
+          iconColor: AppColors.accent,
+          iconBg: AppColors.accentSoft,
+          label: l10n.settings_goals,
+          onTap: () => context.push('/settings/goals'),
+        ),
+        _ItemDivider(),
+        _NavItem(
+          icon: Icons.language_rounded,
+          iconColor: const Color(0xFF7C3AED),
+          iconBg: const Color(0xFFEDE9FE),
+          label: l10n.settings_language,
+          onTap: () => _showLangSheet(context, l10n, isRu),
+          trailing: Text(
+            isRu ? '🇷🇺 RU' : '🇬🇧 EN',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ]),
+      const SizedBox(height: 8),
+      _SectionCard(children: [
+        _NavItem(
+          icon: Icons.privacy_tip_rounded,
+          iconColor: AppColors.warm,
+          iconBg: AppColors.warmSoft,
+          label: l10n.settings_privacy_policy,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const DocumentScreen(type: DocumentType.privacyPolicy),
+            ),
+          ),
+        ),
+        _ItemDivider(),
+        _NavItem(
+          icon: Icons.description_rounded,
+          iconColor: AppColors.support,
+          iconBg: AppColors.supportSoft,
+          label: l10n.settings_terms,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const DocumentScreen(type: DocumentType.termsOfService),
+            ),
+          ),
+        ),
+      ]),
+      const SizedBox(height: 8),
+      _LogoutCard(
+        label: l10n.settings_logout,
+        onTap: () {
+          AnalyticsService.loggedOut();
+          ref.read(authNotifierProvider.notifier).logout();
+        },
+      ),
+      const SizedBox(height: 8),
+      _DeleteAccountCard(
+        onTap: () => _confirmDeleteAccount(context),
+      ),
+      const SizedBox(height: 24),
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(title: Text(l10n.settings_title)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ── User card ────────────────────────────────────────────────────
-          if (user != null)
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                boxShadow: AppShadow.sm,
+      body: CustomScrollView(
+        slivers: [
+          // ── Gradient AppBar ──────────────────────────────────────────
+          SliverAppBar(
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            expandedHeight: 120,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              title: Text(
+                l10n.settings_title,
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: OBColors.pinkSoft,
-                    child: const Icon(Icons.person, color: OBColors.pink, size: 28),
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFFDCFCE7), Color(0xFFF4F6F8)],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(user.username ?? user.email ?? 'User',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                        if (user.email != null)
-                          Text(user.email!, style: const TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-
-          // TODO: SUBSCRIPTION_REQUIRED — subscription block commented out
-
-          // ── Navigation items ─────────────────────────────────────────────
-          _SettingsCard(
-            children: [
-              _Item(
-                icon: Icons.flag_outlined,
-                label: l10n.settings_goals,
-                onTap: () => context.push('/settings/goals'),
-              ),
-              _Divider(),
-              _Item(
-                icon: Icons.language,
-                label: l10n.settings_language,
-                onTap: () => _showLangDialog(context, l10n, isRu),
-              ),
-            ],
           ),
 
-          const SizedBox(height: 12),
-
-          _SettingsCard(
-            children: [
-              _Item(
-                icon: Icons.privacy_tip_outlined,
-                label: l10n.settings_privacy_policy,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const DocumentScreen(type: DocumentType.privacyPolicy),
+          // ── Content ─────────────────────────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => FadeTransition(
+                  opacity: _fadeFor(index),
+                  child: SlideTransition(
+                    position: _slideFor(index),
+                    child: sections[index],
                   ),
                 ),
+                childCount: sections.length,
               ),
-              _Divider(),
-              _Item(
-                icon: Icons.description_outlined,
-                label: l10n.settings_terms,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const DocumentScreen(type: DocumentType.termsOfService),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          _SettingsCard(
-            children: [
-              _Item(
-                icon: Icons.logout,
-                label: l10n.settings_logout,
-                color: AppColors.accentOver,
-                onTap: () {
-                AnalyticsService.loggedOut();
-                ref.read(authNotifierProvider.notifier).logout();
-              },
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showLangDialog(BuildContext context, AppLocalizations l10n, bool isRu) {
+  void _confirmDeleteAccount(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          isRu ? 'Удалить аккаунт?' : 'Delete account?',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+        content: Text(
+          isRu
+              ? 'Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.'
+              : 'All your data will be permanently deleted. This action cannot be undone.',
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              isRu ? 'Отмена' : 'Cancel',
+              style: const TextStyle(color: AppColors.textMuted),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              AnalyticsService.loggedOut();
+              await ref.read(authNotifierProvider.notifier).deleteAccount();
+            },
+            child: Text(
+              isRu ? 'Удалить' : 'Delete',
+              style: const TextStyle(
+                color: AppColors.accentOver,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLangSheet(
+      BuildContext context, AppLocalizations l10n, bool isRu) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 36),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l10n.settings_language,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Container(
+              width: 36,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(
+              l10n.settings_language,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 16),
             _LangOption(
-              flag: '🇷🇺', label: 'Русский', selected: isRu,
+              flag: '🇷🇺',
+              label: 'Русский',
+              selected: isRu,
               onTap: () {
-                ref.read(localeProvider.notifier).setLocale(const Locale('ru'));
+                ref
+                    .read(localeProvider.notifier)
+                    .setLocale(const Locale('ru'));
                 AnalyticsService.languageChanged('ru');
                 Navigator.pop(context);
               },
             ),
             const SizedBox(height: 8),
             _LangOption(
-              flag: '🇬🇧', label: 'English', selected: !isRu,
+              flag: '🇬🇧',
+              label: 'English',
+              selected: !isRu,
               onTap: () {
-                ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                ref
+                    .read(localeProvider.notifier)
+                    .setLocale(const Locale('en'));
                 AnalyticsService.languageChanged('en');
                 Navigator.pop(context);
               },
@@ -204,17 +294,91 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-// TODO: SUBSCRIPTION_REQUIRED — _ActiveSubCard and _NoSubCard removed
+// ─────────────────────────────────────────────────────────────────────────────
+// User card
+// ─────────────────────────────────────────────────────────────────────────────
 
-class _SettingsCard extends StatelessWidget {
+class _UserCard extends StatelessWidget {
+  final dynamic user;
+  const _UserCard({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF064E1F), Color(0xFF16A34A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accent.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Hero(
+            tag: 'user_card',
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person_rounded,
+                  color: Colors.white, size: 30),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.username ?? user.email ?? 'User',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                if (user.email != null)
+                  Text(
+                    user.email!,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Section card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SectionCard extends StatelessWidget {
   final List<Widget> children;
-  const _SettingsCard({required this.children});
+  const _SectionCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
         boxShadow: AppShadow.sm,
       ),
@@ -223,32 +387,154 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
-class _Item extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
-
-  const _Item({required this.icon, required this.label, required this.onTap, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? AppColors.text;
-    return ListTile(
-      leading: Icon(icon, color: c, size: 22),
-      title: Text(label, style: TextStyle(color: c, fontWeight: FontWeight.w500)),
-      trailing: color == null ? const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20) : null,
-      onTap: onTap,
-      minLeadingWidth: 24,
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
+class _ItemDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Divider(height: 1, indent: 56, color: AppColors.border);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Navigation item
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NavItem extends StatefulWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final String label;
+  final VoidCallback onTap;
+  final Widget? trailing;
+
+  const _NavItem({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.label,
+    required this.onTap,
+    this.trailing,
+  });
+
+  @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        color: _pressed
+            ? AppColors.accentSoft.withValues(alpha: 0.5)
+            : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            // Color icon badge
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: widget.iconBg,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(widget.icon, color: widget.iconColor, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                widget.label,
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            widget.trailing ??
+                const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.textMuted, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Logout card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LogoutCard extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _LogoutCard({required this.label, required this.onTap});
+
+  @override
+  State<_LogoutCard> createState() => _LogoutCardState();
+}
+
+class _LogoutCardState extends State<_LogoutCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 130),
+        decoration: BoxDecoration(
+          color:
+              _pressed ? AppColors.accentOverSoft : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          boxShadow: AppShadow.sm,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.accentOverSoft,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: const Icon(Icons.logout_rounded,
+                  color: AppColors.accentOver, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              widget.label,
+              style: const TextStyle(
+                color: AppColors.accentOver,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Language option
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _LangOption extends StatelessWidget {
   final String flag;
@@ -256,27 +542,112 @@ class _LangOption extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _LangOption({required this.flag, required this.label, required this.selected, required this.onTap});
+  const _LangOption({
+    required this.flag,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? OBColors.pinkSoft : Colors.white,
+          color: selected ? AppColors.accentSoft : AppColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: selected ? OBColors.pink : AppColors.border, width: selected ? 2 : 1),
+          border: Border.all(
+            color: selected ? AppColors.accent : AppColors.border,
+            width: selected ? 2 : 1,
+          ),
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 20)),
+            Text(flag, style: const TextStyle(fontSize: 22)),
             const SizedBox(width: 12),
-            Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: selected ? OBColors.pink : AppColors.text)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: selected ? AppColors.accent : AppColors.text,
+              ),
+            ),
             const Spacer(),
-            if (selected) const Icon(Icons.check_circle_rounded, color: OBColors.pink, size: 20),
+            AnimatedScale(
+              scale: selected ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.elasticOut,
+              child: const Icon(Icons.check_circle_rounded,
+                  color: AppColors.accent, size: 22),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Delete account card
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DeleteAccountCard extends StatefulWidget {
+  final VoidCallback onTap;
+  const _DeleteAccountCard({required this.onTap});
+
+  @override
+  State<_DeleteAccountCard> createState() => _DeleteAccountCardState();
+}
+
+class _DeleteAccountCardState extends State<_DeleteAccountCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 130),
+        decoration: BoxDecoration(
+          color: _pressed
+              ? AppColors.accentOverSoft
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          boxShadow: AppShadow.sm,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.accentOverSoft,
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: const Icon(Icons.person_remove_rounded,
+                  color: AppColors.accentOver, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isRu ? 'Удалить аккаунт' : 'Delete account',
+              style: const TextStyle(
+                color: AppColors.accentOver,
+                fontWeight: FontWeight.w500,
+                fontSize: 15,
+              ),
+            ),
           ],
         ),
       ),

@@ -3,18 +3,18 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/auth/auth_provider.dart';
+import 'core/ai_consent/ai_consent_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/journal/screens/journal_screen.dart';
 import 'features/journal/screens/edit_meal_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
 import 'features/settings/screens/goals_screen.dart';
-import 'features/settings/screens/subscription_screen.dart';
 import 'features/auth/screens/email_auth_screen.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
-import 'features/tariffs/screens/tariffs_screen.dart';
 import 'features/way_to_goal/screens/way_to_goal_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
+import 'features/ai_consent/screens/ai_consent_screen.dart';
 import 'shared/widgets/bottom_nav.dart';
 
 const _kOnboardingDoneKey = 'onboarding_done';
@@ -38,6 +38,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = ref.watch(authNotifierProvider);
   final onboardingDone = ref.watch(onboardingDoneProvider);
   final showWayToGoal = ref.watch(showWayToGoalProvider);
+  final aiConsent = ref.watch(aiConsentProvider);
 
   return GoRouter(
     initialLocation: '/',
@@ -52,7 +53,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isPublic = loc == '/login' ||
           loc == '/email-auth' ||
           loc == '/onboarding' ||
-          loc == '/way-to-goal';
+          loc == '/way-to-goal' ||
+          loc == '/ai-consent';
 
       if (!isLoggedIn) {
         if (isPublic) return null;
@@ -66,6 +68,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If coming from onboarding+auth flow, redirect to /way-to-goal once
       if (showWayToGoal && loc != '/way-to-goal') {
         return '/way-to-goal';
+      }
+
+      // If consent was never given (null), redirect to consent screen
+      // Skip if already on /ai-consent or /way-to-goal (let way-to-goal finish first)
+      if (isLoggedIn && aiConsent == null && !showWayToGoal &&
+          loc != '/ai-consent' && loc != '/way-to-goal') {
+        return '/ai-consent';
       }
 
       return null;
@@ -88,16 +97,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const WayToGoalScreen(),
       ),
       GoRoute(
-        path: '/tariffs',
-        builder: (context, state) => const TariffsScreen(),
+        path: '/ai-consent',
+        builder: (context, state) => const AiConsentScreen(),
       ),
       GoRoute(
         path: '/settings/goals',
         builder: (context, state) => const GoalsScreen(),
-      ),
-      GoRoute(
-        path: '/settings/subscription',
-        builder: (context, state) => const SubscriptionScreen(),
       ),
       GoRoute(
         path: '/meals/:id/edit',

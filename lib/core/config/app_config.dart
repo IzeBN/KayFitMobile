@@ -10,7 +10,7 @@ class AppConfig {
   static const googleClientId =
       'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 
-  static const telegramBotUrl = 'https://t.me/Formavkaif_bot?start=1';
+  static const telegramBotUrl = 'https://t.me/kayfit_bot?start=1';
   static const baseUrl = 'https://app.kayfit.ru';
   static const deepLinkScheme = 'kayfit';
 }

@@ -18,7 +18,6 @@ part 'journal_screen.g.dart';
 Future<List<Meal>> journalDayMeals(JournalDayMealsRef ref, String date) async {
   final resp = await apiDio.get('/api/meals/history', queryParameters: {'limit': 500});
   final list = resp.data as List<dynamic>;
-  // API returns "time" field; remap to "createdAt" expected by Meal.fromJson
   final all = list.map((e) {
     final map = Map<String, dynamic>.from(e as Map);
     if (!map.containsKey('createdAt') && map.containsKey('time')) {
@@ -38,6 +37,10 @@ Future<List<Meal>> journalDayMeals(JournalDayMealsRef ref, String date) async {
   }).toList();
 }
 
+// ---------------------------------------------------------------------------
+// JournalScreen
+// ---------------------------------------------------------------------------
+
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
 
@@ -45,8 +48,15 @@ class JournalScreen extends ConsumerStatefulWidget {
   ConsumerState<JournalScreen> createState() => _JournalScreenState();
 }
 
-class _JournalScreenState extends ConsumerState<JournalScreen> {
+class _JournalScreenState extends ConsumerState<JournalScreen>
+    with TickerProviderStateMixin {
   DateTime _selectedDate = _today();
+  // Tracks whether the last navigation was forward (true) or backward (false)
+  bool _navigatedForward = false;
+
+  // Chevron button scale controllers
+  late final AnimationController _leftChevCtrl;
+  late final AnimationController _rightChevCtrl;
 
   static DateTime _today() {
     final now = DateTime.now();
@@ -62,12 +72,55 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
   bool get _isToday => _selectedDate == _today();
 
-  void _prevDay() =>
-      setState(() => _selectedDate = _selectedDate.subtract(const Duration(days: 1)));
+  @override
+  void initState() {
+    super.initState();
+    _leftChevCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.85,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+    _rightChevCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.85,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _leftChevCtrl.dispose();
+    _rightChevCtrl.dispose();
+    super.dispose();
+  }
+
+  void _prevDay() {
+    _leftChevCtrl.reverse().then((_) => _leftChevCtrl.forward());
+    setState(() {
+      _navigatedForward = false;
+      _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+    });
+  }
 
   void _nextDay() {
     if (_isToday) return;
-    setState(() => _selectedDate = _selectedDate.add(const Duration(days: 1)));
+    _rightChevCtrl.reverse().then((_) => _rightChevCtrl.forward());
+    setState(() {
+      _navigatedForward = true;
+      _selectedDate = _selectedDate.add(const Duration(days: 1));
+    });
+  }
+
+  void _goToDate(DateTime date) {
+    if (date == _selectedDate) return;
+    setState(() {
+      _navigatedForward = date.isAfter(_selectedDate);
+      _selectedDate = date;
+    });
   }
 
   Future<void> _deleteMeal(BuildContext context, int id) async {
@@ -106,15 +159,28 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     final meals = ref.watch(journalDayMealsProvider(_dateKey));
 
     final dateLabel = _isToday
-        ? l10n.dashboard_title // "Сегодня"
+        ? l10n.dashboard_title
         : DateFormat('d MMMM', locale).format(_selectedDate);
 
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
-        title: Text(l10n.journal_title),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
+        title: Row(
+          children: [
+            Text(
+              l10n.journal_title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: AppColors.text,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddMeal(context),
@@ -127,73 +193,127 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       ),
       body: Column(
         children: [
-          // Date navigation bar
+          // ── Week strip ────────────────────────────────────────────────
+          _WeekStrip(
+            selectedDate: _selectedDate,
+            today: _today(),
+            onDateTap: _goToDate,
+          ),
+
+          // ── Date navigation bar ───────────────────────────────────────
           Container(
             color: AppColors.surface,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left_rounded),
-                  onPressed: _prevDay,
-                  color: AppColors.text,
+                // Left chevron with bounce
+                ScaleTransition(
+                  scale: _leftChevCtrl,
+                  child: IconButton(
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    onPressed: _prevDay,
+                    color: AppColors.text,
+                  ),
                 ),
-                Text(
-                  dateLabel,
-                  style: const TextStyle(
+
+                // Animated date label — slides based on direction
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, anim) {
+                    final inFromRight = child.key == ValueKey(_dateKey);
+                    final beginOffset = inFromRight
+                        ? (_navigatedForward
+                            ? const Offset(0.3, 0)
+                            : const Offset(-0.3, 0))
+                        : (_navigatedForward
+                            ? const Offset(-0.3, 0)
+                            : const Offset(0.3, 0));
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: beginOffset,
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: anim,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: FadeTransition(opacity: anim, child: child),
+                    );
+                  },
+                  child: Text(
+                    dateLabel,
+                    key: ValueKey(_dateKey),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.text),
+                      color: AppColors.text,
+                    ),
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right_rounded),
-                  onPressed: _isToday ? null : _nextDay,
-                  color: _isToday ? AppColors.border : AppColors.text,
+
+                // Right chevron with bounce
+                ScaleTransition(
+                  scale: _rightChevCtrl,
+                  child: IconButton(
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    onPressed: _isToday ? null : _nextDay,
+                    color: _isToday ? AppColors.border : AppColors.text,
+                  ),
                 ),
               ],
             ),
           ),
+
+          // ── Meals content ─────────────────────────────────────────────
           Expanded(
-            child: meals.when(
-              data: (list) {
-                if (list.isEmpty) {
-                  return Column(
-                    children: [
-                      _AiNutritionistBanner(onTap: () => context.go('/chat')),
-                      Expanded(
-                        child: Center(
-                          child: Text(l10n.journal_empty,
-                              style: const TextStyle(color: AppColors.textMuted)),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: KeyedSubtree(
+                key: ValueKey(_dateKey),
+                child: meals.when(
+                data: (list) {
+                  if (list.isEmpty) {
+                    return Column(
+                      children: [
+                        _AiNutritionistBanner(onTap: () => context.go('/chat')),
+                        Expanded(
+                          child: Center(
+                            child: Text(l10n.journal_empty,
+                                style: const TextStyle(
+                                    color: AppColors.textMuted)),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    );
+                  }
+                  return RefreshIndicator(
+                    color: AppColors.accent,
+                    onRefresh: () async =>
+                        ref.invalidate(journalDayMealsProvider(_dateKey)),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(top: 8, bottom: 100),
+                      itemCount: list.length + 1,
+                      itemBuilder: (ctx, i) {
+                        if (i == 0) {
+                          return _AiNutritionistBanner(
+                              onTap: () => context.go('/chat'));
+                        }
+                        final meal = list[i - 1];
+                        return MealItem(
+                          meal: meal,
+                          onDelete: () => _deleteMeal(ctx, meal.id),
+                          onEdit: () => context.push('/meals/${meal.id}/edit'),
+                        );
+                      },
+                    ),
                   );
-                }
-                return RefreshIndicator(
-                  color: AppColors.accent,
-                  onRefresh: () async =>
-                      ref.invalidate(journalDayMealsProvider(_dateKey)),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 8, bottom: 100),
-                    itemCount: list.length + 1,
-                    itemBuilder: (ctx, i) {
-                      if (i == 0) {
-                        return _AiNutritionistBanner(
-                            onTap: () => context.go('/chat'));
-                      }
-                      final meal = list[i - 1];
-                      return MealItem(
-                        meal: meal,
-                        onDelete: () => _deleteMeal(ctx, meal.id),
-                        onEdit: () => context.push('/meals/${meal.id}/edit'),
-                      );
-                    },
-                  ),
-                );
-              },
-              loading: () => const LoadingIndicator(),
-              error: (e, _) => Center(child: Text('$e')),
+                },
+                loading: () => const LoadingIndicator(),
+                error: (e, _) => Center(child: Text('$e')),
+              ),
+              ),
             ),
           ),
         ],
@@ -202,7 +322,107 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   }
 }
 
-// ─── AI Nutritionist Banner ───────────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// _WeekStrip — 7-day horizontal scrollable strip
+// ---------------------------------------------------------------------------
+
+class _WeekStrip extends StatelessWidget {
+  final DateTime selectedDate;
+  final DateTime today;
+  final ValueChanged<DateTime> onDateTap;
+
+  const _WeekStrip({
+    required this.selectedDate,
+    required this.today,
+    required this.onDateTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Build a 7-day window ending on today
+    final days = List.generate(7, (i) => today.subtract(Duration(days: 6 - i)));
+    final locale = Localizations.localeOf(context).languageCode;
+
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: days.map((day) {
+          final isSelected = day == selectedDate;
+          final isToday = day == today;
+          final dayName = DateFormat('E', locale)
+              .format(day)
+              .substring(0, 1)
+              .toUpperCase();
+          final dayNum = day.day.toString();
+
+          return GestureDetector(
+            onTap: () => onDateTap(day),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 42,
+              height: 62,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.accent
+                    : isToday
+                        ? AppColors.accentSoft
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.accent.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dayName,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white.withValues(alpha: 0.85)
+                          : isToday
+                              ? AppColors.accent
+                              : AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    dayNum,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: isSelected
+                          ? Colors.white
+                          : isToday
+                              ? AppColors.accent
+                              : AppColors.text,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _AiNutritionistBanner
+// ---------------------------------------------------------------------------
 
 class _AiNutritionistBanner extends StatefulWidget {
   final VoidCallback onTap;
@@ -257,7 +477,6 @@ class _AiNutritionistBannerState extends State<_AiNutritionistBanner>
           borderRadius: BorderRadius.circular(AppRadius.md),
           child: Stack(
             children: [
-              // Animated decorative circles in background
               AnimatedBuilder(
                 animation: _ctrl,
                 builder: (context, _) {
@@ -288,7 +507,6 @@ class _AiNutritionistBannerState extends State<_AiNutritionistBanner>
                   ),
                 ),
               ),
-              // Content
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
@@ -334,7 +552,8 @@ class _AiNutritionistBannerState extends State<_AiNutritionistBanner>
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
