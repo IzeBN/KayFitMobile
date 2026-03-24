@@ -16,6 +16,7 @@ import '../../add_meal/screens/add_meal_sheet.dart';
 import '../../way_to_goal/providers/way_to_goal_provider.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 
 // SharedPreferences key tracking how many times way-to-goal was opened
@@ -64,6 +65,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     )..repeat(reverse: true);
 
     _listCtrl.forward();
+
+    AnalyticsService.dashboardOpened();
 
     // Deferred side-effects after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -207,6 +210,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       body: RefreshIndicator(
         color: AppColors.accent,
         onRefresh: () async {
+          AnalyticsService.dashboardRefreshed();
           ref.invalidate(todayStatsProvider);
           ref.invalidate(todayMealsProvider);
           ref.invalidate(calculationResultProvider);
@@ -273,7 +277,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   child: _PersonalPlanCard(
                     l10n: l10n,
                     kcal: calc.valueOrNull!.targetCalories.toInt(),
-                    onTap: () => _onWayToGoalTap(context),
+                    onTap: () {
+                      AnalyticsService.dashboardPersonalPlanTapped();
+                      _onWayToGoalTap(context);
+                    },
                   ),
                 ),
               ),
@@ -345,7 +352,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         controller: _fabPulseCtrl,
         pulse: !hasMeals,
         child: FloatingActionButton.extended(
-          onPressed: () => _showAddMeal(context, ref),
+          onPressed: () {
+            AnalyticsService.dashboardAddMealTapped();
+            _showAddMeal(context, ref);
+          },
           backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
           elevation: 4,

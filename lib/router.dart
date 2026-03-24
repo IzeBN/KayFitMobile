@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,51 +35,75 @@ Future<void> markOnboardingDone(WidgetRef ref) async {
   ref.read(onboardingDoneProvider.notifier).state = true;
 }
 
+// ---------------------------------------------------------------------------
+// RouterNotifier — drives GoRouter.refreshListenable instead of rebuilding
+// the entire GoRouter object on every auth/consent state change.
+// ---------------------------------------------------------------------------
+
+class _RouterNotifier extends ChangeNotifier {
+  _RouterNotifier(this._ref) {
+    // Watch auth, onboarding, consent, wayToGoal — notify GoRouter on change.
+    _ref.listen(authNotifierProvider, (_, __) => notifyListeners());
+    _ref.listen(onboardingDoneProvider, (_, __) => notifyListeners());
+    _ref.listen(showWayToGoalProvider, (_, __) => notifyListeners());
+    _ref.listen(aiConsentProvider, (_, __) => notifyListeners());
+  }
+
+  final Ref _ref;
+
+  String? redirect(BuildContext context, GoRouterState state) {
+    final authNotifier = _ref.read(authNotifierProvider);
+    final onboardingDone = _ref.read(onboardingDoneProvider);
+    final showWayToGoal = _ref.read(showWayToGoalProvider);
+    final aiConsent = _ref.read(aiConsentProvider);
+
+    if (authNotifier.isLoading) return null;
+
+    final isLoggedIn = authNotifier.value != null;
+    final loc = state.matchedLocation;
+
+    // Public routes
+    final isPublic = loc == '/login' ||
+        loc == '/email-auth' ||
+        loc == '/onboarding' ||
+        loc == '/way-to-goal' ||
+        loc == '/ai-consent';
+
+    if (!isLoggedIn) {
+      if (isPublic) return null;
+      return onboardingDone ? '/login' : '/onboarding';
+    }
+
+    // Logged in
+    if (loc == '/login' || loc == '/email-auth' || loc == '/onboarding') {
+      return '/';
+    }
+
+    if (showWayToGoal && loc != '/way-to-goal') {
+      return '/way-to-goal';
+    }
+
+    if (isLoggedIn && aiConsent == null && !showWayToGoal &&
+        loc != '/ai-consent' && loc != '/way-to-goal') {
+      return '/ai-consent';
+    }
+
+    return null;
+  }
+}
+
+final _routerNotifierProvider = Provider<_RouterNotifier>((ref) {
+  return _RouterNotifier(ref);
+});
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authNotifier = ref.watch(authNotifierProvider);
-  final onboardingDone = ref.watch(onboardingDoneProvider);
-  final showWayToGoal = ref.watch(showWayToGoalProvider);
-  final aiConsent = ref.watch(aiConsentProvider);
+  final notifier = ref.watch(_routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
     observers: [AnalyticsService.routeObserver],
-    redirect: (context, state) {
-      if (authNotifier.isLoading) return null;
-
-      final isLoggedIn = authNotifier.value != null;
-      final loc = state.matchedLocation;
-
-      // Public routes
-      final isPublic = loc == '/login' ||
-          loc == '/email-auth' ||
-          loc == '/onboarding' ||
-          loc == '/way-to-goal' ||
-          loc == '/ai-consent';
-
-      if (!isLoggedIn) {
-        if (isPublic) return null;
-        // New user → onboarding first
-        return onboardingDone ? '/login' : '/onboarding';
-      }
-
-      // Logged in
-      if (loc == '/login' || loc == '/email-auth' || loc == '/onboarding') return '/';
-
-      // If coming from onboarding+auth flow, redirect to /way-to-goal once
-      if (showWayToGoal && loc != '/way-to-goal') {
-        return '/way-to-goal';
-      }
-
-      // If consent was never given (null), redirect to consent screen
-      // Skip if already on /ai-consent or /way-to-goal (let way-to-goal finish first)
-      if (isLoggedIn && aiConsent == null && !showWayToGoal &&
-          loc != '/ai-consent' && loc != '/way-to-goal') {
-        return '/ai-consent';
-      }
-
-      return null;
-    },
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
     routes: [
       GoRoute(
         path: '/onboarding',

@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 // import '../../../core/auth/onboarding_sync.dart';
 // import '../../../router.dart';
 // import '../../../shared/widgets/loading_indicator.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -22,6 +23,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   // TODO: re-add _loading, _afterLogin, _saveTokens, _showError when Google/Apple re-enabled
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.loginPageOpened();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +77,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       label: isRu ? 'Войти по email' : 'Sign in with Email',
                       iconColor: AppColors.textMuted,
                       borderColor: OBColors.border,
-                      onTap: () => context.push('/email-auth'),
+                      onTap: () {
+                      AnalyticsService.loginMethodSelected('email');
+                      context.push('/email-auth');
+                    },
                     ),
                     const SizedBox(height: 28),
                     Text(
@@ -173,8 +183,14 @@ class _LangToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _LangChip(label: 'RU', active: isRu, onTap: () => onToggle(const Locale('ru'))),
-          _LangChip(label: 'EN', active: !isRu, onTap: () => onToggle(const Locale('en'))),
+          _LangChip(label: 'RU', active: isRu, onTap: () {
+            AnalyticsService.langSelected('ru', 'login');
+            onToggle(const Locale('ru'));
+          }),
+          _LangChip(label: 'EN', active: !isRu, onTap: () {
+            AnalyticsService.langSelected('en', 'login');
+            onToggle(const Locale('en'));
+          }),
         ],
       ),
     );

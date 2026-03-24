@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../shared/models/meal.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
@@ -95,6 +96,7 @@ class _MealItemState extends State<MealItem>
         onTapDown: (_) => _pressCtrl.reverse(),
         onTapUp: (_) {
           _pressCtrl.forward();
+          AnalyticsService.journalMealEditTapped(widget.meal.id);
           widget.onEdit?.call();
         },
         onTapCancel: () => _pressCtrl.forward(),
@@ -536,6 +538,7 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
                         ),
                         shadowColor: AppColors.accent,
                         onTap: () {
+                          AnalyticsService.journalMealEditTapped(meal.id);
                           Navigator.pop(context);
                           widget.onEdit?.call();
                         },
@@ -554,6 +557,7 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
                         ),
                         shadowColor: AppColors.accentOver,
                         onTap: () {
+                          AnalyticsService.journalMealDeleteConfirmed(meal.id);
                           Navigator.pop(context);
                           widget.onDelete?.call();
                         },

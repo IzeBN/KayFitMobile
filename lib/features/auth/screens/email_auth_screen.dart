@@ -130,7 +130,10 @@ class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
+      onTap: () {
+        AnalyticsService.tap('email_auth', 'back');
+        Navigator.of(context).pop();
+      },
       child: Container(
         width: 36,
         height: 36,
@@ -165,8 +168,14 @@ class _TabToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _TabChip(label: AppLocalizations.of(context)!.auth_tab_login, active: isLogin, onTap: () => onToggle(true)),
-          _TabChip(label: AppLocalizations.of(context)!.auth_tab_register, active: !isLogin, onTap: () => onToggle(false)),
+          _TabChip(label: AppLocalizations.of(context)!.auth_tab_login, active: isLogin, onTap: () {
+            AnalyticsService.authTabSwitched('login');
+            onToggle(true);
+          }),
+          _TabChip(label: AppLocalizations.of(context)!.auth_tab_register, active: !isLogin, onTap: () {
+            AnalyticsService.authTabSwitched('register');
+            onToggle(false);
+          }),
         ],
       ),
     );
@@ -475,7 +484,10 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
             textInputAction: TextInputAction.done,
             obscure: _obscure,
             autofillHints: const [AutofillHints.password],
-            onToggleObscure: () => setState(() => _obscure = !_obscure),
+            onToggleObscure: () {
+              AnalyticsService.passwordVisibilityToggled();
+              setState(() => _obscure = !_obscure);
+            },
             onEditingComplete: _submit,
             validator: (v) {
               if (v == null || v.isEmpty) return l10n.auth_err_enter_password;

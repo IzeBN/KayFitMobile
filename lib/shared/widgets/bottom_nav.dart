@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 
@@ -26,6 +27,8 @@ class ScaffoldWithBottomNav extends StatelessWidget {
         current: current,
         l10n: l10n,
         onTap: (i) {
+          const tabs = ['home', 'journal', 'chat', 'settings'];
+          AnalyticsService.navTab(tabs[i]);
           switch (i) {
             case 0: context.go('/');
             case 1: context.go('/journal');

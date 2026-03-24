@@ -112,6 +112,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
 
   void _switchMode(_InputMode mode) async {
     HapticFeedback.selectionClick();
+    if (mode != _InputMode.choose) {
+      AnalyticsService.addMealModeSelected(mode.name);
+    }
     await _modeCtrl.reverse();
     setState(() => _mode = mode);
     _modeCtrl.forward();
@@ -222,7 +225,11 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
       if (mounted) _switchMode(_InputMode.choose);
       return;
     }
-    AnalyticsService.mealPhotoTaken();
+    if (source == ImageSource.gallery) {
+      AnalyticsService.addMealPhotoFromGallery();
+    } else {
+      AnalyticsService.addMealPhotoTaken();
+    }
     if (!mounted) return;
     setState(() => _loadingType = _LoadingType.photo);
     try {
@@ -432,6 +439,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                         l10n: l10n,
                                         isRu: isRu,
                                         onParse: () async {
+                                          AnalyticsService.addMealTextSubmitted(_textController.text.length);
                                           _parseText(_textController.text, _lang);
                                         },
                                       )

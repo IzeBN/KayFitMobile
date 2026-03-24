@@ -56,7 +56,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>app.kayfit.kayfit</string>
+				<string>com.kayfit.app</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>kayfit</string>
@@ -95,9 +95,8 @@
 			<string>tg</string>
 			<string>https</string>
 		</array>
-		<!-- Google Sign-In: replace with real client ID from GoogleService-Info.plist -->
-		<key>GIDClientID</key>
-		<string>YOUR_IOS_CLIENT_ID.apps.googleusercontent.com</string>
 		<!-- Sign in with Apple: handled via entitlements (add in Xcode -> Signing & Capabilities) -->
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 	</dict>
 </plist>

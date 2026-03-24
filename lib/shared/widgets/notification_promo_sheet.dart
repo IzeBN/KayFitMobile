@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
 
 /// Beautiful bottom sheet that explains notification value to the user before
@@ -53,6 +54,8 @@ class _NotificationPromoSheetState extends State<NotificationPromoSheet>
     );
 
     _ctrl.forward();
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => AnalyticsService.notificationPromoShown());
   }
 
   @override
@@ -201,6 +204,7 @@ class _NotificationPromoSheetState extends State<NotificationPromoSheet>
               height: 54,
               child: ElevatedButton(
                 onPressed: () {
+                  AnalyticsService.notificationPromoAccepted();
                   Navigator.of(context).pop();
                   widget.onAllow();
                 },
@@ -225,6 +229,7 @@ class _NotificationPromoSheetState extends State<NotificationPromoSheet>
             // Not now link
             GestureDetector(
               onTap: () {
+                AnalyticsService.notificationPromoDismissed();
                 Navigator.of(context).pop();
                 widget.onDismiss?.call();
               },

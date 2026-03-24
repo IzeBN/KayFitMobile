@@ -111,6 +111,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.onboardingStarted();
     AnalyticsService.onboardingStepViewed(_Step.landing.name);
   }
 
@@ -138,6 +139,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _goBack() {
+    AnalyticsService.onboardingBackTapped(_step.name);
     setState(() {
       _error = null;
       _showSkipDialog = false;
@@ -164,6 +166,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // ── Step handlers ───────────────────────────────────────────────────────────
   void _handleAgeSelect(int age) {
     _age = age;
+    AnalyticsService.onboardingAgeSelected(age);
     _savePending();
     _goNext();
   }
@@ -175,12 +178,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
     _height = h;
+    AnalyticsService.onboardingHeightEntered(h.toInt());
     _savePending();
     _goNext();
   }
 
   void _handleGenderSelect(String g) {
     _gender = g;
+    AnalyticsService.onboardingGenderSelected(g);
     _savePending();
     _goNext();
   }
@@ -198,6 +203,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
     _targetWeight = tw;
+    AnalyticsService.onboardingWeightEntered(w.toInt(), tw.toInt());
     _savePending();
     _goNext();
   }
@@ -207,6 +213,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() => _error = l10n.ob_err_training);
       return;
     }
+    final daysCount = _trainingDays.contains('none') ? 0 :
+        _trainingDays.where((d) => d.isNotEmpty).length;
+    AnalyticsService.onboardingTrainingDaysSelected(daysCount);
     _savePending();
     _goNext();
   }
@@ -246,6 +255,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       trainingDays: td,
     ));
     AnalyticsService.onboardingCompleted();
+    AnalyticsService.onboardingGoToLogin();
     AnalyticsService.setUserProfile(
       gender: _gender.isNotEmpty ? _gender : null,
       age: _age,
@@ -1249,6 +1259,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
                 desc: l10n.ob_method_photo_desc,
                 active: _active == _DemoMode.photo,
                 onTap: _loading ? null : () {
+                  AnalyticsService.onboardingMethodSelected('photo');
                   setState(() { _active = _DemoMode.photo; _items = []; _error = null; });
                   _showPhotoSourcePicker();
                 },
@@ -1264,6 +1275,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
                 recording: _isRecording,
                 onTap: _loading ? null : () {
                   if (_active != _DemoMode.voice) {
+                    AnalyticsService.onboardingMethodSelected('voice');
                     setState(() { _active = _DemoMode.voice; _items = []; _error = null; });
                     _startVoice();
                   } else if (_isRecording) {
@@ -1279,11 +1291,14 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
                 title: l10n.ob_method_text_title,
                 desc: l10n.ob_method_text_desc,
                 active: _active == _DemoMode.text,
-                onTap: _loading ? null : () => setState(() {
-                  _active = _DemoMode.text;
-                  _items = [];
-                  _error = null;
-                }),
+                onTap: _loading ? null : () {
+                  AnalyticsService.onboardingMethodSelected('text');
+                  setState(() {
+                    _active = _DemoMode.text;
+                    _items = [];
+                    _error = null;
+                  });
+                },
               ),
 
               // Text input area

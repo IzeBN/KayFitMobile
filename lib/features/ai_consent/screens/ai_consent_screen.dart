@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
+import '../../../core/analytics/analytics_service.dart';
 
 class AiConsentScreen extends ConsumerStatefulWidget {
   const AiConsentScreen({super.key});
@@ -13,6 +14,12 @@ class AiConsentScreen extends ConsumerStatefulWidget {
 
 class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
   bool _checked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.aiConsentScreenOpened();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +133,11 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
 
               // ── Checkbox row ─────────────────────────────────────────────
               GestureDetector(
-                onTap: () => setState(() => _checked = !_checked),
+                onTap: () {
+                  final next = !_checked;
+                  AnalyticsService.aiConsentCheckboxToggled(next);
+                  setState(() => _checked = next);
+                },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -241,11 +252,13 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
   }
 
   Future<void> _onAccept() async {
+    AnalyticsService.aiConsentAccepted();
     await ref.read(aiConsentProvider.notifier).setConsent(true);
     if (mounted) context.go('/');
   }
 
   Future<void> _onDecline() async {
+    AnalyticsService.aiConsentDeclined();
     final isRu = Localizations.localeOf(context).languageCode == 'ru';
     final confirmed = await showDialog<bool>(
       context: context,
@@ -279,6 +292,7 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
       ),
     );
     if (confirmed == true && mounted) {
+      AnalyticsService.aiConsentDeclineConfirmed();
       await ref.read(aiConsentProvider.notifier).setConsent(false);
       if (mounted) context.go('/');
     }

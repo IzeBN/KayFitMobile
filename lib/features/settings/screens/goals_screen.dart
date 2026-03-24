@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -52,6 +53,7 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
       ctrl.addListener(_onMacroChanged);
     }
 
+    AnalyticsService.goalsScreenOpened();
     _loadGoals();
   }
 
@@ -93,6 +95,7 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
         'fat': int.parse(_fatCtrl.text),
         'carbs': int.parse(_carbsCtrl.text),
       });
+      AnalyticsService.goalsSaved();
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(

@@ -28,6 +28,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
+    AnalyticsService.settingsOpened();
   }
 
   @override
@@ -72,7 +73,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           iconColor: AppColors.accent,
           iconBg: AppColors.accentSoft,
           label: l10n.settings_goals,
-          onTap: () => context.push('/settings/goals'),
+          onTap: () {
+            AnalyticsService.settingsGoalsTapped();
+            context.push('/settings/goals');
+          },
         ),
         _ItemDivider(),
         _NavItem(
@@ -80,7 +84,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           iconColor: const Color(0xFF7C3AED),
           iconBg: const Color(0xFFEDE9FE),
           label: l10n.settings_language,
-          onTap: () => _showLangSheet(context, l10n, isRu),
+          onTap: () {
+            AnalyticsService.settingsLanguageTapped();
+            _showLangSheet(context, l10n, isRu);
+          },
           trailing: Text(
             isRu ? '🇷🇺 RU' : '🇬🇧 EN',
             style: const TextStyle(
@@ -98,13 +105,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           iconColor: AppColors.warm,
           iconBg: AppColors.warmSoft,
           label: l10n.settings_privacy_policy,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  const DocumentScreen(type: DocumentType.privacyPolicy),
-            ),
-          ),
+          onTap: () {
+            AnalyticsService.settingsPrivacyTapped();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    const DocumentScreen(type: DocumentType.privacyPolicy),
+              ),
+            );
+          },
         ),
         _ItemDivider(),
         _NavItem(
@@ -112,26 +122,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           iconColor: AppColors.support,
           iconBg: AppColors.supportSoft,
           label: l10n.settings_terms,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  const DocumentScreen(type: DocumentType.termsOfService),
-            ),
-          ),
+          onTap: () {
+            AnalyticsService.settingsTermsTapped();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    const DocumentScreen(type: DocumentType.termsOfService),
+              ),
+            );
+          },
         ),
       ]),
       const SizedBox(height: 8),
       _LogoutCard(
         label: l10n.settings_logout,
         onTap: () {
+          AnalyticsService.settingsLogoutTapped();
           AnalyticsService.loggedOut();
           ref.read(authNotifierProvider.notifier).logout();
         },
       ),
       const SizedBox(height: 8),
       _DeleteAccountCard(
-        onTap: () => _confirmDeleteAccount(context),
+        onTap: () {
+          AnalyticsService.settingsDeleteAccountTapped();
+          _confirmDeleteAccount(context);
+        },
       ),
       const SizedBox(height: 24),
     ];
@@ -208,7 +225,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              AnalyticsService.deleteAccountCancelled();
+              Navigator.pop(ctx);
+            },
             child: Text(
               isRu ? 'Отмена' : 'Cancel',
               style: const TextStyle(color: AppColors.textMuted),
@@ -216,8 +236,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
           TextButton(
             onPressed: () async {
+              AnalyticsService.deleteAccountConfirmed();
               Navigator.pop(ctx);
-              AnalyticsService.loggedOut();
               await ref.read(authNotifierProvider.notifier).deleteAccount();
             },
             child: Text(

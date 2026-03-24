@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
@@ -18,6 +19,7 @@ class WayToGoalScreen extends ConsumerWidget {
         ref.read(showWayToGoalProvider.notifier).state = false;
       }
     });
+    AnalyticsService.wayToGoalOpened();
 
     final result = ref.watch(calculationResultProvider);
     final l10n = AppLocalizations.of(context)!;
@@ -36,7 +38,10 @@ class WayToGoalScreen extends ConsumerWidget {
             calc: calc,
             l10n: l10n,
             footer: GestureDetector(
-              onTap: () => context.go('/'),
+              onTap: () {
+                AnalyticsService.wayToGoalStartDiaryTapped();
+                context.go('/');
+              },
               child: Container(
                 width: double.infinity,
                 height: 64,

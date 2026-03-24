@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -53,6 +54,7 @@ class _EditMealScreenState extends State<EditMealScreen>
       ctrl.addListener(_onMacroChanged);
     }
 
+    AnalyticsService.editMealOpened(widget.mealId);
     _loadMeal();
   }
 
@@ -99,6 +101,7 @@ class _EditMealScreenState extends State<EditMealScreen>
         'fat': double.parse(_fatCtrl.text),
         'carbs': double.parse(_carbsCtrl.text),
       });
+      AnalyticsService.editMealSaved(widget.mealId);
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(

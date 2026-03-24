@@ -64,6 +64,17 @@ class NotificationService {
   static Future<void> init() async {
     try {
       await Firebase.initializeApp();
+      await initAfterFirebase();
+    } catch (e) {
+      // Firebase not configured (missing config files) — continue without push.
+      debugPrint('[FCM] init skipped (Firebase not configured): $e');
+    }
+  }
+
+  /// Like [init] but assumes Firebase.initializeApp() was already called.
+  /// Use this when Firebase is initialised in main() before parallel inits.
+  static Future<void> initAfterFirebase() async {
+    try {
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
       );
@@ -76,8 +87,7 @@ class NotificationService {
 
       debugPrint('[FCM] NotificationService initialised (permissions deferred)');
     } catch (e) {
-      // Firebase not configured (missing config files) — continue without push.
-      debugPrint('[FCM] init skipped (Firebase not configured): $e');
+      debugPrint('[FCM] initAfterFirebase error (ignored): $e');
     }
   }
 

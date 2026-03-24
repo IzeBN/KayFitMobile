@@ -9,8 +9,8 @@ files that contain project-specific credentials.  Follow the steps below to enab
 
 1. Go to https://console.firebase.google.com and create a project (or reuse an existing one).
 2. Register both the Android and iOS apps:
-   - **Android**: package name `ru.kayfit.kayfit`
-   - **iOS**: bundle ID `ru.kayfit.kayfit` (verify in `ios/Runner.xcodeproj`)
+   - **Android**: package name `com.kayfit.app`
+   - **iOS**: bundle ID `com.kayfit.app` (verify in `ios/Runner.xcodeproj`)
 
 ---
 

@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/models/user_profile.dart';
 import '../api/api_client.dart';
 import '../notifications/notification_service.dart';
 import '../ai_consent/ai_consent_provider.dart';
 import 'onboarding_sync.dart';
+
+const _kCachedUserKey = 'cached_user';
 
 part 'auth_provider.g.dart';
 
@@ -20,20 +25,31 @@ class AuthNotifier extends _$AuthNotifier {
     return const AsyncValue.loading();
   }
 
+  /// Instantly restores a cached user profile so the router shows the app
+  /// without waiting for the network. Call before [checkSession].
+  void restoreFromCache(UserProfile user) {
+    state = AsyncValue.data(user);
+  }
+
   /// Called on app start — checks stored token, fetches profile if valid.
+  ///
+  /// When [backgroundRefresh] is true (cached user already shown) the state
+  /// is NOT set to loading, so the UI stays visible during the silent refresh.
   /// Uses a plain Dio (no interceptor) to avoid interfering with the
   /// refresh/logout cycle used by normal API calls.
-  Future<void> checkSession() async {
-    state = const AsyncValue.loading();
+  Future<void> checkSession({bool backgroundRefresh = false}) async {
+    if (!backgroundRefresh) state = const AsyncValue.loading();
     try {
       final token = await TokenStorage.getAccess();
       if (token == null) {
+        await _clearCache();
         state = const AsyncValue.data(null);
         return;
       }
 
       final user = await _fetchMe(token);
       if (user != null) {
+        await _saveCache(user);
         state = AsyncValue.data(user);
         syncOnboardingPending().catchError(
           (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
@@ -59,6 +75,7 @@ class AuthNotifier extends _$AuthNotifier {
           await TokenStorage.save(newAccess, newRefresh);
           final refreshedUser = await _fetchMe(newAccess);
           if (refreshedUser != null) {
+            await _saveCache(refreshedUser);
             state = AsyncValue.data(refreshedUser);
             syncOnboardingPending().catchError(
               (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
@@ -75,11 +92,26 @@ class AuthNotifier extends _$AuthNotifier {
 
       // All attempts failed
       await TokenStorage.clear();
+      await _clearCache();
       state = const AsyncValue.data(null);
     } catch (e) {
       debugPrint('[auth] checkSession error: $e');
-      state = const AsyncValue.data(null);
+      if (!backgroundRefresh) state = const AsyncValue.data(null);
     }
+  }
+
+  static Future<void> _saveCache(UserProfile user) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kCachedUserKey, jsonEncode(user.toJson()));
+    } catch (_) {}
+  }
+
+  static Future<void> _clearCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_kCachedUserKey);
+    } catch (_) {}
   }
 
   /// Fetches /api/v1/auth/me using a plain Dio (no interceptor).
@@ -120,6 +152,7 @@ class AuthNotifier extends _$AuthNotifier {
       }
     } catch (_) {}
     await TokenStorage.clear();
+    await _clearCache();
     state = const AsyncValue.data(null);
   }
 
@@ -129,6 +162,7 @@ class AuthNotifier extends _$AuthNotifier {
       await apiDio.delete('/api/v1/auth/account');
     } catch (_) {}
     await TokenStorage.clear();
+    await _clearCache();
     state = const AsyncValue.data(null);
   }
 }

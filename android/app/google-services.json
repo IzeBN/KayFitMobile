@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "452793124435",
+    "project_id": "kayfit-b09b3",
+    "storage_bucket": "kayfit-b09b3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452793124435:android:8e14b07f648488dbd268a6",
+        "android_client_info": {
+          "package_name": "com.kayfit.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2Gt8yuSmisvon8wyQaPCYQ-PA8bi9Lu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

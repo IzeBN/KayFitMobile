@@ -10,6 +10,7 @@ import '../../add_meal/screens/add_meal_sheet.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/models/meal.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 
 part 'journal_screen.g.dart';
@@ -75,6 +76,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.journalOpened();
     _leftChevCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -99,6 +101,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
   }
 
   void _prevDay() {
+    AnalyticsService.journalDateChanged('prev');
     _leftChevCtrl.reverse().then((_) => _leftChevCtrl.forward());
     setState(() {
       _navigatedForward = false;
@@ -108,6 +111,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
 
   void _nextDay() {
     if (_isToday) return;
+    AnalyticsService.journalDateChanged('next');
     _rightChevCtrl.reverse().then((_) => _rightChevCtrl.forward());
     setState(() {
       _navigatedForward = true;
@@ -117,6 +121,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
 
   void _goToDate(DateTime date) {
     if (date == _selectedDate) return;
+    AnalyticsService.journalDaySelected(date.toIso8601String().substring(0, 10));
     setState(() {
       _navigatedForward = date.isAfter(_selectedDate);
       _selectedDate = date;
@@ -183,7 +188,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddMeal(context),
+        onPressed: () {
+          AnalyticsService.journalAddMealTapped();
+          _showAddMeal(context);
+        },
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
@@ -277,7 +285,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                   if (list.isEmpty) {
                     return Column(
                       children: [
-                        _AiNutritionistBanner(onTap: () => context.go('/chat')),
+                        _AiNutritionistBanner(onTap: () {
+                          AnalyticsService.journalAiBannerTapped();
+                          context.go('/chat');
+                        }),
                         Expanded(
                           child: Center(
                             child: Text(l10n.journal_empty,
@@ -298,7 +309,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                       itemBuilder: (ctx, i) {
                         if (i == 0) {
                           return _AiNutritionistBanner(
-                              onTap: () => context.go('/chat'));
+                              onTap: () {
+                                AnalyticsService.journalAiBannerTapped();
+                                context.go('/chat');
+                              });
                         }
                         final meal = list[i - 1];
                         return MealItem(

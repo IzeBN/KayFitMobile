@@ -36,6 +36,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat();
+    AnalyticsService.chatOpened();
     _loadHistory();
   }
 
