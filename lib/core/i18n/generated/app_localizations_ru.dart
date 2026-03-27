@@ -980,4 +980,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chat_empty => 'Спросите меня о питании, диете или прогрессе!';
+
+  @override
+  String get chat_suggestion_1 => '🥗 Что съесть на обед при дефиците?';
+
+  @override
+  String get chat_suggestion_2 => '💪 Норма белка для похудения';
+
+  @override
+  String get chat_suggestion_3 => '🌙 Можно ли есть после 18:00?';
 }

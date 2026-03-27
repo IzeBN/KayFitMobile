@@ -10,33 +10,24 @@ import '../notifications/notification_service.dart';
 import '../ai_consent/ai_consent_provider.dart';
 import 'onboarding_sync.dart';
 
-const _kCachedUserKey = 'cached_user';
-
 part 'auth_provider.g.dart';
+
+const _kCachedUserKey = 'cached_user';
 
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
   @override
   AsyncValue<UserProfile?> build() {
-    // Register logout callback so token expiry auto-clears state
     setLogoutCallback(() async {
       state = const AsyncValue.data(null);
     });
     return const AsyncValue.loading();
   }
 
-  /// Instantly restores a cached user profile so the router shows the app
-  /// without waiting for the network. Call before [checkSession].
   void restoreFromCache(UserProfile user) {
     state = AsyncValue.data(user);
   }
 
-  /// Called on app start — checks stored token, fetches profile if valid.
-  ///
-  /// When [backgroundRefresh] is true (cached user already shown) the state
-  /// is NOT set to loading, so the UI stays visible during the silent refresh.
-  /// Uses a plain Dio (no interceptor) to avoid interfering with the
-  /// refresh/logout cycle used by normal API calls.
   Future<void> checkSession({bool backgroundRefresh = false}) async {
     if (!backgroundRefresh) state = const AsyncValue.loading();
     try {
@@ -55,12 +46,10 @@ class AuthNotifier extends _$AuthNotifier {
           (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
         );
         NotificationService.registerTokenAfterLogin();
-        // Load AI consent status from server
         ref.read(aiConsentProvider.notifier).load();
         return;
       }
 
-      // Access token rejected — try refresh
       final refreshToken = await TokenStorage.getRefresh();
       if (refreshToken != null) {
         try {
@@ -81,7 +70,6 @@ class AuthNotifier extends _$AuthNotifier {
               (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
             );
             NotificationService.registerTokenAfterLogin();
-            // Load AI consent status from server
             ref.read(aiConsentProvider.notifier).load();
             return;
           }
@@ -90,7 +78,6 @@ class AuthNotifier extends _$AuthNotifier {
         }
       }
 
-      // All attempts failed
       await TokenStorage.clear();
       await _clearCache();
       state = const AsyncValue.data(null);
@@ -114,8 +101,6 @@ class AuthNotifier extends _$AuthNotifier {
     } catch (_) {}
   }
 
-  /// Fetches /api/v1/auth/me using a plain Dio (no interceptor).
-  /// Returns null on 401/error without throwing.
   Future<UserProfile?> _fetchMe(String token) async {
     try {
       final plain = Dio(BaseOptions(
@@ -130,16 +115,16 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  /// Called after any successful sign-in to refresh the user state.
+  Future<void> loginWithTokens(String access, String refresh) async {
+    await TokenStorage.save(access, refresh);
+    await checkSession();
+  }
+
   Future<void> refreshUser() async {
     await checkSession();
   }
 
-  /// Sign out: invalidate refresh token on server, clear local storage,
-  /// unregister FCM push token.
   Future<void> logout() async {
-    // Unregister FCM token before clearing auth — the request needs the
-    // Bearer token that is still valid at this point.
     await NotificationService.unregisterToken();
 
     try {
@@ -156,7 +141,6 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncValue.data(null);
   }
 
-  /// Permanently delete the user account and all associated data.
   Future<void> deleteAccount() async {
     try {
       await apiDio.delete('/api/v1/auth/account');

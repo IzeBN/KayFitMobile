@@ -1,16 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _baseUrl = 'https://app.kayfit.ru';
+const _baseUrl = 'https://app.carbcounter.online';
 
-/// Public base URL — exposed so auth provider can create plain Dio instances.
 const baseUrl = _baseUrl;
 
 late final Dio apiDio;
-
-// ---------------------------------------------------------------------------
-// Token storage
-// ---------------------------------------------------------------------------
 
 class TokenStorage {
   static const _keyAccess = 'access_token';
@@ -39,18 +34,10 @@ class TokenStorage {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Logout callback — set by auth layer to react to token expiry
-// ---------------------------------------------------------------------------
-
 typedef LogoutCallback = Future<void> Function();
 LogoutCallback? _onLogout;
 
 void setLogoutCallback(LogoutCallback cb) => _onLogout = cb;
-
-// ---------------------------------------------------------------------------
-// Init
-// ---------------------------------------------------------------------------
 
 Future<void> initApiClient() async {
   apiDio = Dio(BaseOptions(
@@ -64,10 +51,6 @@ Future<void> initApiClient() async {
   apiDio.interceptors.add(LogInterceptor(responseBody: false));
 }
 
-// ---------------------------------------------------------------------------
-// Auth interceptor: inject Bearer + auto-refresh on 401
-// ---------------------------------------------------------------------------
-
 class _AuthInterceptor extends Interceptor {
   _AuthInterceptor(this._dio);
 
@@ -79,7 +62,6 @@ class _AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Skip auth header injection for auth endpoints themselves
     final path = options.path;
     final isAuthEndpoint = path.contains('/api/v1/auth/login') ||
         path.contains('/api/v1/auth/register') ||
@@ -101,7 +83,7 @@ class _AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (err.response?.statusCode == 402) {
+    /* if (err.response?.statusCode == 402) {
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,
@@ -111,15 +93,22 @@ class _AuthInterceptor extends Interceptor {
         ),
       );
       return;
-    }
+    } */
 
-    if (err.response?.statusCode == 401 && !_isRefreshing) {
-      // Auth and onboarding endpoints — don't trigger refresh/logout cycle
+    if (err.response?.statusCode == 401) {
       final path = err.requestOptions.path;
       if (path.contains('/api/v1/auth/') || path.contains('/api/onboarding/')) {
         handler.next(err);
         return;
       }
+
+      if (_isRefreshing) {
+        // Another request is already refreshing — just reject so the caller
+        // gets a clean error; the logout will happen from the refreshing request.
+        handler.next(err);
+        return;
+      }
+
       _isRefreshing = true;
       try {
         final refreshToken = await TokenStorage.getRefresh();
@@ -129,7 +118,6 @@ class _AuthInterceptor extends Interceptor {
           return;
         }
 
-        // Use a separate Dio instance to avoid infinite loop
         final refreshDio = Dio(BaseOptions(baseUrl: _baseUrl));
         final resp = await refreshDio.post(
           '/api/v1/auth/refresh',
@@ -141,7 +129,6 @@ class _AuthInterceptor extends Interceptor {
         final newRefresh = data['refresh_token'] as String;
         await TokenStorage.save(newAccess, newRefresh);
 
-        // Retry the original request with new token
         final opts = err.requestOptions;
         opts.headers['Authorization'] = 'Bearer $newAccess';
         final retryResp = await _dio.fetch(opts);
@@ -163,10 +150,6 @@ class _AuthInterceptor extends Interceptor {
   }
 }
 
-// ---------------------------------------------------------------------------
-// ApiException
-// ---------------------------------------------------------------------------
-
 class ApiException implements Exception {
   final int? statusCode;
   final String message;
@@ -176,7 +159,6 @@ class ApiException implements Exception {
   String toString() => 'ApiException($statusCode): $message';
 }
 
-/// Thrown when the server returns 402 Payment Required.
 class PaymentRequiredException implements Exception {
   const PaymentRequiredException();
   @override

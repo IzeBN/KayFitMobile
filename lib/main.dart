@@ -65,19 +65,14 @@ class _AppInitState extends ConsumerState<_AppInit> {
   @override
   void initState() {
     super.initState();
-
-    final notifier = ref.read(authNotifierProvider.notifier);
-
-    // Restore cached user immediately so the router doesn't show a blank
-    // loading screen — the user sees the app at once.
-    if (widget.cachedUser != null) {
-      notifier.restoreFromCache(widget.cachedUser!);
-    }
-
-    // Verify / refresh token in background.
-    // If cache was set: runs silently, updates state when done.
-    // If no cache: sets AsyncValue.loading() → router shows splash.
-    notifier.checkSession(backgroundRefresh: widget.cachedUser != null);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final notifier = ref.read(authNotifierProvider.notifier);
+      if (widget.cachedUser != null) {
+        notifier.restoreFromCache(widget.cachedUser!);
+      }
+      notifier.checkSession(backgroundRefresh: widget.cachedUser != null);
+    });
   }
 
   @override

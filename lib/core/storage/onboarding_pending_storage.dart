@@ -8,6 +8,10 @@ class OnboardingPendingData {
   final double? weight;
   final double? targetWeight;
   final String trainingDays; // comma-separated or "none"
+  final List<String> healthConditions;
+  final String dietType;
+  final String? foodRestrictions;
+  final List<String> goals;
 
   const OnboardingPendingData({
     this.age,
@@ -16,6 +20,10 @@ class OnboardingPendingData {
     this.weight,
     this.targetWeight,
     this.trainingDays = '',
+    this.healthConditions = const ['none'],
+    this.dietType = 'none',
+    this.foodRestrictions,
+    this.goals = const [],
   });
 
   OnboardingPendingData copyWith({
@@ -25,6 +33,10 @@ class OnboardingPendingData {
     double? weight,
     double? targetWeight,
     String? trainingDays,
+    List<String>? healthConditions,
+    String? dietType,
+    String? foodRestrictions,
+    List<String>? goals,
   }) =>
       OnboardingPendingData(
         age: age ?? this.age,
@@ -33,6 +45,10 @@ class OnboardingPendingData {
         weight: weight ?? this.weight,
         targetWeight: targetWeight ?? this.targetWeight,
         trainingDays: trainingDays ?? this.trainingDays,
+        healthConditions: healthConditions ?? this.healthConditions,
+        dietType: dietType ?? this.dietType,
+        foodRestrictions: foodRestrictions ?? this.foodRestrictions,
+        goals: goals ?? this.goals,
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,6 +58,11 @@ class OnboardingPendingData {
         if (weight != null) 'weight': weight,
         if (targetWeight != null) 'target_weight': targetWeight,
         'training_days': trainingDays,
+        'health_conditions': healthConditions,
+        'diet_type': dietType,
+        if (foodRestrictions != null && foodRestrictions!.isNotEmpty)
+          'food_restrictions': foodRestrictions,
+        'goals': goals,
       };
 
   factory OnboardingPendingData.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +73,16 @@ class OnboardingPendingData {
         weight: (json['weight'] as num?)?.toDouble(),
         targetWeight: (json['target_weight'] as num?)?.toDouble(),
         trainingDays: json['training_days'] as String? ?? '',
+        healthConditions: (json['health_conditions'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            const ['none'],
+        dietType: json['diet_type'] as String? ?? 'none',
+        foodRestrictions: json['food_restrictions'] as String?,
+        goals: (json['goals'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            const [],
       );
 }
 

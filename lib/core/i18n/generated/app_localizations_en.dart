@@ -980,4 +980,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chat_empty =>
       'Ask me anything about nutrition, your diet, or progress!';
+
+  @override
+  String get chat_suggestion_1 => '🥗 What to eat for lunch on a deficit?';
+
+  @override
+  String get chat_suggestion_2 => '💪 Daily protein norm for weight loss';
+
+  @override
+  String get chat_suggestion_3 => '🌙 Is it okay to eat after 6 PM?';
 }

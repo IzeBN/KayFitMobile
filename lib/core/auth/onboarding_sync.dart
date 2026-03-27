@@ -28,7 +28,9 @@ Future<bool> syncOnboardingPending() async {
   debugPrint('[onboarding_sync] Syncing pending onboarding data: '
       'age=${pending.age} height=${pending.height} weight=${pending.weight} '
       'targetWeight=${pending.targetWeight} gender=${pending.gender} '
-      'trainingDays=${pending.trainingDays}');
+      'trainingDays=${pending.trainingDays} '
+      'healthConditions=${pending.healthConditions} '
+      'dietType=${pending.dietType} goals=${pending.goals}');
 
   // Build request body — only include non-null/non-empty fields
   final body = <String, dynamic>{};
@@ -40,6 +42,14 @@ Future<bool> syncOnboardingPending() async {
     body['gender'] = pending.gender;
   }
   if (pending.trainingDays.isNotEmpty) body['training_days'] = pending.trainingDays;
+  if (pending.healthConditions.isNotEmpty) {
+    body['health_conditions'] = pending.healthConditions;
+  }
+  body['diet_type'] = pending.dietType;
+  if (pending.foodRestrictions != null && pending.foodRestrictions!.isNotEmpty) {
+    body['food_restrictions'] = pending.foodRestrictions;
+  }
+  if (pending.goals.isNotEmpty) body['goals'] = pending.goals;
 
   try {
     await apiDio.post('/api/onboarding/submit', data: body);

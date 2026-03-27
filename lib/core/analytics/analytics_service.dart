@@ -197,7 +197,7 @@ class AnalyticsService {
       _event('tariff_selected', {'tariff_code': tariffCode, 'price': price});
   static void subscriptionPurchaseStarted(String tariffCode, double price) {
     _fa.logPurchase(
-      currency: 'RUB',
+      currency: 'USD',
       value: price,
       transactionId: '${tariffCode}_${DateTime.now().millisecondsSinceEpoch}',
       items: [AnalyticsEventItem(itemId: tariffCode, itemName: tariffCode, price: price, quantity: 1)],

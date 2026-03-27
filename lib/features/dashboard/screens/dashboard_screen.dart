@@ -92,7 +92,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     if (!mounted) return;
     await Future<void>.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    await NotificationService.showPromoAndRequest(context);
+    try {
+      await NotificationService.showPromoAndRequest(context);
+    } catch (_) {}
   }
 
   Future<void> _maybeCheckDayStreakReview() async {

@@ -1939,6 +1939,24 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Спросите меня о питании, диете или прогрессе!'**
   String get chat_empty;
+
+  /// No description provided for @chat_suggestion_1.
+  ///
+  /// In ru, this message translates to:
+  /// **'🥗 Что съесть на обед при дефиците?'**
+  String get chat_suggestion_1;
+
+  /// No description provided for @chat_suggestion_2.
+  ///
+  /// In ru, this message translates to:
+  /// **'💪 Норма белка для похудения'**
+  String get chat_suggestion_2;
+
+  /// No description provided for @chat_suggestion_3.
+  ///
+  /// In ru, this message translates to:
+  /// **'🌙 Можно ли есть после 18:00?'**
+  String get chat_suggestion_3;
 }
 
 class _AppLocalizationsDelegate

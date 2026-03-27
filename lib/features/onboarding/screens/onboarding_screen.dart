@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,15 +20,30 @@ import '../../way_to_goal/widgets/plan_result_view.dart';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
 enum _Step {
-  landing,   // 1
-  age,       // 2
-  height,    // 3
-  gender,    // 4
-  weight,    // 5
-  training,  // 6
-  method,    // 7
-  result,    // 8
-  auth,      // 9 → navigates to /login
+  landing,
+  health,
+  diet,
+  // ignore: constant_identifier_names
+  food_restrictions,
+  goals,
+  age,
+  height,
+  gender,
+  weight,
+  training,
+  // ignore: constant_identifier_names
+  weight_loss_info,
+  // ignore: constant_identifier_names
+  calc_preview,
+  // ignore: constant_identifier_names
+  info_1,
+  // ignore: constant_identifier_names
+  info_2,
+  // ignore: constant_identifier_names
+  info_3,
+  method,
+  result,
+  auth,
 }
 
 const _ageOptions = [
@@ -90,15 +106,47 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  _Step _step = _Step.landing;
+  // ── Dynamic step tracking ────────────────────────────────────────────────────
+  int _stepIndex = 0;
 
-  // Data
+  List<_Step> _buildStepList() {
+    return [
+      _Step.landing,
+      _Step.health,
+      _Step.diet,
+      _Step.food_restrictions,
+      _Step.goals,
+      _Step.age,
+      _Step.height,
+      _Step.gender,
+      _Step.weight,
+      _Step.training,
+      if (_goals.contains('lose_weight')) _Step.weight_loss_info,
+      if (_goals.contains('lose_weight')) _Step.calc_preview,
+      _Step.info_1,
+      _Step.info_2,
+      _Step.info_3,
+      _Step.method,
+      _Step.result,
+      _Step.auth,
+    ];
+  }
+
+  _Step get _currentStep => _buildStepList()[_stepIndex];
+
+  // ── Data ─────────────────────────────────────────────────────────────────────
   int? _age;
   double? _height;
   String _gender = '';
   double? _weight;
   double? _targetWeight;
   final Set<String> _trainingDays = {};
+
+  // New step data
+  Set<String> _healthConditions = {'none'};
+  String _dietType = 'none';
+  String _foodRestrictions = '';
+  Set<String> _goals = {};
 
   // Controllers
   final _heightCtrl = TextEditingController();
@@ -125,29 +173,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Navigation ──────────────────────────────────────────────────────────────
   void _goNext() {
-    AnalyticsService.onboardingStepCompleted(_step.name);
+    AnalyticsService.onboardingStepCompleted(_currentStep.name);
+    final steps = _buildStepList();
     setState(() {
       _error = null;
       _showSkipDialog = false;
-      final steps = _Step.values;
-      final idx = steps.indexOf(_step);
-      if (idx < steps.length - 1) {
-        _step = steps[idx + 1];
-        AnalyticsService.onboardingStepViewed(_step.name);
+      if (_stepIndex < steps.length - 1) {
+        _stepIndex++;
+        AnalyticsService.onboardingStepViewed(_buildStepList()[_stepIndex].name);
       }
     });
   }
 
   void _goBack() {
-    AnalyticsService.onboardingBackTapped(_step.name);
+    AnalyticsService.onboardingBackTapped(_currentStep.name);
     setState(() {
       _error = null;
       _showSkipDialog = false;
-      final steps = _Step.values;
-      final idx = steps.indexOf(_step);
-      if (idx > 0) {
-        _step = steps[idx - 1];
-      }
+      if (_stepIndex > 0) _stepIndex--;
     });
   }
 
@@ -160,6 +203,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       weight: _weight,
       targetWeight: _targetWeight,
       trainingDays: td,
+      healthConditions: _healthConditions.toList(),
+      dietType: _dietType,
+      foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
+      goals: _goals.toList(),
     ));
   }
 
@@ -243,8 +290,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _navigateToLogin() async {
     // Explicit await-save with all collected data before leaving onboarding.
-    // _savePending() calls are fire-and-forget; this final save guarantees
-    // the most complete data is persisted before registration/login.
     final td = _trainingDays.isEmpty ? '' : _trainingDays.join(',');
     await OnboardingPendingStorage.save(OnboardingPendingData(
       age: _age,
@@ -253,6 +298,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       weight: _weight,
       targetWeight: _targetWeight,
       trainingDays: td,
+      healthConditions: _healthConditions.toList(),
+      dietType: _dietType,
+      foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
+      goals: _goals.toList(),
     ));
     AnalyticsService.onboardingCompleted();
     AnalyticsService.onboardingGoToLogin();
@@ -274,14 +323,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       );
 
   // ── Progress ────────────────────────────────────────────────────────────────
-  int get _stepIndex => _Step.values.indexOf(_step);
-  int get _total => _Step.values.length;
-  bool get _canSkip => _stepIndex >= 1 && _stepIndex <= 5;
+  bool get _canSkip => _stepIndex >= 1 && _stepIndex <= 8;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isLanding = _step == _Step.landing;
+    final isLanding = _currentStep == _Step.landing;
 
     return Scaffold(
       backgroundColor: OBColors.bg,
@@ -304,7 +351,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Header ──────────────────────────────────────────────────────────────────
   Widget _buildHeader(AppLocalizations l10n) {
-    final progress = (_stepIndex + 1) / _total;
+    final steps = _buildStepList();
+    final progress = (_stepIndex + 1) / steps.length;
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -355,51 +403,142 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // ── Footer ──────────────────────────────────────────────────────────────────
   Widget _buildFooter(AppLocalizations l10n) {
-    VoidCallback? action;
-    String label = l10n.common_next;
-    bool disabled = false;
+    final isRu = ref.watch(localeProvider).languageCode == 'ru';
 
-    switch (_step) {
+    switch (_currentStep) {
       case _Step.landing:
-        return const SizedBox.shrink();
       case _Step.age:
-        return const SizedBox.shrink(); // tap-to-select
-      case _Step.height:
-        action = () => _handleHeightNext(l10n);
-        label = l10n.common_next;
-        disabled = _heightCtrl.text.isEmpty;
       case _Step.gender:
-        return const SizedBox.shrink(); // tap-to-select
-      case _Step.weight:
-        action = () => _handleWeightNext(l10n);
-        label = l10n.ob_footer_calc;
-        disabled = _weightCtrl.text.isEmpty;
-      case _Step.training:
-        action = () => _handleTrainingNext(l10n);
-        label = l10n.common_next;
-        disabled = _trainingDays.isEmpty;
-      case _Step.method:
-        action = _goNext;
-        label = l10n.common_next;
-      case _Step.result:
-        action = _goNext;
-        label = l10n.ob_footer_login;
+      case _Step.diet:
       case _Step.auth:
         return const SizedBox.shrink();
-    }
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: _GradientButton(label: label, onTap: disabled ? null : action),
-      ),
-    );
+      case _Step.health:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: isRu ? 'Далее' : 'Next',
+              onTap: _healthConditions.isNotEmpty ? _goNext : null,
+            ),
+          ),
+        );
+
+      case _Step.food_restrictions:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _GradientButton(label: isRu ? 'Далее' : 'Next', onTap: _goNext),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    setState(() => _foodRestrictions = '');
+                    _goNext();
+                  },
+                  child: Text(
+                    isRu ? 'Пропустить' : 'Skip',
+                    style: const TextStyle(color: AppColors.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+      case _Step.goals:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: isRu ? 'Далее' : 'Next',
+              onTap: _goals.isNotEmpty ? _goNext : null,
+            ),
+          ),
+        );
+
+      case _Step.height:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: l10n.common_next,
+              onTap: _heightCtrl.text.isEmpty ? null : () => _handleHeightNext(l10n),
+            ),
+          ),
+        );
+
+      case _Step.weight:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: l10n.ob_footer_calc,
+              onTap: _weightCtrl.text.isEmpty ? null : () => _handleWeightNext(l10n),
+            ),
+          ),
+        );
+
+      case _Step.training:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: l10n.common_next,
+              onTap: _trainingDays.isEmpty ? null : () => _handleTrainingNext(l10n),
+            ),
+          ),
+        );
+
+      case _Step.weight_loss_info:
+      case _Step.calc_preview:
+      case _Step.info_1:
+      case _Step.info_2:
+      case _Step.info_3:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(
+              label: isRu ? 'Далее' : 'Next',
+              onTap: _goNext,
+            ),
+          ),
+        );
+
+      case _Step.method:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(label: l10n.common_next, onTap: _goNext),
+          ),
+        );
+
+      case _Step.result:
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: _GradientButton(label: l10n.ob_footer_login, onTap: _goNext),
+          ),
+        );
+    }
   }
 
   // ── Step content ─────────────────────────────────────────────────────────────
   Widget _buildStepContent(AppLocalizations l10n) {
-    switch (_step) {
+    final isRu = ref.watch(localeProvider).languageCode == 'ru';
+
+    switch (_currentStep) {
       case _Step.landing:
         return _LandingStep(
           l10n: l10n,
@@ -409,13 +548,55 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onLocaleChange: (loc) => ref.read(localeProvider.notifier).setLocale(loc),
           onboardingDone: ref.watch(onboardingDoneProvider),
         );
+
+      case _Step.health:
+        return _HealthStep(
+          value: _healthConditions,
+          onChange: (v) => setState(() => _healthConditions = v),
+          isRu: isRu,
+        );
+
+      case _Step.diet:
+        return _DietStep(
+          value: _dietType,
+          onChange: (v) {
+            setState(() => _dietType = v);
+            _goNext();
+          },
+          isRu: isRu,
+        );
+
+      case _Step.food_restrictions:
+        return _FoodRestrictionsStep(
+          value: _foodRestrictions,
+          onChange: (v) => setState(() => _foodRestrictions = v),
+          isRu: isRu,
+        );
+
+      case _Step.goals:
+        return _GoalsStep(
+          value: _goals,
+          onChange: (v) {
+            setState(() => _goals = v);
+            _savePending();
+          },
+          isRu: isRu,
+        );
+
       case _Step.age:
         return _AgeStep(l10n: l10n, selected: _age, onSelect: _handleAgeSelect);
+
       case _Step.height:
-        return _HeightStep(l10n: l10n, controller: _heightCtrl, error: _error,
-            onChanged: (_) => setState(() => _error = null));
+        return _HeightStep(
+          l10n: l10n,
+          controller: _heightCtrl,
+          error: _error,
+          onChanged: (_) => setState(() => _error = null),
+        );
+
       case _Step.gender:
         return _GenderStep(l10n: l10n, selected: _gender, onSelect: _handleGenderSelect);
+
       case _Step.weight:
         return _WeightStep(
           l10n: l10n,
@@ -424,6 +605,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           error: _error,
           onChanged: (_) => setState(() => _error = null),
         );
+
       case _Step.training:
         return _TrainingStep(
           l10n: l10n,
@@ -431,10 +613,72 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onToggle: _handleTrainingToggle,
           error: _error,
         );
+
+      case _Step.weight_loss_info:
+        return _WeightLossInfoStep(isRu: isRu);
+
+      case _Step.calc_preview:
+        return _CalcPreviewStep(
+          preview: _preview,
+          currentWeight: _weight ?? 70,
+          targetWeight: _targetWeight ?? ((_weight ?? 70) - 5),
+          isRu: isRu,
+        );
+
+      case _Step.info_1:
+        return _InfoStep(
+          icon: Icons.center_focus_strong_rounded,
+          iconColor: const Color(0xFF16A34A),
+          titleRu: 'Распознаём точнее',
+          titleEn: 'More accurate recognition',
+          subtitleRu: 'Наш алгоритм анализирует форму, текстуру и цвет блюда',
+          subtitleEn: 'Our algorithm analyzes shape, texture and color of the dish',
+          features: [
+            _InfoFeature(icon: Icons.photo_camera_rounded, textRu: '94% точность распознавания по фото', textEn: '94% photo recognition accuracy'),
+            _InfoFeature(icon: Icons.record_voice_over_rounded, textRu: 'Голосовой ввод — скажи что съел', textEn: 'Voice input — just say what you ate'),
+            _InfoFeature(icon: Icons.edit_rounded, textRu: 'Текстовый ввод с умными подсказками', textEn: 'Text input with smart suggestions'),
+          ],
+          isRu: isRu,
+        );
+
+      case _Step.info_2:
+        return _InfoStep(
+          icon: Icons.biotech_rounded,
+          iconColor: const Color(0xFF3B82F6),
+          titleRu: 'Основано на науке',
+          titleEn: 'Science-based approach',
+          subtitleRu: 'Расчёты по международным стандартам питания',
+          subtitleEn: 'Calculations based on international nutrition standards',
+          features: [
+            _InfoFeature(icon: Icons.calculate_rounded, textRu: 'Формула Миффлина-Сент-Жора', textEn: 'Mifflin-St Jeor formula'),
+            _InfoFeature(icon: Icons.storage_rounded, textRu: 'База USDA — 500 000+ продуктов', textEn: 'USDA database — 500 000+ products'),
+            _InfoFeature(icon: Icons.fitness_center_rounded, textRu: 'Учёт уровня активности и метаболизма', textEn: 'Activity level and metabolism accounted for'),
+          ],
+          isRu: isRu,
+        );
+
+      case _Step.info_3:
+        return _InfoStep(
+          icon: Icons.psychology_rounded,
+          iconColor: const Color(0xFF8B5CF6),
+          titleRu: 'Нутрициолог в кармане',
+          titleEn: 'Your pocket nutritionist',
+          subtitleRu: 'ИИ-помощник по питанию доступен 24/7',
+          subtitleEn: 'AI nutrition assistant available 24/7',
+          features: [
+            _InfoFeature(icon: Icons.chat_bubble_rounded, textRu: 'Персональные рекомендации в чате', textEn: 'Personalized recommendations in chat'),
+            _InfoFeature(icon: Icons.trending_down_rounded, textRu: 'Анализ рациона и прогресса', textEn: 'Diet and progress analysis'),
+            _InfoFeature(icon: Icons.star_rounded, textRu: 'Бесплатно — без ограничений', textEn: 'Free — without limits'),
+          ],
+          isRu: isRu,
+        );
+
       case _Step.method:
         return _MethodStep(l10n: l10n);
+
       case _Step.result:
         return _ResultStep(l10n: l10n, preview: _preview);
+
       case _Step.auth:
         // Auto-navigate to login
         WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
@@ -598,13 +842,13 @@ class _LandingStep extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
             child: Column(
               children: [
-                _FeatureTile(icon: '📸', text: l10n.ob_demo_perk1),
+                _FeatureTile(icon: Icons.photo_camera_rounded, text: l10n.ob_demo_perk1),
                 const SizedBox(height: 16),
-                _FeatureTile(icon: '🎤', text: l10n.ob_demo_perk2),
+                _FeatureTile(icon: Icons.mic_rounded, text: l10n.ob_demo_perk2),
                 const SizedBox(height: 16),
-                _FeatureTile(icon: '📊', text: l10n.ob_demo_perk3),
+                _FeatureTile(icon: Icons.bar_chart_rounded, text: l10n.ob_demo_perk3),
                 const SizedBox(height: 16),
-                _FeatureTile(icon: '🤖', text: l10n.ob_demo_perk4),
+                _FeatureTile(icon: Icons.smart_toy_rounded, text: l10n.ob_demo_perk4),
               ],
             ),
           ),
@@ -712,7 +956,7 @@ class _Chip extends StatelessWidget {
 }
 
 class _FeatureTile extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String text;
 
   const _FeatureTile({required this.icon, required this.text});
@@ -729,7 +973,7 @@ class _FeatureTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
-          child: Text(icon, style: const TextStyle(fontSize: 22)),
+          child: Icon(icon, color: OBColors.pink, size: 22),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -743,7 +987,412 @@ class _FeatureTile extends StatelessWidget {
   }
 }
 
-// ─── Step 2: Age ───────────────────────────────────────────────────────────────
+// ─── Health step ───────────────────────────────────────────────────────────────
+class _HealthStep extends StatelessWidget {
+  final Set<String> value;
+  final ValueChanged<Set<String>> onChange;
+  final bool isRu;
+
+  const _HealthStep({
+    required this.value,
+    required this.onChange,
+    required this.isRu,
+  });
+
+  static const _options = <(String, IconData, String, String)>[
+    ('none', Icons.check_circle_outline_rounded, 'Нет ограничений', 'No restrictions'),
+    ('diabetes', Icons.water_drop_rounded, 'Диабет', 'Diabetes'),
+    ('hypertension', Icons.favorite_rounded, 'Гипертония', 'Hypertension'),
+    ('celiac', Icons.grass_rounded, 'Целиакия', 'Celiac disease'),
+    ('lactose', Icons.local_drink_rounded, 'Непереносимость лактозы', 'Lactose intolerance'),
+    ('kidney', Icons.healing_rounded, 'Болезни почек', 'Kidney disease'),
+    ('heart', Icons.monitor_heart_rounded, 'Болезни сердца', 'Heart disease'),
+    ('allergies', Icons.eco_rounded, 'Аллергии', 'Allergies'),
+  ];
+
+  void _toggle(String id) {
+    final updated = Set<String>.from(value);
+    if (id == 'none') {
+      updated
+        ..clear()
+        ..add('none');
+    } else {
+      updated.remove('none');
+      if (updated.contains(id)) {
+        updated.remove(id);
+        if (updated.isEmpty) updated.add('none');
+      } else {
+        updated.add(id);
+      }
+    }
+    onChange(updated);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRu ? 'Есть ли у тебя ограничения по здоровью?' : 'Any health conditions?',
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isRu ? 'Это поможет составить безопасный план питания' : 'This helps us create a safe nutrition plan',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+          ..._options.map((opt) {
+            final isSelected = value.contains(opt.$1);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: () => _toggle(opt.$1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected ? OBColors.pinkSoft : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected ? OBColors.pink : OBColors.border,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(opt.$2, size: 20, color: isSelected ? OBColors.pink : AppColors.textMuted),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          isRu ? opt.$3 : opt.$4,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected ? OBColors.pink : AppColors.text,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected ? OBColors.pink : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected ? OBColors.pink : OBColors.border,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check, color: Colors.white, size: 14)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Diet step ─────────────────────────────────────────────────────────────────
+class _DietStep extends StatelessWidget {
+  final String value;
+  final ValueChanged<String> onChange;
+  final bool isRu;
+
+  const _DietStep({
+    required this.value,
+    required this.onChange,
+    required this.isRu,
+  });
+
+  static const _options = <(String, IconData, String, String)>[
+    ('none', Icons.restaurant_rounded, 'Обычная', 'No specific diet'),
+    ('vegetarian', Icons.eco_rounded, 'Вегетарианство', 'Vegetarian'),
+    ('vegan', Icons.spa_rounded, 'Веганство', 'Vegan'),
+    ('keto', Icons.local_fire_department_rounded, 'Кето', 'Keto'),
+    ('paleo', Icons.set_meal_rounded, 'Палео', 'Paleo'),
+    ('mediterranean', Icons.water_rounded, 'Средиземноморская', 'Mediterranean'),
+    ('halal', Icons.star_rounded, 'Халяль', 'Halal'),
+    ('kosher', Icons.star_border_rounded, 'Кошерная', 'Kosher'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRu ? 'Придерживаешься какой-либо диеты?' : 'Do you follow a specific diet?',
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isRu ? 'Выбери один вариант' : 'Choose one option',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+          ..._options.map((opt) {
+            final isSelected = value == opt.$1;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: () => onChange(opt.$1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected ? OBColors.pinkSoft : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected ? OBColors.pink : OBColors.border,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(opt.$2, size: 20, color: isSelected ? OBColors.pink : AppColors.textMuted),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          isRu ? opt.$3 : opt.$4,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected ? OBColors.pink : AppColors.text,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected ? OBColors.pink : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected ? OBColors.pink : OBColors.border,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check, color: Colors.white, size: 14)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Food restrictions step ────────────────────────────────────────────────────
+class _FoodRestrictionsStep extends StatefulWidget {
+  final String value;
+  final ValueChanged<String> onChange;
+  final bool isRu;
+
+  const _FoodRestrictionsStep({
+    required this.value,
+    required this.onChange,
+    required this.isRu,
+  });
+
+  @override
+  State<_FoodRestrictionsStep> createState() => _FoodRestrictionsStepState();
+}
+
+class _FoodRestrictionsStepState extends State<_FoodRestrictionsStep> {
+  late final TextEditingController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = widget.isRu;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRu ? 'Есть нелюбимые или запрещённые продукты?' : 'Any foods you avoid?',
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isRu ? 'Необязательно — пропусти, если нет' : 'Optional — skip if none',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _ctrl,
+            maxLines: 4,
+            autofocus: false,
+            style: const TextStyle(fontSize: 15),
+            decoration: InputDecoration(
+              hintText: isRu
+                  ? 'Орехи, морепродукты, глютен...'
+                  : 'Nuts, seafood, gluten...',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: OBColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: OBColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: OBColors.pink, width: 2),
+              ),
+            ),
+            onChanged: widget.onChange,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Goals step ────────────────────────────────────────────────────────────────
+class _GoalsStep extends StatelessWidget {
+  final Set<String> value;
+  final ValueChanged<Set<String>> onChange;
+  final bool isRu;
+
+  const _GoalsStep({
+    required this.value,
+    required this.onChange,
+    required this.isRu,
+  });
+
+  static const _options = <(String, IconData, String, String)>[
+    ('lose_weight', Icons.monitor_weight_rounded, 'Похудеть', 'Lose weight'),
+    ('maintain_weight', Icons.track_changes_rounded, 'Поддерживать вес', 'Maintain weight'),
+    ('gain_muscle', Icons.fitness_center_rounded, 'Набирать мышечную массу', 'Build muscle'),
+    ('stay_toned', Icons.flash_on_rounded, 'Быть в тонусе', 'Stay toned'),
+    ('maintain_glucose', Icons.water_drop_rounded, 'Поддерживать уровень глюкозы', 'Maintain glucose'),
+    ('maintain_energy', Icons.bolt_rounded, 'Высокий уровень энергии', 'High energy all day'),
+    ('mental_clarity', Icons.psychology_rounded, 'Ясность разума', 'Mental clarity'),
+  ];
+
+  void _toggle(String id) {
+    final updated = Set<String>.from(value);
+    if (updated.contains(id)) {
+      updated.remove(id);
+    } else {
+      updated.add(id);
+    }
+    onChange(updated);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRu ? 'Какова твоя цель?' : "What's your goal?",
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isRu ? 'Можно выбрать несколько' : 'Choose one or more',
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+          ..._options.map((opt) {
+            final isSelected = value.contains(opt.$1);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: () => _toggle(opt.$1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isSelected ? OBColors.pinkSoft : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected ? OBColors.pink : OBColors.border,
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(opt.$2, size: 20, color: isSelected ? OBColors.pink : AppColors.textMuted),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          isRu ? opt.$3 : opt.$4,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected ? OBColors.pink : AppColors.text,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected ? OBColors.pink : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected ? OBColors.pink : OBColors.border,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check, color: Colors.white, size: 14)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Step: Age ─────────────────────────────────────────────────────────────────
 class _AgeStep extends StatelessWidget {
   final AppLocalizations l10n;
   final int? selected;
@@ -776,7 +1425,7 @@ class _AgeStep extends StatelessWidget {
   }
 }
 
-// ─── Step 3: Height ────────────────────────────────────────────────────────────
+// ─── Step: Height ──────────────────────────────────────────────────────────────
 class _HeightStep extends StatelessWidget {
   final AppLocalizations l10n;
   final TextEditingController controller;
@@ -840,7 +1489,7 @@ class _HeightStep extends StatelessWidget {
   }
 }
 
-// ─── Step 4: Gender ────────────────────────────────────────────────────────────
+// ─── Step: Gender ──────────────────────────────────────────────────────────────
 class _GenderStep extends StatelessWidget {
   final AppLocalizations l10n;
   final String selected;
@@ -857,7 +1506,7 @@ class _GenderStep extends StatelessWidget {
         children: [
           Expanded(
             child: _OptionButton(
-              label: '👩  ${l10n.ob_step_gender_female}',
+              label: l10n.ob_step_gender_female,
               selected: selected == 'female',
               onTap: () => onSelect('female'),
               height: 80,
@@ -866,7 +1515,7 @@ class _GenderStep extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: _OptionButton(
-              label: '👨  ${l10n.ob_step_gender_male}',
+              label: l10n.ob_step_gender_male,
               selected: selected == 'male',
               onTap: () => onSelect('male'),
               height: 80,
@@ -878,7 +1527,7 @@ class _GenderStep extends StatelessWidget {
   }
 }
 
-// ─── Step 5: Weight ────────────────────────────────────────────────────────────
+// ─── Step: Weight ──────────────────────────────────────────────────────────────
 class _WeightStep extends StatelessWidget {
   final AppLocalizations l10n;
   final TextEditingController weightCtrl;
@@ -981,7 +1630,7 @@ class _WeightCard extends StatelessWidget {
   }
 }
 
-// ─── Step 6: Training days ─────────────────────────────────────────────────────
+// ─── Step: Training days ───────────────────────────────────────────────────────
 class _TrainingStep extends StatelessWidget {
   final AppLocalizations l10n;
   final Set<String> selected;
@@ -1063,7 +1712,541 @@ class _TrainingStep extends StatelessWidget {
   }
 }
 
-// ─── Step 7: Method demo ───────────────────────────────────────────────────────
+// ─── Weight loss info step ─────────────────────────────────────────────────────
+class _WeightLossInfoStep extends StatelessWidget {
+  final bool isRu;
+
+  const _WeightLossInfoStep({required this.isRu});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Gradient header card
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+            decoration: BoxDecoration(
+              gradient: OBColors.gradient,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Icon(Icons.monitor_weight_outlined, color: Colors.white, size: 44),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isRu ? 'Отличный выбор!' : 'Great choice!',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          _BulletRow(
+            emoji: '✅',
+            text: isRu ? 'Оптимальный дефицит калорий' : 'Optimal calorie deficit',
+          ),
+          const SizedBox(height: 12),
+          _BulletRow(
+            emoji: '✅',
+            text: isRu ? 'Сохраним мышечную массу' : 'Preserve muscle mass',
+          ),
+          const SizedBox(height: 12),
+          _BulletRow(
+            emoji: '✅',
+            text: isRu ? 'Без чувства голода' : 'No hunger feelings',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BulletRow extends StatelessWidget {
+  final String emoji;
+  final String text;
+
+  const _BulletRow({required this.emoji, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OBColors.border),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: OBColors.pink.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.check_rounded, color: OBColors.pink, size: 18),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.text),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Calc preview step ─────────────────────────────────────────────────────────
+class _CalcPreviewStep extends StatelessWidget {
+  final CalculationResult preview;
+  final double currentWeight;
+  final double targetWeight;
+  final bool isRu;
+
+  const _CalcPreviewStep({
+    required this.preview,
+    required this.currentWeight,
+    required this.targetWeight,
+    required this.isRu,
+  });
+
+  List<FlSpot> _buildSpots() {
+    final deficit = preview.tdee - preview.targetCalories;
+    if (deficit <= 0) {
+      return [const FlSpot(0, 0), const FlSpot(12, 0)];
+    }
+    final weeklyLoss = (deficit * 7) / 7700;
+    final totalLoss = currentWeight - targetWeight;
+    final weeksNeeded = (totalLoss / weeklyLoss).clamp(4.0, 20.0);
+    final spots = <FlSpot>[];
+    for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
+      final lost = (weeklyLoss * w).clamp(0.0, totalLoss);
+      spots.add(FlSpot(w, currentWeight - lost));
+    }
+    spots.add(FlSpot(weeksNeeded, targetWeight));
+    return spots;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final kcal = preview.targetCalories.toStringAsFixed(0);
+    final protein = preview.protein.toStringAsFixed(0);
+    final fat = preview.fat.toStringAsFixed(0);
+    final carbs = preview.carbs.toStringAsFixed(0);
+    final spots = _buildSpots();
+    final totalLoss = (currentWeight - targetWeight).abs();
+    final deficit = preview.tdee - preview.targetCalories;
+    final weeksNeeded = deficit > 0
+        ? ((totalLoss / ((deficit * 7) / 7700)).clamp(4.0, 20.0)).round()
+        : 12;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            isRu ? 'Твой план похудения' : 'Your weight loss plan',
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isRu ? 'Прогноз снижения веса' : 'Weight loss projection',
+            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 20),
+
+          // Weight projection chart
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 20, 20, 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: OBColors.border),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${currentWeight.toStringAsFixed(1)} кг',
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text),
+                        ),
+                        Text(
+                          isRu ? 'сейчас' : 'now',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+                    const Icon(Icons.arrow_forward_rounded, color: AppColors.textMuted, size: 18),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (b) => OBColors.gradient.createShader(b),
+                          child: Text(
+                            '${targetWeight.toStringAsFixed(1)} кг',
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                        ),
+                        Text(
+                          isRu ? 'цель' : 'goal',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: OBColors.pinkSoft,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        isRu ? '~$weeksNeeded нед.' : '~$weeksNeeded wks',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: OBColors.pink),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 140,
+                  child: LineChart(
+                    LineChartData(
+                      gridData: const FlGridData(show: false),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 24,
+                            interval: spots.last.x / 4,
+                            getTitlesWidget: (v, _) => Text(
+                              '${v.round()}${isRu ? "н" : "w"}',
+                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                            ),
+                          ),
+                        ),
+                      ),
+                      lineTouchData: const LineTouchData(enabled: false),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: spots,
+                          isCurved: true,
+                          curveSmoothness: 0.35,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
+                          ),
+                          barWidth: 3,
+                          dotData: FlDotData(
+                            show: true,
+                            checkToShowDot: (spot, _) =>
+                                spot == spots.first || spot == spots.last,
+                            getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                              radius: 5,
+                              color: spot == spots.last
+                                  ? const Color(0xFFFE7650)
+                                  : const Color(0xFFFF597D),
+                              strokeWidth: 2,
+                              strokeColor: Colors.white,
+                            ),
+                          ),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                const Color(0xFFFF597D).withValues(alpha: 0.18),
+                                const Color(0xFFFE7650).withValues(alpha: 0.0),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Kcal target
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: OBColors.gradient,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isRu ? 'Норма калорий' : 'Daily target',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    Text(
+                      '$kcal ${isRu ? "ккал / день" : "kcal / day"}',
+                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Macro cards
+          Row(
+            children: [
+              Expanded(child: _MacroCard(label: isRu ? 'Белки' : 'Protein', value: '$protein${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFF6C8EF5))),
+              const SizedBox(width: 10),
+              Expanded(child: _MacroCard(label: isRu ? 'Жиры' : 'Fat', value: '$fat${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFFFE7650))),
+              const SizedBox(width: 10),
+              Expanded(child: _MacroCard(label: isRu ? 'Углеводы' : 'Carbs', value: '$carbs${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFF4CC0A0))),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: Text(
+              isRu ? 'По формуле Миффлина-Сент-Жора' : 'Mifflin-St Jeor formula',
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MacroCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _MacroCard({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Info feature data ─────────────────────────────────────────────────────────
+class _InfoFeature {
+  final IconData icon;
+  final String textRu;
+  final String textEn;
+  const _InfoFeature({required this.icon, required this.textRu, required this.textEn});
+}
+
+// ─── Info step (reusable) ──────────────────────────────────────────────────────
+class _InfoStep extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String titleRu;
+  final String titleEn;
+  final String subtitleRu;
+  final String subtitleEn;
+  final List<_InfoFeature> features;
+  final bool isRu;
+
+  const _InfoStep({
+    required this.icon,
+    required this.iconColor,
+    required this.titleRu,
+    required this.titleEn,
+    required this.subtitleRu,
+    required this.subtitleEn,
+    required this.features,
+    required this.isRu,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Hero card
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [iconColor.withValues(alpha: 0.12), iconColor.withValues(alpha: 0.04)],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: iconColor.withValues(alpha: 0.18)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: iconColor,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: iconColor.withValues(alpha: 0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 40),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  isRu ? titleRu : titleEn,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: AppColors.text,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isRu ? subtitleRu : subtitleEn,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textMuted,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...features.map((f) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _FeatureRow(feature: f, color: iconColor, isRu: isRu),
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureRow extends StatelessWidget {
+  final _InfoFeature feature;
+  final Color color;
+  final bool isRu;
+
+  const _FeatureRow({required this.feature, required this.color, required this.isRu});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OBColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(feature.icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              isRu ? feature.textRu : feature.textEn,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.text,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Step: Method demo ─────────────────────────────────────────────────────────
 enum _DemoMode { none, text, voice, photo }
 
 class _MethodStep extends StatefulWidget {
@@ -1254,7 +2437,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
 
               // Method tiles
               _MethodTile(
-                icon: '📸',
+                icon: Icons.photo_camera_rounded,
                 title: l10n.ob_method_photo_title,
                 desc: l10n.ob_method_photo_desc,
                 active: _active == _DemoMode.photo,
@@ -1266,7 +2449,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
               ),
               const SizedBox(height: 10),
               _MethodTile(
-                icon: '🎤',
+                icon: Icons.mic_rounded,
                 title: l10n.ob_method_voice_title,
                 desc: _active == _DemoMode.voice && _isRecording
                     ? l10n.ob_method_recording
@@ -1287,7 +2470,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
               ),
               const SizedBox(height: 10),
               _MethodTile(
-                icon: '⌨️',
+                icon: Icons.keyboard_rounded,
                 title: l10n.ob_method_text_title,
                 desc: l10n.ob_method_text_desc,
                 active: _active == _DemoMode.text,
@@ -1381,7 +2564,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
                     children: [
                       Row(
                         children: [
-                          const Text('✅', style: TextStyle(fontSize: 16)),
+                          const Icon(Icons.check_circle_rounded, color: OBColors.pink, size: 18),
                           const SizedBox(width: 8),
                           Text(l10n.ob_method_recognized,
                               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
@@ -1438,7 +2621,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
                   ),
                   child: Row(
                     children: [
-                      const Text('🎉', style: TextStyle(fontSize: 16)),
+                      const Icon(Icons.celebration_rounded, color: OBColors.pink, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -1468,7 +2651,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
 }
 
 class _MethodTile extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String title;
   final String desc;
   final bool active;
@@ -1483,6 +2666,7 @@ class _MethodTile extends StatelessWidget {
     this.active = false,
     this.recording = false,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -1504,7 +2688,7 @@ class _MethodTile extends StatelessWidget {
           children: [
             recording
                 ? _PulsingDot()
-                : Text(icon, style: const TextStyle(fontSize: 28)),
+                : Icon(icon, size: 28, color: active ? OBColors.pink : AppColors.text),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1573,7 +2757,7 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
   }
 }
 
-// ─── Step 8: Result ────────────────────────────────────────────────────────────
+// ─── Step: Result ──────────────────────────────────────────────────────────────
 class _ResultStep extends StatelessWidget {
   final AppLocalizations l10n;
   final CalculationResult preview;
@@ -1612,7 +2796,7 @@ class _StepScaffold extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('💡', style: TextStyle(fontSize: 16)),
+                const Icon(Icons.lightbulb_rounded, color: OBColors.pink, size: 18),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(hint,
@@ -1645,9 +2829,7 @@ class _GradientButton extends StatelessWidget {
         width: double.infinity,
         height: 58,
         decoration: BoxDecoration(
-          gradient: disabled
-              ? null
-              : OBColors.gradient,
+          gradient: disabled ? null : OBColors.gradient,
           color: disabled ? AppColors.border : null,
           borderRadius: BorderRadius.circular(18),
           boxShadow: disabled ? [] : OBColors.buttonShadow,
@@ -1898,29 +3080,37 @@ class _OBDotLoading extends StatelessWidget {
   }
 }
 
+// ─── Source option (photo picker) ──────────────────────────────────────────────
 class _OBSourceOption extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _OBSourceOption({required this.icon, required this.label, required this.onTap});
+
+  const _OBSourceOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: OBColors.border),
-          borderRadius: BorderRadius.circular(AppRadius.sm),
+          color: OBColors.pinkSoft,
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(icon, color: OBColors.pink),
+            Icon(icon, color: OBColors.pink, size: 22),
             const SizedBox(width: 12),
-            Text(label, style: const TextStyle(fontSize: 16)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.text),
+            ),
           ],
         ),
       ),

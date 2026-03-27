@@ -322,11 +322,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
 
   void _handleError(Object e) {
     if (!mounted) return;
-    final isPayment =
-        e is DioException && e.error is PaymentRequiredException;
-    final msg = isPayment
-        ? AppLocalizations.of(context)!.addMeal_subscription_snack
-        : '$e';
+    const msg = 'Something went wrong. Please try again.';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),

@@ -1,18 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kayfit/core/i18n/generated/app_localizations.dart';
-// import 'package:google_sign_in/google_sign_in.dart'; // TODO: enable when configured
-// import 'package:sign_in_with_apple/sign_in_with_apple.dart'; // TODO: enable when configured
 import 'package:go_router/go_router.dart';
-// TODO: restore when Google/Apple re-enabled:
-// import '../../../core/api/api_client.dart';
-// import '../../../core/auth/auth_provider.dart';
-// import '../../../core/auth/onboarding_sync.dart';
-// import '../../../router.dart';
-// import '../../../shared/widgets/loading_indicator.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/api_client.dart';
+import '../../../core/auth/auth_provider.dart';
+import '../../../core/auth/onboarding_sync.dart';
+import '../../../core/auth/social_auth_service.dart';
+import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/loading_indicator.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +23,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  // TODO: re-add _loading, _afterLogin, _saveTokens, _showError when Google/Apple re-enabled
+  bool _loading = false;
 
   @override
   void initState() {
@@ -30,74 +31,171 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     AnalyticsService.loginPageOpened();
   }
 
+  // ---------------------------------------------------------------------------
+  // Auth actions
+  // ---------------------------------------------------------------------------
+
+  Future<void> _afterLogin(Map<String, dynamic> tokens) async {
+    await ref.read(authNotifierProvider.notifier).loginWithTokens(
+          tokens['access_token'] as String,
+          tokens['refresh_token'] as String,
+        );
+    if (mounted) {
+      await syncOnboardingPending();
+    }
+  }
+
+  Future<void> _signInGoogle() async {
+    AnalyticsService.loginMethodSelected('google');
+    setState(() => _loading = true);
+    try {
+      final tokens = await SocialAuthService.signInWithGoogle();
+      await _afterLogin(tokens);
+    } on SignInCancelledException {
+      // user cancelled — no error shown
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _signInApple() async {
+    AnalyticsService.loginMethodSelected('apple');
+    setState(() => _loading = true);
+    try {
+      final tokens = await SocialAuthService.signInWithApple();
+      await _afterLogin(tokens);
+    } on SignInCancelledException {
+      // user cancelled — no error shown
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
     final isRu = locale.languageCode == 'ru';
 
-    return Scaffold(
-      backgroundColor: OBColors.bg,
-      body: Column(
-          children: [
-            _buildHeader(context, isRu),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.auth_subtitle,
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 15,
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: OBColors.bg,
+          body: Column(
+            children: [
+              _buildHeader(context, isRu),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l10n.auth_subtitle,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    // TODO: enable Google/Apple when configured
-                    // _SocialButton(
-                    //   icon: Icons.g_mobiledata_rounded,
-                    //   label: l10n.auth_google,
-                    //   iconColor: const Color(0xFF4285F4),
-                    //   borderColor: OBColors.border,
-                    //   onTap: _signInGoogle,
-                    // ),
-                    // const SizedBox(height: 12),
-                    // _SocialButton(
-                    //   icon: Icons.apple,
-                    //   label: l10n.auth_apple,
-                    //   iconColor: Colors.black,
-                    //   borderColor: OBColors.border,
-                    //   onTap: _signInApple,
-                    // ),
-                    // const SizedBox(height: 12),
-                    _SocialButton(
-                      icon: Icons.mail_outline_rounded,
-                      label: isRu ? 'Войти по email' : 'Sign in with Email',
-                      iconColor: AppColors.textMuted,
-                      borderColor: OBColors.border,
-                      onTap: () {
-                      AnalyticsService.loginMethodSelected('email');
-                      context.push('/email-auth');
-                    },
-                    ),
-                    const SizedBox(height: 28),
-                    Text(
-                      l10n.auth_terms,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                        height: 1.5,
+                      const SizedBox(height: 20),
+                      // Platform-aware ordering: iOS → Apple first; Android → Google first
+                      if (Platform.isIOS) ...[
+                        _buildAppleButton(isRu),
+                        const SizedBox(height: 12),
+                        _SocialButton(
+                          icon: Icons.g_mobiledata_rounded,
+                          label: isRu ? 'Войти через Google' : 'Continue with Google',
+                          iconColor: const Color(0xFF4285F4),
+                          borderColor: OBColors.border,
+                          onTap: _loading ? null : _signInGoogle,
+                        ),
+                      ] else ...[
+                        _SocialButton(
+                          icon: Icons.g_mobiledata_rounded,
+                          label: isRu ? 'Войти через Google' : 'Continue with Google',
+                          iconColor: const Color(0xFF4285F4),
+                          borderColor: OBColors.border,
+                          onTap: _loading ? null : _signInGoogle,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildAppleButton(isRu),
+                      ],
+                      const SizedBox(height: 12),
+                      _SocialButton(
+                        icon: Icons.mail_outline_rounded,
+                        label: isRu ? 'Войти по email' : 'Sign in with Email',
+                        iconColor: AppColors.textMuted,
+                        borderColor: OBColors.border,
+                        onTap: _loading
+                            ? null
+                            : () {
+                                AnalyticsService.loginMethodSelected('email');
+                                context.push('/email-auth');
+                              },
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 28),
+                      Text(
+                        l10n.auth_terms,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-      ),
+            ],
+          ),
+        ),
+        if (_loading)
+          const ColoredBox(
+            color: Color(0x66000000),
+            child: Center(child: LoadingIndicator()),
+          ),
+      ],
+    );
+  }
+
+  /// Apple button — native [SignInWithAppleButton] on iOS (required by Apple HIG),
+  /// custom [_SocialButton] on Android (where the web flow is used).
+  Widget _buildAppleButton(bool isRu) {
+    if (Platform.isIOS) {
+      return SignInWithAppleButton(
+        onPressed: _loading ? () {} : _signInApple,
+        text: isRu ? 'Войти через Apple' : 'Sign in with Apple',
+        height: 54,
+        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.md)),
+        style: SignInWithAppleButtonStyle.black,
+      );
+    }
+    return _SocialButton(
+      icon: Icons.apple,
+      label: isRu ? 'Войти через Apple' : 'Sign in with Apple',
+      iconColor: Colors.black87,
+      borderColor: OBColors.border,
+      onTap: _loading ? null : _signInApple,
     );
   }
 
@@ -132,7 +230,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha:0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
@@ -155,7 +253,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Text(
                 isRu ? 'Ваш трекер питания' : 'Your nutrition tracker',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha:0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 16,
                 ),
               ),
@@ -167,6 +265,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// _LangToggle / _LangChip
+// ---------------------------------------------------------------------------
+
 class _LangToggle extends StatelessWidget {
   final bool isRu;
   final ValueChanged<Locale> onToggle;
@@ -177,20 +279,28 @@ class _LangToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha:0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _LangChip(label: 'RU', active: isRu, onTap: () {
-            AnalyticsService.langSelected('ru', 'login');
-            onToggle(const Locale('ru'));
-          }),
-          _LangChip(label: 'EN', active: !isRu, onTap: () {
-            AnalyticsService.langSelected('en', 'login');
-            onToggle(const Locale('en'));
-          }),
+          _LangChip(
+            label: 'RU',
+            active: isRu,
+            onTap: () {
+              AnalyticsService.langSelected('ru', 'login');
+              onToggle(const Locale('ru'));
+            },
+          ),
+          _LangChip(
+            label: 'EN',
+            active: !isRu,
+            onTap: () {
+              AnalyticsService.langSelected('en', 'login');
+              onToggle(const Locale('en'));
+            },
+          ),
         ],
       ),
     );
@@ -202,7 +312,11 @@ class _LangChip extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  const _LangChip({required this.label, required this.active, required this.onTap});
+  const _LangChip({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -228,12 +342,16 @@ class _LangChip extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// _SocialButton
+// ---------------------------------------------------------------------------
+
 class _SocialButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color iconColor;
   final Color borderColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _SocialButton({
     required this.icon,
@@ -245,32 +363,35 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: InkWell(
-        onTap: onTap,
+    return Opacity(
+      opacity: onTap == null ? 0.5 : 1.0,
+      child: Material(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Container(
-          height: 54,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: borderColor, width: 1.5),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              Icon(icon, color: iconColor, size: 22),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.text,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Container(
+            height: 54,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: borderColor, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                Icon(icon, color: iconColor, size: 22),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.text,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

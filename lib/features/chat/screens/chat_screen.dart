@@ -390,10 +390,11 @@ class _EmptyStateState extends State<_EmptyState>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final suggestions = [
-      '🥗 Что съесть на обед при дефиците?',
-      '💪 Норма белка для похудения',
-      '🌙 Можно ли есть после 18:00?',
+      l10n.chat_suggestion_1,
+      l10n.chat_suggestion_2,
+      l10n.chat_suggestion_3,
     ];
 
     return SingleChildScrollView(

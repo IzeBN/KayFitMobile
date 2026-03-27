@@ -53,7 +53,20 @@
       "Bash(grep -E \"\\\\.dart$\")",
       "Bash(grep -r \"tariffs\\\\|paywall\" C:/Data/projects/KayFitMobile/lib/features --include=*.dart -l)",
       "Bash(powershell -Command \"Get-Content 'C:\\\\Data\\\\projects\\\\KayFitMobile\\\\ios\\\\Runner\\\\Info.plist' | Select-String -Pattern 'NSMicro|NSCamera|NSPhoto' -Context 0,1\")",
-      "Bash(\"C:\\\\Data\\\\projects\\\\KayFitMobile\\\\lib\\\\features\\\\settings\\\\screens\\\\settings_screen.g.dart\")"
+      "Bash(\"C:\\\\Data\\\\projects\\\\KayFitMobile\\\\lib\\\\features\\\\settings\\\\screens\\\\settings_screen.g.dart\")",
+      "Bash(ls C:/Data/projects/Calories/backend/.env*)",
+      "Bash(ls \"C:\\\\Data\\\\projects\\\\KayFitMobile\\\\ios\\\\Runner\\\\Assets.xcassets\\\\AppIcon.appiconset\"\" | head -5 && ls \"C:DataprojectsKayFitMobilenew\"\")",
+      "Bash(unzip -o new/ios_fixed_icons.zip -d /tmp/ios_icons)",
+      "Read(//tmp/**)",
+      "Bash(ICON_SRC=\"/tmp/ios_icons\")",
+      "Bash(ICON_DST=\"C:/Data/projects/KayFitMobile/ios/Runner/Assets.xcassets/AppIcon.appiconset\")",
+      "Bash(__NEW_LINE_f9345dfd3f9ebd9a__ cp:*)",
+      "Bash(cp \"$ICON_SRC/AppIcon-20.png\" \"$ICON_DST/Icon-App-20x20@1x.png\")",
+      "Bash(cp \"$ICON_SRC/AppIcon-20@2x.png\" \"$ICON_DST/Icon-App-20x20@2x.png\")",
+      "Bash(python3.exe --version)",
+      "Bash(where python3:*)",
+      "Bash(where python:*)",
+      "Bash(ls \"C:/Data/projects/Calories/backend/\"AuthKey*.p8)"
     ]
   }
 }
