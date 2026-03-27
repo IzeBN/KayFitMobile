@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
@@ -188,29 +188,8 @@ class _TariffsScreenState extends ConsumerState<TariffsScreen> {
         (tariff['price'] as num?)?.toDouble() ?? 0,
       );
     }
-    setState(() {
-      _paying = true;
-      _payError = null;
-    });
-    try {
-      final resp = await apiDio.post('/api/payments/create', data: {
-        'tariff_id': _selectedId,
-        'email': email,
-      });
-      final url = (resp.data as Map<String, dynamic>)['confirmation_url'] as String?;
-      if (url != null && context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => _PaymentWebView(url: url)),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _payError = l10n.tariffs_pay_error);
-      }
-    } finally {
-      if (mounted) setState(() => _paying = false);
-    }
+    // Payment via external WebView is disabled (Apple App Store Guideline 3.1.1).
+    // In-App Purchase will be implemented in a future release.
   }
 
   @override
@@ -810,38 +789,3 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ─── Payment WebView ───────────────────────────────────────────────────────────
-
-class _PaymentWebView extends StatefulWidget {
-  final String url;
-  const _PaymentWebView({required this.url});
-
-  @override
-  State<_PaymentWebView> createState() => _PaymentWebViewState();
-}
-
-class _PaymentWebViewState extends State<_PaymentWebView> {
-  late final WebViewController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(widget.url));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.tariffs_payment_title),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: WebViewWidget(controller: _controller),
-    );
-  }
-}
