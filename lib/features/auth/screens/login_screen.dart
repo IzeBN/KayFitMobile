@@ -45,21 +45,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _signInGoogle() async {
-    AnalyticsService.loginMethodSelected('google');
-    setState(() => _loading = true);
-    try {
-      final tokens = await SocialAuthService.signInWithGoogle();
-      await _afterLogin(tokens);
-    } on SignInCancelledException {
-      // user cancelled — no error shown
-    } catch (e) {
-      _showError(e.toString());
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
   Future<void> _signInApple() async {
     AnalyticsService.loginMethodSelected('apple');
     setState(() => _loading = true);
@@ -117,28 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Platform-aware ordering: iOS → Apple first; Android → Google first
-                      if (Platform.isIOS) ...[
-                        _buildAppleButton(isRu),
-                        const SizedBox(height: 12),
-                        _SocialButton(
-                          icon: Icons.g_mobiledata_rounded,
-                          label: isRu ? 'Войти через Google' : 'Continue with Google',
-                          iconColor: const Color(0xFF4285F4),
-                          borderColor: OBColors.border,
-                          onTap: _loading ? null : _signInGoogle,
-                        ),
-                      ] else ...[
-                        _SocialButton(
-                          icon: Icons.g_mobiledata_rounded,
-                          label: isRu ? 'Войти через Google' : 'Continue with Google',
-                          iconColor: const Color(0xFF4285F4),
-                          borderColor: OBColors.border,
-                          onTap: _loading ? null : _signInGoogle,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildAppleButton(isRu),
-                      ],
+                      _buildAppleButton(isRu),
                       const SizedBox(height: 12),
                       _SocialButton(
                         icon: Icons.mail_outline_rounded,

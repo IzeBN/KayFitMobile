@@ -66,7 +66,15 @@
       "Bash(python3.exe --version)",
       "Bash(where python3:*)",
       "Bash(where python:*)",
-      "Bash(ls \"C:/Data/projects/Calories/backend/\"AuthKey*.p8)"
+      "Bash(ls \"C:/Data/projects/Calories/backend/\"AuthKey*.p8)",
+      "Bash(find C:DataprojectsKayFitMobile -type f \\\\\\(-name *auth* -o -name *login* -o -name *sign* \\\\\\))",
+      "Bash(find C:DataprojectsKayFitMobile -type f \\\\\\(-name *.gradle -o -name *.plist -o -name *.xml -o -name pubspec.yaml -o -name build.gradle \\\\\\))",
+      "Bash(grep -r GOOGLE_WEB_CLIENT_ID C:DataprojectsKayFitMobile --include=*.gradle --include=*.yml --include=*.yaml)",
+      "Bash(find C:DataprojectsKayFitMobile/android -name build.gradle -o -name *.gradle.kts)",
+      "Bash(find C:DataprojectsKayFitMobile/ios -name Podfile -o -name *.plist)",
+      "Bash(grep -r \"google\\\\|Google\\\\|GOOGLE\" C:DataprojectsKayFitMobile/ios --include=*.plist --include=*.swift)",
+      "Bash(find C:DataprojectsKayFitMobile/lib -name router.dart -o -name *route*)",
+      "Bash(grep -r \"signInWithGoogle\\\\|_signInGoogle\\\\|SocialAuthService\" C:DataprojectsKayFitMobile/lib --include=*.dart)"
     ]
   }
 }
