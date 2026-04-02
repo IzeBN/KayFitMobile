@@ -26,7 +26,6 @@ dependencies:
   path_provider: ^2.1.0
 
   # Auth
-  google_sign_in: ^6.2.0
   sign_in_with_apple: ^6.1.0
   app_links: ^6.1.0
 
@@ -36,9 +35,6 @@ dependencies:
 
   # i18n
   intl: ^0.20.2
-
-  # Payments (WebView)
-  webview_flutter: ^4.7.0
 
   # Media
   image_picker: ^1.1.0

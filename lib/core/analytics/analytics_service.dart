@@ -179,7 +179,7 @@ class AnalyticsService {
   // ─── AI Consent ───────────────────────────────────────────────────────────
 
   static void aiConsentScreenOpened() => _event('ai_consent_screen_opened');
-  static void aiConsentCheckboxToggled(bool checked) => _event('ai_consent_checkbox_toggled', {'checked': checked});
+  static void aiConsentCheckboxToggled(bool checked) => _event('ai_consent_checkbox_toggled', {'checked': checked ? 1 : 0});
   static void aiConsentAccepted() => _event('ai_consent_accepted');
   static void aiConsentDeclined() => _event('ai_consent_declined');
   static void aiConsentDeclineConfirmed() => _event('ai_consent_decline_confirmed');

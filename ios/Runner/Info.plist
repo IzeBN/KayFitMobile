@@ -61,16 +61,6 @@
 					<string>kayfit</string>
 				</array>
 			</dict>
-			<dict>
-				<key>CFBundleTypeRole</key>
-				<string>Editor</string>
-				<key>CFBundleURLName</key>
-				<string>google-sign-in</string>
-				<key>CFBundleURLSchemes</key>
-				<array>
-					<string>REPLACE_WITH_REVERSED_CLIENT_ID</string>
-				</array>
-			</dict>
 		</array>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Kayfit uses the microphone for voice-based meal logging</string>

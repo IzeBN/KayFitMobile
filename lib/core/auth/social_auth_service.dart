@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -12,11 +11,6 @@ class SignInCancelledException implements Exception {
 }
 
 class SocialAuthService {
-  static const _googleWebClientId = String.fromEnvironment(
-    'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '',
-  );
-
   static const _appleServicesId = String.fromEnvironment(
     'APPLE_SERVICES_ID',
     defaultValue: 'com.kayfit.app.auth',
@@ -26,35 +20,6 @@ class SocialAuthService {
     'APPLE_REDIRECT_URI',
     defaultValue: 'https://app.carbcounter.online/api/v1/auth/apple/callback',
   );
-
-  static Future<Map<String, dynamic>> signInWithGoogle() async {
-    final googleSignIn = GoogleSignIn(
-      scopes: ['email', 'profile'],
-      serverClientId: _googleWebClientId.isNotEmpty ? _googleWebClientId : null,
-    );
-
-    GoogleSignInAccount? account;
-    try {
-      account = await googleSignIn.signIn();
-    } catch (e) {
-      throw Exception('Google Sign-In error: $e');
-    }
-
-    if (account == null) throw SignInCancelledException();
-
-    final auth = await account.authentication;
-    final idToken = auth.idToken;
-    if (idToken == null) {
-      throw Exception('Google did not return an id_token');
-    }
-
-    final deviceId = await _getDeviceId();
-    final resp = await apiDio.post(
-      '/api/v1/auth/google',
-      data: {'id_token': idToken, 'device_id': deviceId},
-    );
-    return resp.data as Map<String, dynamic>;
-  }
 
   static Future<Map<String, dynamic>> signInWithApple() async {
     AuthorizationCredentialAppleID credential;

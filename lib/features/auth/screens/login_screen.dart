@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/auth/onboarding_sync.dart';
 import '../../../core/auth/social_auth_service.dart';

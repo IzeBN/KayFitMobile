@@ -29,6 +29,10 @@ final onboardingDoneProvider = StateProvider<bool>((ref) => false);
 /// Router redirects to /way-to-goal once; WayToGoalScreen clears it.
 final showWayToGoalProvider = StateProvider<bool>((ref) => false);
 
+/// Set to true when AI consent is triggered from onboarding demo.
+/// AiConsentScreen uses this to navigate back to /onboarding after consent.
+final consentFromOnboardingProvider = StateProvider<bool>((ref) => false);
+
 /// Call after successful onboarding completion to mark it done.
 Future<void> markOnboardingDone(WidgetRef ref) async {
   final prefs = await SharedPreferences.getInstance();

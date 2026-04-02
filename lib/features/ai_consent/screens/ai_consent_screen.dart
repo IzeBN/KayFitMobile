@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../router.dart';
 
 class AiConsentScreen extends ConsumerStatefulWidget {
   const AiConsentScreen({super.key});
@@ -29,8 +30,13 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
     final subtitle = isRu
         ? 'Для работы функций распознавания еды'
         : 'Required for food recognition features';
-    final row1 = isRu ? 'Голосовые описания и фото блюд' : 'Voice descriptions and meal photos';
-    final row2 = isRu ? 'Данные отправляются в Anthropic (Claude)' : 'Data is sent to Anthropic (Claude)';
+    final row1 = isRu ? 'Текстовые описания блюд' : 'Text descriptions of meals';
+    final row1b = isRu ? 'Голосовые записи (аудиофайлы)' : 'Voice recordings (audio files)';
+    final row1c = isRu ? 'Фотографии еды' : 'Food photos';
+    final row1d = isRu ? 'Сообщения в AI-чате' : 'AI chat messages';
+    final row2 = isRu
+        ? 'Данные отправляются в Anthropic, Inc. (США) и обрабатываются на их серверах'
+        : 'Data is sent to Anthropic, Inc. (USA) and processed on their servers';
     final row3 = isRu ? 'Не используются для обучения модели' : 'Never used for model training';
     final checkboxLabel = isRu ? 'Я согласен(а) с передачей данных' : 'I agree to the data transfer';
     final acceptLabel = isRu ? 'Принять и продолжить' : 'Accept & Continue';
@@ -107,19 +113,50 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
                 ),
                 padding: const EdgeInsets.all(20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      isRu ? 'Данные, которые передаются:' : 'Data that is shared:',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     _BenefitRow(
-                      icon: Icons.mic_rounded,
+                      icon: Icons.text_snippet_outlined,
                       color: const Color(0xFF7C3AED),
                       text: row1,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+                    _BenefitRow(
+                      icon: Icons.mic_rounded,
+                      color: const Color(0xFF7C3AED),
+                      text: row1b,
+                    ),
+                    const SizedBox(height: 12),
+                    _BenefitRow(
+                      icon: Icons.camera_alt_outlined,
+                      color: const Color(0xFF7C3AED),
+                      text: row1c,
+                    ),
+                    const SizedBox(height: 12),
+                    _BenefitRow(
+                      icon: Icons.chat_outlined,
+                      color: const Color(0xFF7C3AED),
+                      text: row1d,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1),
+                    ),
                     _BenefitRow(
                       icon: Icons.send_rounded,
                       color: const Color(0xFF3B82F6),
                       text: row2,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _BenefitRow(
                       icon: Icons.shield_rounded,
                       color: const Color(0xFF16A34A),
@@ -251,10 +288,20 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
     );
   }
 
+  void _navigateAfterConsent() {
+    final fromOnboarding = ref.read(consentFromOnboardingProvider);
+    if (fromOnboarding) {
+      ref.read(consentFromOnboardingProvider.notifier).state = false;
+      context.go('/onboarding');
+    } else {
+      context.go('/');
+    }
+  }
+
   Future<void> _onAccept() async {
     AnalyticsService.aiConsentAccepted();
     await ref.read(aiConsentProvider.notifier).setConsent(true);
-    if (mounted) context.go('/');
+    if (mounted) _navigateAfterConsent();
   }
 
   Future<void> _onDecline() async {
@@ -294,7 +341,7 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
     if (confirmed == true && mounted) {
       AnalyticsService.aiConsentDeclineConfirmed();
       await ref.read(aiConsentProvider.notifier).setConsent(false);
-      if (mounted) context.go('/');
+      if (mounted) _navigateAfterConsent();
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
@@ -209,6 +211,11 @@ class PlanResultView extends StatelessWidget {
           ),
         ),
 
+        const SizedBox(height: 12),
+
+        // ── Scientific source citation ────────────────────────────────────────
+        _CitationCard(l10n: l10n),
+
         const SizedBox(height: 28),
 
         ?footer,
@@ -317,6 +324,66 @@ class _FeatureRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Scientific source citation ───────────────────────────────────────────────
+
+class _CitationCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _CitationCard({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final citationText = isRu
+        ? 'Расчёт основан на формуле Mifflin-St Jeor (Mifflin MD et al., The American Journal of Clinical Nutrition, 1990) с коэффициентами активности ВОЗ/ФАО.'
+        : 'Calculation is based on the Mifflin-St Jeor formula (Mifflin MD et al., The American Journal of Clinical Nutrition, 1990) with WHO/FAO activity coefficients.';
+    final linkLabel = isRu ? 'Источник: PubMed' : 'Source: PubMed';
+    const pubmedUrl = 'https://pubmed.ncbi.nlm.nih.gov/2305711/';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, size: 16, color: AppColors.textMuted),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                  height: 1.4,
+                ),
+                children: [
+                  TextSpan(text: '$citationText '),
+                  TextSpan(
+                    text: linkLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(pubmedUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

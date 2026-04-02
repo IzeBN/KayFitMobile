@@ -10,6 +10,7 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../core/storage/onboarding_pending_storage.dart';
@@ -2249,17 +2250,17 @@ class _FeatureRow extends StatelessWidget {
 // ─── Step: Method demo ─────────────────────────────────────────────────────────
 enum _DemoMode { none, text, voice, photo }
 
-class _MethodStep extends StatefulWidget {
+class _MethodStep extends ConsumerStatefulWidget {
   final AppLocalizations l10n;
   const _MethodStep({required this.l10n});
 
   @override
-  State<_MethodStep> createState() => _MethodStepState();
+  ConsumerState<_MethodStep> createState() => _MethodStepState();
 }
 
 enum _DemoLoadingType { none, voice, photo, text }
 
-class _MethodStepState extends State<_MethodStep> with SingleTickerProviderStateMixin {
+class _MethodStepState extends ConsumerState<_MethodStep> with SingleTickerProviderStateMixin {
   _DemoMode _active = _DemoMode.none;
   _DemoLoadingType _loadingType = _DemoLoadingType.none;
   bool get _loading => _loadingType != _DemoLoadingType.none;
@@ -2285,7 +2286,18 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
 
   String get _lang => Localizations.localeOf(context).languageCode == 'ru' ? 'ru' : 'en';
 
+  /// Returns true if the user hasn't consented yet and we navigated to the
+  /// consent screen. The caller should abort their action in that case.
+  bool _requireConsent() {
+    final consent = ref.read(aiConsentProvider);
+    if (consent != null) return false; // already decided — proceed
+    ref.read(consentFromOnboardingProvider.notifier).state = true;
+    context.go('/ai-consent');
+    return true;
+  }
+
   Future<void> _parseText(String text) async {
+    if (_requireConsent()) return;
     if (text.trim().isEmpty) return;
     setState(() { _loadingType = _DemoLoadingType.text; _error = null; _items = []; });
     try {
@@ -2305,6 +2317,7 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
+    if (_requireConsent()) return;
     setState(() { _active = _DemoMode.photo; _items = []; _error = null; });
     final picker = ImagePicker();
     final file = await picker.pickImage(source: source, imageQuality: 80);
@@ -2330,11 +2343,23 @@ class _MethodStepState extends State<_MethodStep> with SingleTickerProviderState
   }
 
   Future<void> _startVoice() async {
+    if (_requireConsent()) return;
     final status = await Permission.microphone.request();
     if (!mounted) return;
     if (!status.isGranted) {
       setState(() => _error = widget.l10n.ob_method_mic_denied);
-      if (status.isPermanentlyDenied) openAppSettings();
+      if (status.isPermanentlyDenied && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(widget.l10n.ob_method_mic_denied),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFFEF4444),
+          action: SnackBarAction(
+            label: widget.l10n.addMeal_open_settings,
+            textColor: Colors.white,
+            onPressed: openAppSettings,
+          ),
+        ));
+      }
       return;
     }
     final dir = await getTemporaryDirectory();

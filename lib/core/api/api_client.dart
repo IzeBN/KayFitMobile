@@ -66,7 +66,6 @@ class _AuthInterceptor extends Interceptor {
     final isAuthEndpoint = path.contains('/api/v1/auth/login') ||
         path.contains('/api/v1/auth/register') ||
         path.contains('/api/v1/auth/refresh') ||
-        path.contains('/api/v1/auth/google') ||
         path.contains('/api/v1/auth/apple');
 
     if (!isAuthEndpoint) {
@@ -97,7 +96,7 @@ class _AuthInterceptor extends Interceptor {
 
     if (err.response?.statusCode == 401) {
       final path = err.requestOptions.path;
-      if (path.contains('/api/v1/auth/') || path.contains('/api/onboarding/')) {
+      if (path.contains('/api/v1/auth/')) {
         handler.next(err);
         return;
       }

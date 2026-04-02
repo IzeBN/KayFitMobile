@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -77,10 +76,14 @@ class _NoSubscription extends StatelessWidget {
                       color: AppColors.textMuted,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => context.push('/tariffs'),
-                    child: Text(l10n.subscription_view_tariffs),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.tariffs_free,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accent,
+                    ),
                   ),
                 ],
               ),

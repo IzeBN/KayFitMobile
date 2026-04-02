@@ -21,6 +21,7 @@ class KayfitApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Kayfit',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,
       locale: locale,
