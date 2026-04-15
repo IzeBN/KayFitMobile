@@ -29,8 +29,38 @@ mixin _$Meal {
   double get carbs => throw _privateConstructorUsedError;
   double? get weight => throw _privateConstructorUsedError;
   String? get emotion => throw _privateConstructorUsedError;
-  @JsonKey(name: 'time')
-  String? get createdAt => throw _privateConstructorUsedError;
+  String? get createdAt =>
+      throw _privateConstructorUsedError; // ── New: dish-level fields ──
+  @JsonKey(name: 'dish_name')
+  String? get dishName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'meal_type')
+  String? get mealType => throw _privateConstructorUsedError; // breakfast, lunch, dinner, snack
+  // ── New: carb decomposition ──
+  @JsonKey(name: 'total_carbs')
+  double? get totalCarbs => throw _privateConstructorUsedError;
+  double? get fiber => throw _privateConstructorUsedError;
+  double? get sugar => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sugar_alcohols')
+  double? get sugarAlcohols => throw _privateConstructorUsedError;
+  @JsonKey(name: 'net_carbs')
+  double? get netCarbs => throw _privateConstructorUsedError;
+  @JsonKey(name: 'glycemic_index')
+  int? get glycemicIndex => throw _privateConstructorUsedError; // ── New: fat breakdown ──
+  @JsonKey(name: 'saturated_fat')
+  double? get saturatedFat => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unsaturated_fat')
+  double? get unsaturatedFat => throw _privateConstructorUsedError; // ── New: micronutrients ──
+  double? get sodium => throw _privateConstructorUsedError;
+  double? get cholesterol => throw _privateConstructorUsedError;
+  double? get iron => throw _privateConstructorUsedError;
+  double? get calcium => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_a')
+  double? get vitaminA => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_c')
+  double? get vitaminC => throw _privateConstructorUsedError;
+  double? get potassium =>
+      throw _privateConstructorUsedError; // ── New: ingredients (for dish recognition) ──
+  List<Ingredient>? get ingredients => throw _privateConstructorUsedError;
 
   /// Serializes this Meal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,7 +85,25 @@ abstract class $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    @JsonKey(name: 'time') String? createdAt,
+    String? createdAt,
+    @JsonKey(name: 'dish_name') String? dishName,
+    @JsonKey(name: 'meal_type') String? mealType,
+    @JsonKey(name: 'total_carbs') double? totalCarbs,
+    double? fiber,
+    double? sugar,
+    @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
+    @JsonKey(name: 'net_carbs') double? netCarbs,
+    @JsonKey(name: 'glycemic_index') int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
+    double? sodium,
+    double? cholesterol,
+    double? iron,
+    double? calcium,
+    @JsonKey(name: 'vitamin_a') double? vitaminA,
+    @JsonKey(name: 'vitamin_c') double? vitaminC,
+    double? potassium,
+    List<Ingredient>? ingredients,
   });
 }
 
@@ -83,6 +131,24 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
     Object? weight = freezed,
     Object? emotion = freezed,
     Object? createdAt = freezed,
+    Object? dishName = freezed,
+    Object? mealType = freezed,
+    Object? totalCarbs = freezed,
+    Object? fiber = freezed,
+    Object? sugar = freezed,
+    Object? sugarAlcohols = freezed,
+    Object? netCarbs = freezed,
+    Object? glycemicIndex = freezed,
+    Object? saturatedFat = freezed,
+    Object? unsaturatedFat = freezed,
+    Object? sodium = freezed,
+    Object? cholesterol = freezed,
+    Object? iron = freezed,
+    Object? calcium = freezed,
+    Object? vitaminA = freezed,
+    Object? vitaminC = freezed,
+    Object? potassium = freezed,
+    Object? ingredients = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -122,6 +188,78 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as String?,
+            dishName: freezed == dishName
+                ? _value.dishName
+                : dishName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            mealType: freezed == mealType
+                ? _value.mealType
+                : mealType // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            totalCarbs: freezed == totalCarbs
+                ? _value.totalCarbs
+                : totalCarbs // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            fiber: freezed == fiber
+                ? _value.fiber
+                : fiber // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sugar: freezed == sugar
+                ? _value.sugar
+                : sugar // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sugarAlcohols: freezed == sugarAlcohols
+                ? _value.sugarAlcohols
+                : sugarAlcohols // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            netCarbs: freezed == netCarbs
+                ? _value.netCarbs
+                : netCarbs // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            glycemicIndex: freezed == glycemicIndex
+                ? _value.glycemicIndex
+                : glycemicIndex // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            saturatedFat: freezed == saturatedFat
+                ? _value.saturatedFat
+                : saturatedFat // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            unsaturatedFat: freezed == unsaturatedFat
+                ? _value.unsaturatedFat
+                : unsaturatedFat // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sodium: freezed == sodium
+                ? _value.sodium
+                : sodium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            cholesterol: freezed == cholesterol
+                ? _value.cholesterol
+                : cholesterol // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            iron: freezed == iron
+                ? _value.iron
+                : iron // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            calcium: freezed == calcium
+                ? _value.calcium
+                : calcium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminA: freezed == vitaminA
+                ? _value.vitaminA
+                : vitaminA // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminC: freezed == vitaminC
+                ? _value.vitaminC
+                : vitaminC // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            potassium: freezed == potassium
+                ? _value.potassium
+                : potassium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            ingredients: freezed == ingredients
+                ? _value.ingredients
+                : ingredients // ignore: cast_nullable_to_non_nullable
+                      as List<Ingredient>?,
           )
           as $Val,
     );
@@ -145,7 +283,25 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    @JsonKey(name: 'time') String? createdAt,
+    String? createdAt,
+    @JsonKey(name: 'dish_name') String? dishName,
+    @JsonKey(name: 'meal_type') String? mealType,
+    @JsonKey(name: 'total_carbs') double? totalCarbs,
+    double? fiber,
+    double? sugar,
+    @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
+    @JsonKey(name: 'net_carbs') double? netCarbs,
+    @JsonKey(name: 'glycemic_index') int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
+    double? sodium,
+    double? cholesterol,
+    double? iron,
+    double? calcium,
+    @JsonKey(name: 'vitamin_a') double? vitaminA,
+    @JsonKey(name: 'vitamin_c') double? vitaminC,
+    double? potassium,
+    List<Ingredient>? ingredients,
   });
 }
 
@@ -170,6 +326,24 @@ class __$$MealImplCopyWithImpl<$Res>
     Object? weight = freezed,
     Object? emotion = freezed,
     Object? createdAt = freezed,
+    Object? dishName = freezed,
+    Object? mealType = freezed,
+    Object? totalCarbs = freezed,
+    Object? fiber = freezed,
+    Object? sugar = freezed,
+    Object? sugarAlcohols = freezed,
+    Object? netCarbs = freezed,
+    Object? glycemicIndex = freezed,
+    Object? saturatedFat = freezed,
+    Object? unsaturatedFat = freezed,
+    Object? sodium = freezed,
+    Object? cholesterol = freezed,
+    Object? iron = freezed,
+    Object? calcium = freezed,
+    Object? vitaminA = freezed,
+    Object? vitaminC = freezed,
+    Object? potassium = freezed,
+    Object? ingredients = freezed,
   }) {
     return _then(
       _$MealImpl(
@@ -209,6 +383,78 @@ class __$$MealImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as String?,
+        dishName: freezed == dishName
+            ? _value.dishName
+            : dishName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        mealType: freezed == mealType
+            ? _value.mealType
+            : mealType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        totalCarbs: freezed == totalCarbs
+            ? _value.totalCarbs
+            : totalCarbs // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        fiber: freezed == fiber
+            ? _value.fiber
+            : fiber // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sugar: freezed == sugar
+            ? _value.sugar
+            : sugar // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sugarAlcohols: freezed == sugarAlcohols
+            ? _value.sugarAlcohols
+            : sugarAlcohols // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        netCarbs: freezed == netCarbs
+            ? _value.netCarbs
+            : netCarbs // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        glycemicIndex: freezed == glycemicIndex
+            ? _value.glycemicIndex
+            : glycemicIndex // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        saturatedFat: freezed == saturatedFat
+            ? _value.saturatedFat
+            : saturatedFat // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        unsaturatedFat: freezed == unsaturatedFat
+            ? _value.unsaturatedFat
+            : unsaturatedFat // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sodium: freezed == sodium
+            ? _value.sodium
+            : sodium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        cholesterol: freezed == cholesterol
+            ? _value.cholesterol
+            : cholesterol // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        iron: freezed == iron
+            ? _value.iron
+            : iron // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        calcium: freezed == calcium
+            ? _value.calcium
+            : calcium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminA: freezed == vitaminA
+            ? _value.vitaminA
+            : vitaminA // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminC: freezed == vitaminC
+            ? _value.vitaminC
+            : vitaminC // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        potassium: freezed == potassium
+            ? _value.potassium
+            : potassium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        ingredients: freezed == ingredients
+            ? _value._ingredients
+            : ingredients // ignore: cast_nullable_to_non_nullable
+                  as List<Ingredient>?,
       ),
     );
   }
@@ -226,8 +472,26 @@ class _$MealImpl implements _Meal {
     required this.carbs,
     this.weight,
     this.emotion,
-    @JsonKey(name: 'time') this.createdAt,
-  });
+    this.createdAt,
+    @JsonKey(name: 'dish_name') this.dishName,
+    @JsonKey(name: 'meal_type') this.mealType,
+    @JsonKey(name: 'total_carbs') this.totalCarbs,
+    this.fiber,
+    this.sugar,
+    @JsonKey(name: 'sugar_alcohols') this.sugarAlcohols,
+    @JsonKey(name: 'net_carbs') this.netCarbs,
+    @JsonKey(name: 'glycemic_index') this.glycemicIndex,
+    @JsonKey(name: 'saturated_fat') this.saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') this.unsaturatedFat,
+    this.sodium,
+    this.cholesterol,
+    this.iron,
+    this.calcium,
+    @JsonKey(name: 'vitamin_a') this.vitaminA,
+    @JsonKey(name: 'vitamin_c') this.vitaminC,
+    this.potassium,
+    final List<Ingredient>? ingredients,
+  }) : _ingredients = ingredients;
 
   factory _$MealImpl.fromJson(Map<String, dynamic> json) =>
       _$$MealImplFromJson(json);
@@ -249,12 +513,71 @@ class _$MealImpl implements _Meal {
   @override
   final String? emotion;
   @override
-  @JsonKey(name: 'time')
   final String? createdAt;
+  // ── New: dish-level fields ──
+  @override
+  @JsonKey(name: 'dish_name')
+  final String? dishName;
+  @override
+  @JsonKey(name: 'meal_type')
+  final String? mealType;
+  // breakfast, lunch, dinner, snack
+  // ── New: carb decomposition ──
+  @override
+  @JsonKey(name: 'total_carbs')
+  final double? totalCarbs;
+  @override
+  final double? fiber;
+  @override
+  final double? sugar;
+  @override
+  @JsonKey(name: 'sugar_alcohols')
+  final double? sugarAlcohols;
+  @override
+  @JsonKey(name: 'net_carbs')
+  final double? netCarbs;
+  @override
+  @JsonKey(name: 'glycemic_index')
+  final int? glycemicIndex;
+  // ── New: fat breakdown ──
+  @override
+  @JsonKey(name: 'saturated_fat')
+  final double? saturatedFat;
+  @override
+  @JsonKey(name: 'unsaturated_fat')
+  final double? unsaturatedFat;
+  // ── New: micronutrients ──
+  @override
+  final double? sodium;
+  @override
+  final double? cholesterol;
+  @override
+  final double? iron;
+  @override
+  final double? calcium;
+  @override
+  @JsonKey(name: 'vitamin_a')
+  final double? vitaminA;
+  @override
+  @JsonKey(name: 'vitamin_c')
+  final double? vitaminC;
+  @override
+  final double? potassium;
+  // ── New: ingredients (for dish recognition) ──
+  final List<Ingredient>? _ingredients;
+  // ── New: ingredients (for dish recognition) ──
+  @override
+  List<Ingredient>? get ingredients {
+    final value = _ingredients;
+    if (value == null) return null;
+    if (_ingredients is EqualUnmodifiableListView) return _ingredients;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt)';
+    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, dishName: $dishName, mealType: $mealType, totalCarbs: $totalCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, netCarbs: $netCarbs, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, vitaminA: $vitaminA, vitaminC: $vitaminC, potassium: $potassium, ingredients: $ingredients)';
   }
 
   @override
@@ -272,12 +595,45 @@ class _$MealImpl implements _Meal {
             (identical(other.weight, weight) || other.weight == weight) &&
             (identical(other.emotion, emotion) || other.emotion == emotion) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.dishName, dishName) ||
+                other.dishName == dishName) &&
+            (identical(other.mealType, mealType) ||
+                other.mealType == mealType) &&
+            (identical(other.totalCarbs, totalCarbs) ||
+                other.totalCarbs == totalCarbs) &&
+            (identical(other.fiber, fiber) || other.fiber == fiber) &&
+            (identical(other.sugar, sugar) || other.sugar == sugar) &&
+            (identical(other.sugarAlcohols, sugarAlcohols) ||
+                other.sugarAlcohols == sugarAlcohols) &&
+            (identical(other.netCarbs, netCarbs) ||
+                other.netCarbs == netCarbs) &&
+            (identical(other.glycemicIndex, glycemicIndex) ||
+                other.glycemicIndex == glycemicIndex) &&
+            (identical(other.saturatedFat, saturatedFat) ||
+                other.saturatedFat == saturatedFat) &&
+            (identical(other.unsaturatedFat, unsaturatedFat) ||
+                other.unsaturatedFat == unsaturatedFat) &&
+            (identical(other.sodium, sodium) || other.sodium == sodium) &&
+            (identical(other.cholesterol, cholesterol) ||
+                other.cholesterol == cholesterol) &&
+            (identical(other.iron, iron) || other.iron == iron) &&
+            (identical(other.calcium, calcium) || other.calcium == calcium) &&
+            (identical(other.vitaminA, vitaminA) ||
+                other.vitaminA == vitaminA) &&
+            (identical(other.vitaminC, vitaminC) ||
+                other.vitaminC == vitaminC) &&
+            (identical(other.potassium, potassium) ||
+                other.potassium == potassium) &&
+            const DeepCollectionEquality().equals(
+              other._ingredients,
+              _ingredients,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     name,
@@ -288,7 +644,25 @@ class _$MealImpl implements _Meal {
     weight,
     emotion,
     createdAt,
-  );
+    dishName,
+    mealType,
+    totalCarbs,
+    fiber,
+    sugar,
+    sugarAlcohols,
+    netCarbs,
+    glycemicIndex,
+    saturatedFat,
+    unsaturatedFat,
+    sodium,
+    cholesterol,
+    iron,
+    calcium,
+    vitaminA,
+    vitaminC,
+    potassium,
+    const DeepCollectionEquality().hash(_ingredients),
+  ]);
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.
@@ -314,7 +688,25 @@ abstract class _Meal implements Meal {
     required final double carbs,
     final double? weight,
     final String? emotion,
-    @JsonKey(name: 'time') final String? createdAt,
+    final String? createdAt,
+    @JsonKey(name: 'dish_name') final String? dishName,
+    @JsonKey(name: 'meal_type') final String? mealType,
+    @JsonKey(name: 'total_carbs') final double? totalCarbs,
+    final double? fiber,
+    final double? sugar,
+    @JsonKey(name: 'sugar_alcohols') final double? sugarAlcohols,
+    @JsonKey(name: 'net_carbs') final double? netCarbs,
+    @JsonKey(name: 'glycemic_index') final int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') final double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') final double? unsaturatedFat,
+    final double? sodium,
+    final double? cholesterol,
+    final double? iron,
+    final double? calcium,
+    @JsonKey(name: 'vitamin_a') final double? vitaminA,
+    @JsonKey(name: 'vitamin_c') final double? vitaminC,
+    final double? potassium,
+    final List<Ingredient>? ingredients,
   }) = _$MealImpl;
 
   factory _Meal.fromJson(Map<String, dynamic> json) = _$MealImpl.fromJson;
@@ -336,8 +728,54 @@ abstract class _Meal implements Meal {
   @override
   String? get emotion;
   @override
-  @JsonKey(name: 'time')
-  String? get createdAt;
+  String? get createdAt; // ── New: dish-level fields ──
+  @override
+  @JsonKey(name: 'dish_name')
+  String? get dishName;
+  @override
+  @JsonKey(name: 'meal_type')
+  String? get mealType; // breakfast, lunch, dinner, snack
+  // ── New: carb decomposition ──
+  @override
+  @JsonKey(name: 'total_carbs')
+  double? get totalCarbs;
+  @override
+  double? get fiber;
+  @override
+  double? get sugar;
+  @override
+  @JsonKey(name: 'sugar_alcohols')
+  double? get sugarAlcohols;
+  @override
+  @JsonKey(name: 'net_carbs')
+  double? get netCarbs;
+  @override
+  @JsonKey(name: 'glycemic_index')
+  int? get glycemicIndex; // ── New: fat breakdown ──
+  @override
+  @JsonKey(name: 'saturated_fat')
+  double? get saturatedFat;
+  @override
+  @JsonKey(name: 'unsaturated_fat')
+  double? get unsaturatedFat; // ── New: micronutrients ──
+  @override
+  double? get sodium;
+  @override
+  double? get cholesterol;
+  @override
+  double? get iron;
+  @override
+  double? get calcium;
+  @override
+  @JsonKey(name: 'vitamin_a')
+  double? get vitaminA;
+  @override
+  @JsonKey(name: 'vitamin_c')
+  double? get vitaminC;
+  @override
+  double? get potassium; // ── New: ingredients (for dish recognition) ──
+  @override
+  List<Ingredient>? get ingredients;
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.

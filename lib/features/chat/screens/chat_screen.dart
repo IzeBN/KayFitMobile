@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -9,6 +10,7 @@ import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:kayfit/core/ai_consent/ai_consent_provider.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/chat_message.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -215,6 +217,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             hasMessages: _messages.isNotEmpty,
             onClear: _clearHistory,
           ),
+
+          // ── Citation / disclaimer banner ─────────────────────────────
+          _ChatDisclaimerBanner(),
 
           // ── Messages ──────────────────────────────────────────────────
           Expanded(
@@ -905,6 +910,94 @@ class _InputRowState extends State<_InputRow>
                       )
                     : const Icon(Icons.send_rounded,
                         color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Citation / disclaimer banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ChatDisclaimerBanner extends StatelessWidget {
+  const _ChatDisclaimerBanner();
+
+  static const _whoUrl =
+      'https://www.who.int/news-room/fact-sheets/detail/healthy-diet';
+  static const _usdaUrl =
+      'https://odphp.health.gov/our-work/nutrition-physical-activity/dietary-guidelines';
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+
+    final disclaimerText = isRu
+        ? 'Ответы ИИ носят информационный характер и не заменяют консультацию врача. Основано на: '
+        : 'AI-generated responses are for informational purposes only and do not replace professional medical advice. Based on: ';
+
+    final whoLabel = isRu ? 'Рекомендации ВОЗ/ФАО' : 'WHO/FAO Dietary Guidelines';
+    final usdaLabel = isRu ? 'Рекомендации USDA' : 'USDA Dietary Guidelines';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        border: const Border(
+          bottom: BorderSide(color: AppColors.border, width: 1),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                  height: 1.4,
+                ),
+                children: [
+                  TextSpan(text: disclaimerText),
+                  TextSpan(
+                    text: whoLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_whoUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  ),
+                  const TextSpan(text: ', '),
+                  TextSpan(
+                    text: usdaLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_usdaUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  ),
+                  const TextSpan(text: '.'),
+                ],
               ),
             ),
           ),

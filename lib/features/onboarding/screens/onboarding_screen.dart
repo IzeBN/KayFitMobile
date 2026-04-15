@@ -14,9 +14,11 @@ import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../core/storage/onboarding_pending_storage.dart';
+import '../../../core/storage/user_goal_storage.dart';
 import '../../../router.dart';
 import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../way_to_goal/providers/way_to_goal_provider.dart';
 import '../../way_to_goal/widgets/plan_result_view.dart';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
@@ -71,21 +73,43 @@ CalculationResult _calcPreview({
   required String gender,
   required String trainingDays,
   double? targetWeight,
+  List<String> goals = const [],
 }) {
   final offset = gender == 'male' ? 5.0 : -161.0;
   final bmr = 10 * weight + 6.25 * height - 5 * age + offset;
   final tdee = bmr * _getActivityCoef(trainingDays);
-  final target = (tdee - 500).clamp(1200.0, 9999.0);
-  final protein = (weight * 1.6);
-  final fat = (weight * 0.9);
+
+  final isGain = goals.contains('gain_muscle') ||
+      (targetWeight != null && targetWeight > weight + 0.5);
+  final isMaintain = !isGain &&
+      (goals.contains('maintain_weight') ||
+          (targetWeight != null && (targetWeight - weight).abs() <= 0.5));
+
+  final double target;
+  if (isGain) {
+    target = tdee + 400;
+  } else if (isMaintain) {
+    target = tdee;
+  } else {
+    target = (tdee - 500).clamp(1200.0, 9999.0);
+  }
+
+  final protein = weight * 1.6;
+  final fat = weight * 0.9;
   final carbs = ((target - protein * 4 - fat * 9) / 4).clamp(0.0, 9999.0);
+
   int? daysToGoal;
-  if (targetWeight != null && targetWeight < weight) {
-    final deficit = tdee - target;
-    if (deficit > 0) {
-      daysToGoal = ((weight - targetWeight) * 7700 / deficit).round();
+  if (targetWeight != null) {
+    if (isGain && targetWeight > weight) {
+      daysToGoal = ((targetWeight - weight) * 7700 / 400).round();
+    } else if (!isGain && !isMaintain && targetWeight < weight) {
+      final deficit = tdee - target;
+      if (deficit > 0) {
+        daysToGoal = ((weight - targetWeight) * 7700 / deficit).round();
+      }
     }
   }
+
   return CalculationResult(
     bmr: bmr,
     tdee: tdee,
@@ -95,6 +119,7 @@ CalculationResult _calcPreview({
     carbs: carbs,
     daysToGoal: daysToGoal,
     targetWeight: targetWeight,
+    currentWeight: weight,
   );
 }
 
@@ -156,6 +181,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   String? _error;
   bool _showSkipDialog = false;
+  bool _navToLoginStarted = false;
 
   @override
   void initState() {
@@ -209,6 +235,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
       goals: _goals.toList(),
     ));
+    // Also persist to UserGoalStorage — survives onboarding sync/clear
+    if (_goals.isNotEmpty || _weight != null || _targetWeight != null) {
+      UserGoalStorage.save(UserGoalData(
+        goals: _goals.toList(),
+        currentWeight: _weight,
+        targetWeight: _targetWeight,
+      ));
+      // Force calculationResultProvider to re-fetch with new goal data
+      ref.read(goalRevisionProvider.notifier).state++;
+    }
   }
 
   // ── Step handlers ───────────────────────────────────────────────────────────
@@ -321,6 +357,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         gender: _gender.isEmpty ? 'female' : _gender,
         trainingDays: _trainingDays.join(','),
         targetWeight: _targetWeight,
+        goals: _goals.toList(),
       );
 
   // ── Progress ────────────────────────────────────────────────────────────────
@@ -635,7 +672,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           subtitleRu: 'Наш алгоритм анализирует форму, текстуру и цвет блюда',
           subtitleEn: 'Our algorithm analyzes shape, texture and color of the dish',
           features: [
-            _InfoFeature(icon: Icons.photo_camera_rounded, textRu: '94% точность распознавания по фото', textEn: '94% photo recognition accuracy'),
+            _InfoFeature(icon: Icons.photo_camera_rounded, textRu: 'ИИ-распознавание еды по фото', textEn: 'AI-powered food photo recognition'),
             _InfoFeature(icon: Icons.record_voice_over_rounded, textRu: 'Голосовой ввод — скажи что съел', textEn: 'Voice input — just say what you ate'),
             _InfoFeature(icon: Icons.edit_rounded, textRu: 'Текстовый ввод с умными подсказками', textEn: 'Text input with smart suggestions'),
           ],
@@ -678,11 +715,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _MethodStep(l10n: l10n);
 
       case _Step.result:
-        return _ResultStep(l10n: l10n, preview: _preview);
+        return _ResultStep(l10n: l10n, preview: _preview, goals: _goals.toList());
 
       case _Step.auth:
-        // Auto-navigate to login
-        WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
+        // Auto-navigate to login — guard ensures single navigation even if build re-runs
+        if (!_navToLoginStarted) {
+          _navToLoginStarted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
+        }
         return const Center(child: CircularProgressIndicator(color: OBColors.pink));
     }
   }
@@ -1045,7 +1085,31 @@ class _HealthStep extends StatelessWidget {
             isRu ? 'Это поможет составить безопасный план питания' : 'This helps us create a safe nutrition plan',
             style: const TextStyle(color: AppColors.textMuted, fontSize: 14, height: 1.4),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF7ED),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFED7AA)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.medical_services_outlined, size: 16, color: Color(0xFFEA580C)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isRu
+                        ? 'Приложение не заменяет консультацию врача. При наличии заболеваний проконсультируйтесь со специалистом перед изменением рациона.'
+                        : 'This app does not replace professional medical advice. If you have any health conditions, consult a healthcare professional before changing your diet.',
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF9A3412), height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           ..._options.map((opt) {
             final isSelected = value.contains(opt.$1);
             return Padding(
@@ -2786,12 +2850,13 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
 class _ResultStep extends StatelessWidget {
   final AppLocalizations l10n;
   final CalculationResult preview;
+  final List<String> goals;
 
-  const _ResultStep({required this.l10n, required this.preview});
+  const _ResultStep({required this.l10n, required this.preview, this.goals = const []});
 
   @override
   Widget build(BuildContext context) {
-    return PlanResultView(calc: preview, l10n: l10n);
+    return PlanResultView(calc: preview, l10n: l10n, goals: goals);
   }
 }
 

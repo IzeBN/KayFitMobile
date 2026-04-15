@@ -314,6 +314,18 @@ abstract class AppLocalizations {
   /// **'Спросить'**
   String get journal_ai_banner_btn;
 
+  /// No description provided for @journal_delete_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить запись?'**
+  String get journal_delete_title;
+
+  /// No description provided for @journal_delete_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Этот приём пищи будет удалён без возможности восстановления.'**
+  String get journal_delete_body;
+
   /// No description provided for @settings_title.
   ///
   /// In ru, this message translates to:
@@ -331,12 +343,6 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Язык'**
   String get settings_language;
-
-  /// No description provided for @settings_subscription.
-  ///
-  /// In ru, this message translates to:
-  /// **'Подписка'**
-  String get settings_subscription;
 
   /// No description provided for @settings_logout.
   ///
@@ -845,7 +851,7 @@ abstract class AppLocalizations {
   /// No description provided for @ob_result_accuracy.
   ///
   /// In ru, this message translates to:
-  /// **'Точность ≈ 94%'**
+  /// **'Оценка с помощью ИИ'**
   String get ob_result_accuracy;
 
   /// No description provided for @ob_result_next_title.
@@ -1022,12 +1028,6 @@ abstract class AppLocalizations {
   /// **'Войти через Apple'**
   String get auth_apple;
 
-  /// No description provided for @auth_telegram.
-  ///
-  /// In ru, this message translates to:
-  /// **'Войти через Telegram'**
-  String get auth_telegram;
-
   /// No description provided for @auth_email.
   ///
   /// In ru, this message translates to:
@@ -1039,48 +1039,6 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Продолжая, вы соглашаетесь с условиями использования'**
   String get auth_terms;
-
-  /// No description provided for @tariffs_title.
-  ///
-  /// In ru, this message translates to:
-  /// **'Тарифы'**
-  String get tariffs_title;
-
-  /// No description provided for @tariffs_subscribe.
-  ///
-  /// In ru, this message translates to:
-  /// **'Оформить подписку'**
-  String get tariffs_subscribe;
-
-  /// No description provided for @tariffs_current.
-  ///
-  /// In ru, this message translates to:
-  /// **'Текущий тариф'**
-  String get tariffs_current;
-
-  /// No description provided for @tariffs_free.
-  ///
-  /// In ru, this message translates to:
-  /// **'Бесплатно'**
-  String get tariffs_free;
-
-  /// No description provided for @tariffs_perMonth.
-  ///
-  /// In ru, this message translates to:
-  /// **'/ месяц'**
-  String get tariffs_perMonth;
-
-  /// No description provided for @tariffs_cancel.
-  ///
-  /// In ru, this message translates to:
-  /// **'Отменить автопродление'**
-  String get tariffs_cancel;
-
-  /// No description provided for @tariffs_cancelConfirm.
-  ///
-  /// In ru, this message translates to:
-  /// **'Вы уверены, что хотите отменить автопродление?'**
-  String get tariffs_cancelConfirm;
 
   /// No description provided for @wg_title.
   ///
@@ -1232,90 +1190,6 @@ abstract class AppLocalizations {
   /// **'Что-то пошло не так'**
   String get error_unknown;
 
-  /// No description provided for @subscription_title.
-  ///
-  /// In ru, this message translates to:
-  /// **'Подписка'**
-  String get subscription_title;
-
-  /// No description provided for @subscription_none.
-  ///
-  /// In ru, this message translates to:
-  /// **'У вас нет активной подписки'**
-  String get subscription_none;
-
-  /// No description provided for @subscription_view_tariffs.
-  ///
-  /// In ru, this message translates to:
-  /// **'Посмотреть тарифы'**
-  String get subscription_view_tariffs;
-
-  /// No description provided for @subscription_active.
-  ///
-  /// In ru, this message translates to:
-  /// **'Активная подписка'**
-  String get subscription_active;
-
-  /// No description provided for @subscription_expires.
-  ///
-  /// In ru, this message translates to:
-  /// **'Действует до'**
-  String get subscription_expires;
-
-  /// No description provided for @subscription_amount.
-  ///
-  /// In ru, this message translates to:
-  /// **'Стоимость'**
-  String get subscription_amount;
-
-  /// No description provided for @subscription_auto_renew.
-  ///
-  /// In ru, this message translates to:
-  /// **'Автопродление'**
-  String get subscription_auto_renew;
-
-  /// No description provided for @subscription_auto_renew_on.
-  ///
-  /// In ru, this message translates to:
-  /// **'Включено'**
-  String get subscription_auto_renew_on;
-
-  /// No description provided for @subscription_auto_renew_off.
-  ///
-  /// In ru, this message translates to:
-  /// **'Отключено'**
-  String get subscription_auto_renew_off;
-
-  /// No description provided for @subscription_cancel_auto_renew.
-  ///
-  /// In ru, this message translates to:
-  /// **'Отменить автопродление'**
-  String get subscription_cancel_auto_renew;
-
-  /// No description provided for @subscription_cancel_auto_renew_title.
-  ///
-  /// In ru, this message translates to:
-  /// **'Отмена автопродления'**
-  String get subscription_cancel_auto_renew_title;
-
-  /// No description provided for @subscription_cancel_auto_renew_confirm.
-  ///
-  /// In ru, this message translates to:
-  /// **'Вы уверены, что хотите отменить автопродление подписки?'**
-  String get subscription_cancel_auto_renew_confirm;
-
-  /// No description provided for @subscription_cancel_auto_renew_action.
-  ///
-  /// In ru, this message translates to:
-  /// **'Отменить'**
-  String get subscription_cancel_auto_renew_action;
-
-  /// No description provided for @subscription_auto_renew_cancelled.
-  ///
-  /// In ru, this message translates to:
-  /// **'Автопродление отменено'**
-  String get subscription_auto_renew_cancelled;
-
   /// No description provided for @wg_plan_ready.
   ///
   /// In ru, this message translates to:
@@ -1357,6 +1231,30 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Прогноз веса'**
   String get wg_weight_forecast;
+
+  /// No description provided for @wg_weight_forecast_gain.
+  ///
+  /// In ru, this message translates to:
+  /// **'Прогноз набора массы'**
+  String get wg_weight_forecast_gain;
+
+  /// No description provided for @wg_weight_forecast_maintain.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поддержание веса'**
+  String get wg_weight_forecast_maintain;
+
+  /// No description provided for @wg_personal_calc_gain.
+  ///
+  /// In ru, this message translates to:
+  /// **'Набирай мышечную массу — персональный план питания'**
+  String get wg_personal_calc_gain;
+
+  /// No description provided for @wg_personal_calc_maintain.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поддерживай форму — точный расчёт калорий'**
+  String get wg_personal_calc_maintain;
 
   /// No description provided for @wg_how_to_reach.
   ///
@@ -1520,6 +1418,48 @@ abstract class AppLocalizations {
   /// **'Введите значение'**
   String get auth_err_enter_value;
 
+  /// No description provided for @auth_err_invalid_credentials.
+  ///
+  /// In ru, this message translates to:
+  /// **'Неверный email или пароль'**
+  String get auth_err_invalid_credentials;
+
+  /// No description provided for @auth_err_email_already_registered.
+  ///
+  /// In ru, this message translates to:
+  /// **'Email уже зарегистрирован'**
+  String get auth_err_email_already_registered;
+
+  /// No description provided for @auth_err_invalid_or_expired_token.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сессия истекла, войдите снова'**
+  String get auth_err_invalid_or_expired_token;
+
+  /// No description provided for @auth_err_user_not_found.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пользователь не найден'**
+  String get auth_err_user_not_found;
+
+  /// No description provided for @auth_err_account_blocked.
+  ///
+  /// In ru, this message translates to:
+  /// **'Аккаунт заблокирован'**
+  String get auth_err_account_blocked;
+
+  /// No description provided for @auth_err_no_password_set.
+  ///
+  /// In ru, this message translates to:
+  /// **'У аккаунта нет пароля — используйте другой способ входа'**
+  String get auth_err_no_password_set;
+
+  /// No description provided for @auth_err_unknown.
+  ///
+  /// In ru, this message translates to:
+  /// **'Произошла ошибка, попробуйте снова'**
+  String get auth_err_unknown;
+
   /// No description provided for @goals_title.
   ///
   /// In ru, this message translates to:
@@ -1574,6 +1514,12 @@ abstract class AppLocalizations {
   /// **'Превышение'**
   String get dashboard_remaining_over;
 
+  /// No description provided for @dashboard_details.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подробнее'**
+  String get dashboard_details;
+
   /// No description provided for @edit_meal_title.
   ///
   /// In ru, this message translates to:
@@ -1616,24 +1562,6 @@ abstract class AppLocalizations {
   /// **'Введите корректное число'**
   String get edit_meal_err_invalid_number;
 
-  /// No description provided for @addMeal_subscription_needed.
-  ///
-  /// In ru, this message translates to:
-  /// **'Нужна подписка'**
-  String get addMeal_subscription_needed;
-
-  /// No description provided for @addMeal_subscription_desc.
-  ///
-  /// In ru, this message translates to:
-  /// **'Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.'**
-  String get addMeal_subscription_desc;
-
-  /// No description provided for @addMeal_choose_tariff.
-  ///
-  /// In ru, this message translates to:
-  /// **'Выбрать тариф'**
-  String get addMeal_choose_tariff;
-
   /// No description provided for @addMeal_close.
   ///
   /// In ru, this message translates to:
@@ -1645,12 +1573,6 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'{cal} ккал'**
   String addMeal_kcal(String cal);
-
-  /// No description provided for @addMeal_subscription_snack.
-  ///
-  /// In ru, this message translates to:
-  /// **'Для этой функции нужна подписка'**
-  String get addMeal_subscription_snack;
 
   /// No description provided for @addMeal_weight_hint.
   ///
@@ -1693,210 +1615,6 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Пользовательское соглашение'**
   String get settings_terms;
-
-  /// No description provided for @settings_sub_promo.
-  ///
-  /// In ru, this message translates to:
-  /// **'Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.'**
-  String get settings_sub_promo;
-
-  /// No description provided for @settings_sale_ends.
-  ///
-  /// In ru, this message translates to:
-  /// **'Скидка заканчивается через:'**
-  String get settings_sale_ends;
-
-  /// No description provided for @settings_sub_active_badge.
-  ///
-  /// In ru, this message translates to:
-  /// **'✓ Активна'**
-  String get settings_sub_active_badge;
-
-  /// No description provided for @tariffs_title_full.
-  ///
-  /// In ru, this message translates to:
-  /// **'Подпишись и открой\nполный доступ'**
-  String get tariffs_title_full;
-
-  /// No description provided for @tariffs_tag1.
-  ///
-  /// In ru, this message translates to:
-  /// **'🥕 Рекомендации по питанию'**
-  String get tariffs_tag1;
-
-  /// No description provided for @tariffs_tag2.
-  ///
-  /// In ru, this message translates to:
-  /// **'📋 Сканер калорий'**
-  String get tariffs_tag2;
-
-  /// No description provided for @tariffs_tag3.
-  ///
-  /// In ru, this message translates to:
-  /// **'📋 Расчет нормы'**
-  String get tariffs_tag3;
-
-  /// No description provided for @tariffs_tag4.
-  ///
-  /// In ru, this message translates to:
-  /// **'😀 Трекер эмоций'**
-  String get tariffs_tag4;
-
-  /// No description provided for @tariffs_trial.
-  ///
-  /// In ru, this message translates to:
-  /// **'Пробный период'**
-  String get tariffs_trial;
-
-  /// No description provided for @tariffs_monthly.
-  ///
-  /// In ru, this message translates to:
-  /// **'Месяц'**
-  String get tariffs_monthly;
-
-  /// No description provided for @tariffs_yearly.
-  ///
-  /// In ru, this message translates to:
-  /// **'Год'**
-  String get tariffs_yearly;
-
-  /// No description provided for @tariffs_quarterly.
-  ///
-  /// In ru, this message translates to:
-  /// **'3 месяца'**
-  String get tariffs_quarterly;
-
-  /// No description provided for @tariffs_per_3days.
-  ///
-  /// In ru, this message translates to:
-  /// **'/ 3 дня'**
-  String get tariffs_per_3days;
-
-  /// No description provided for @tariffs_per_day.
-  ///
-  /// In ru, this message translates to:
-  /// **'/ день'**
-  String get tariffs_per_day;
-
-  /// No description provided for @tariffs_per_3mo.
-  ///
-  /// In ru, this message translates to:
-  /// **'/ 3 мес'**
-  String get tariffs_per_3mo;
-
-  /// No description provided for @tariffs_trial_then.
-  ///
-  /// In ru, this message translates to:
-  /// **'Затем 2 990 за год'**
-  String get tariffs_trial_then;
-
-  /// No description provided for @tariffs_monthly_billing.
-  ///
-  /// In ru, this message translates to:
-  /// **'Ежемесячная оплата'**
-  String get tariffs_monthly_billing;
-
-  /// No description provided for @tariffs_yearly_save.
-  ///
-  /// In ru, this message translates to:
-  /// **'2 990 ₽ / Экономия 8 890 ₽'**
-  String get tariffs_yearly_save;
-
-  /// No description provided for @tariffs_best_value.
-  ///
-  /// In ru, this message translates to:
-  /// **'Оптимальный выбор'**
-  String get tariffs_best_value;
-
-  /// No description provided for @tariffs_no_discount.
-  ///
-  /// In ru, this message translates to:
-  /// **'Без скидки {price}'**
-  String tariffs_no_discount(String price);
-
-  /// No description provided for @tariffs_no_plans.
-  ///
-  /// In ru, this message translates to:
-  /// **'Тарифы пока не настроены'**
-  String get tariffs_no_plans;
-
-  /// No description provided for @tariffs_cancel_anytime.
-  ///
-  /// In ru, this message translates to:
-  /// **'Подписку можно отменить в любой удобный момент в Личном кабинете'**
-  String get tariffs_cancel_anytime;
-
-  /// No description provided for @tariffs_optimal_months.
-  ///
-  /// In ru, this message translates to:
-  /// **'Оптимальный результат достигается через 3 месяца'**
-  String get tariffs_optimal_months;
-
-  /// No description provided for @tariffs_email_hint.
-  ///
-  /// In ru, this message translates to:
-  /// **'Email для чека'**
-  String get tariffs_email_hint;
-
-  /// No description provided for @tariffs_email_error.
-  ///
-  /// In ru, this message translates to:
-  /// **'Введите корректный email'**
-  String get tariffs_email_error;
-
-  /// No description provided for @tariffs_pay_error.
-  ///
-  /// In ru, this message translates to:
-  /// **'Не удалось создать платёж. Попробуйте ещё раз.'**
-  String get tariffs_pay_error;
-
-  /// No description provided for @tariffs_get_plan.
-  ///
-  /// In ru, this message translates to:
-  /// **'Получить мой план'**
-  String get tariffs_get_plan;
-
-  /// No description provided for @tariffs_load_error.
-  ///
-  /// In ru, this message translates to:
-  /// **'Не удалось загрузить тарифы'**
-  String get tariffs_load_error;
-
-  /// No description provided for @tariffs_sale_ends.
-  ///
-  /// In ru, this message translates to:
-  /// **'СКИДКА ЗАКАНЧИВАЕТСЯ ЧЕРЕЗ'**
-  String get tariffs_sale_ends;
-
-  /// No description provided for @tariffs_benefit1.
-  ///
-  /// In ru, this message translates to:
-  /// **'🥗 Консультация с нутрициологом'**
-  String get tariffs_benefit1;
-
-  /// No description provided for @tariffs_benefit2.
-  ///
-  /// In ru, this message translates to:
-  /// **'🎥 Видео рецепты'**
-  String get tariffs_benefit2;
-
-  /// No description provided for @tariffs_benefit3.
-  ///
-  /// In ru, this message translates to:
-  /// **'🍽️ План питания'**
-  String get tariffs_benefit3;
-
-  /// No description provided for @tariffs_benefit4.
-  ///
-  /// In ru, this message translates to:
-  /// **'📋 Гайд по питанию'**
-  String get tariffs_benefit4;
-
-  /// No description provided for @tariffs_payment_title.
-  ///
-  /// In ru, this message translates to:
-  /// **'Оплата'**
-  String get tariffs_payment_title;
 
   /// No description provided for @nav_chat.
   ///
@@ -1957,6 +1675,228 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'🌙 Можно ли есть после 18:00?'**
   String get chat_suggestion_3;
+
+  /// No description provided for @recogV2_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Что распознано'**
+  String get recogV2_title;
+
+  /// No description provided for @recogV2_save.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранить в дневник'**
+  String get recogV2_save;
+
+  /// No description provided for @recogV2_saving.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохраняем...'**
+  String get recogV2_saving;
+
+  /// No description provided for @recogV2_saved.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранено'**
+  String get recogV2_saved;
+
+  /// No description provided for @recogV2_composition.
+  ///
+  /// In ru, this message translates to:
+  /// **'СОСТАВ'**
+  String get recogV2_composition;
+
+  /// No description provided for @recogV2_macros.
+  ///
+  /// In ru, this message translates to:
+  /// **'ОСНОВНЫЕ НУТРИЕНТЫ'**
+  String get recogV2_macros;
+
+  /// No description provided for @recogV2_carbs_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'УГЛЕВОДЫ'**
+  String get recogV2_carbs_detail;
+
+  /// No description provided for @recogV2_fats_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'ЖИРЫ'**
+  String get recogV2_fats_detail;
+
+  /// No description provided for @recogV2_micro.
+  ///
+  /// In ru, this message translates to:
+  /// **'МИКРОНУТРИЕНТЫ'**
+  String get recogV2_micro;
+
+  /// No description provided for @recogV2_source_fatsecret.
+  ///
+  /// In ru, this message translates to:
+  /// **'FatSecret'**
+  String get recogV2_source_fatsecret;
+
+  /// No description provided for @recogV2_source_claude.
+  ///
+  /// In ru, this message translates to:
+  /// **'AI'**
+  String get recogV2_source_claude;
+
+  /// No description provided for @recogV2_source_cache.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кэш'**
+  String get recogV2_source_cache;
+
+  /// No description provided for @recogV2_gi_low.
+  ///
+  /// In ru, this message translates to:
+  /// **'Низкий ГИ'**
+  String get recogV2_gi_low;
+
+  /// No description provided for @recogV2_gi_medium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Средний ГИ'**
+  String get recogV2_gi_medium;
+
+  /// No description provided for @recogV2_gi_high.
+  ///
+  /// In ru, this message translates to:
+  /// **'Высокий ГИ'**
+  String get recogV2_gi_high;
+
+  /// No description provided for @recogV2_net_carbs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Чистые углеводы'**
+  String get recogV2_net_carbs;
+
+  /// No description provided for @recogV2_fiber.
+  ///
+  /// In ru, this message translates to:
+  /// **'Клетчатка'**
+  String get recogV2_fiber;
+
+  /// No description provided for @recogV2_sugar_alcohols.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сах. спирты'**
+  String get recogV2_sugar_alcohols;
+
+  /// No description provided for @recogV2_sat_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Насыщенные'**
+  String get recogV2_sat_fat;
+
+  /// No description provided for @recogV2_mono_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Мононенасыщ.'**
+  String get recogV2_mono_fat;
+
+  /// No description provided for @recogV2_poly_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Полиненасыщ.'**
+  String get recogV2_poly_fat;
+
+  /// No description provided for @recogV2_mg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мг'**
+  String get recogV2_mg;
+
+  /// No description provided for @recogV2_sodium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Натрий'**
+  String get recogV2_sodium;
+
+  /// No description provided for @recogV2_cholesterol.
+  ///
+  /// In ru, this message translates to:
+  /// **'Холестерин'**
+  String get recogV2_cholesterol;
+
+  /// No description provided for @recogV2_potassium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Калий'**
+  String get recogV2_potassium;
+
+  /// No description provided for @recogV2_meal_type.
+  ///
+  /// In ru, this message translates to:
+  /// **'ТИП ПРИЁМА ПИЩИ'**
+  String get recogV2_meal_type;
+
+  /// No description provided for @recogV2_add_ingredient.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить ингредиент'**
+  String get recogV2_add_ingredient;
+
+  /// No description provided for @recogV2_search_ingredient.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поиск ингредиента'**
+  String get recogV2_search_ingredient;
+
+  /// No description provided for @recogV2_search_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: куриная грудка 150г'**
+  String get recogV2_search_hint;
+
+  /// No description provided for @recogV2_no_items.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ничего не выбрано'**
+  String get recogV2_no_items;
+
+  /// No description provided for @recogV2_total.
+  ///
+  /// In ru, this message translates to:
+  /// **'Итого'**
+  String get recogV2_total;
+
+  /// No description provided for @recogV2_per100g.
+  ///
+  /// In ru, this message translates to:
+  /// **'на 100 г'**
+  String get recogV2_per100g;
+
+  /// No description provided for @recogV2_add_breakfast.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить к завтраку'**
+  String get recogV2_add_breakfast;
+
+  /// No description provided for @recogV2_add_lunch.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить к обеду'**
+  String get recogV2_add_lunch;
+
+  /// No description provided for @recogV2_add_dinner.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить к ужину'**
+  String get recogV2_add_dinner;
+
+  /// No description provided for @recogV2_add_snack.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить к перекусу'**
+  String get recogV2_add_snack;
+
+  /// No description provided for @recogV2_add_meal.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить к приёму пищи'**
+  String get recogV2_add_meal;
 }
 
 class _AppLocalizationsDelegate

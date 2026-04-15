@@ -13,6 +13,9 @@ import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import '../../../router.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../way_to_goal/providers/way_to_goal_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -39,8 +42,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           tokens['access_token'] as String,
           tokens['refresh_token'] as String,
         );
-    if (mounted) {
-      await syncOnboardingPending();
+    if (!mounted) return;
+    final hadPending = await syncOnboardingPending();
+    await markOnboardingDone(ref);
+    if (!mounted) return;
+    if (hadPending) {
+      ref.read(showWayToGoalProvider.notifier).state = true;
+      ref.invalidate(calculationResultProvider);
+      ref.invalidate(todayStatsProvider);
     }
   }
 

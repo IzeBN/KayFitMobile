@@ -122,6 +122,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journal_ai_banner_btn => 'Ask';
 
   @override
+  String get journal_delete_title => 'Delete entry?';
+
+  @override
+  String get journal_delete_body => 'This meal will be permanently deleted.';
+
+  @override
   String get settings_title => 'Settings';
 
   @override
@@ -129,9 +135,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_language => 'Language';
-
-  @override
-  String get settings_subscription => 'Subscription';
 
   @override
   String get settings_logout => 'Log out';
@@ -403,7 +406,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ob_result_kcalday => 'kcal/day';
 
   @override
-  String get ob_result_accuracy => 'Accuracy ≈ 94%';
+  String get ob_result_accuracy => 'AI-assisted estimation';
 
   @override
   String get ob_result_next_title => 'Next step';
@@ -499,35 +502,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_apple => 'Sign in with Apple';
 
   @override
-  String get auth_telegram => 'Sign in with Telegram';
-
-  @override
   String get auth_email => 'Sign in with Email';
 
   @override
   String get auth_terms => 'By continuing you agree to the terms of service';
-
-  @override
-  String get tariffs_title => 'Plans';
-
-  @override
-  String get tariffs_subscribe => 'Subscribe';
-
-  @override
-  String get tariffs_current => 'Current plan';
-
-  @override
-  String get tariffs_free => 'Free';
-
-  @override
-  String get tariffs_perMonth => '/ month';
-
-  @override
-  String get tariffs_cancel => 'Cancel auto-renewal';
-
-  @override
-  String get tariffs_cancelConfirm =>
-      'Are you sure you want to cancel auto-renewal?';
 
   @override
   String get wg_title => 'Calculate your path to goal';
@@ -605,49 +583,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error_unknown => 'Something went wrong';
 
   @override
-  String get subscription_title => 'Subscription';
-
-  @override
-  String get subscription_none => 'You have no active subscription';
-
-  @override
-  String get subscription_view_tariffs => 'View plans';
-
-  @override
-  String get subscription_active => 'Active subscription';
-
-  @override
-  String get subscription_expires => 'Valid until';
-
-  @override
-  String get subscription_amount => 'Amount';
-
-  @override
-  String get subscription_auto_renew => 'Auto-renewal';
-
-  @override
-  String get subscription_auto_renew_on => 'Enabled';
-
-  @override
-  String get subscription_auto_renew_off => 'Disabled';
-
-  @override
-  String get subscription_cancel_auto_renew => 'Cancel auto-renewal';
-
-  @override
-  String get subscription_cancel_auto_renew_title => 'Cancel auto-renewal';
-
-  @override
-  String get subscription_cancel_auto_renew_confirm =>
-      'Are you sure you want to cancel subscription auto-renewal?';
-
-  @override
-  String get subscription_cancel_auto_renew_action => 'Cancel';
-
-  @override
-  String get subscription_auto_renew_cancelled => 'Auto-renewal cancelled';
-
-  @override
   String get wg_plan_ready => 'Your plan is ready!';
 
   @override
@@ -671,6 +606,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wg_weight_forecast => 'Weight forecast';
+
+  @override
+  String get wg_weight_forecast_gain => 'Mass gain forecast';
+
+  @override
+  String get wg_weight_forecast_maintain => 'Weight maintenance';
+
+  @override
+  String get wg_personal_calc_gain =>
+      'Build muscle — your personalised nutrition plan';
+
+  @override
+  String get wg_personal_calc_maintain =>
+      'Stay in shape — precise calorie calculation';
 
   @override
   String get wg_how_to_reach => 'How to reach your goal';
@@ -757,6 +706,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_err_enter_value => 'Enter a value';
 
   @override
+  String get auth_err_invalid_credentials => 'Invalid email or password';
+
+  @override
+  String get auth_err_email_already_registered => 'Email is already registered';
+
+  @override
+  String get auth_err_invalid_or_expired_token =>
+      'Session expired, please log in again';
+
+  @override
+  String get auth_err_user_not_found => 'User not found';
+
+  @override
+  String get auth_err_account_blocked => 'Account is blocked';
+
+  @override
+  String get auth_err_no_password_set =>
+      'No password set — use another sign-in method';
+
+  @override
+  String get auth_err_unknown => 'Something went wrong, please try again';
+
+  @override
   String get goals_title => 'Macro goals';
 
   @override
@@ -787,6 +759,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_remaining_over => 'Over limit';
 
   @override
+  String get dashboard_details => 'Details';
+
+  @override
   String get edit_meal_title => 'Edit meal';
 
   @override
@@ -810,26 +785,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get edit_meal_err_invalid_number => 'Enter a valid number';
 
   @override
-  String get addMeal_subscription_needed => 'Subscription required';
-
-  @override
-  String get addMeal_subscription_desc =>
-      'Food recognition is available on a paid plan. Subscribe to use AI features.';
-
-  @override
-  String get addMeal_choose_tariff => 'Choose a plan';
-
-  @override
   String get addMeal_close => 'Close';
 
   @override
   String addMeal_kcal(String cal) {
     return '$cal kcal';
   }
-
-  @override
-  String get addMeal_subscription_snack =>
-      'A subscription is required for this feature';
 
   @override
   String get addMeal_weight_hint => 'Weight (g)';
@@ -851,113 +812,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_terms => 'Terms of Service';
-
-  @override
-  String get settings_sub_promo =>
-      'Subscribe to unlock AI recognition, voice and photo.';
-
-  @override
-  String get settings_sale_ends => 'Sale ends in:';
-
-  @override
-  String get settings_sub_active_badge => '✓ Active';
-
-  @override
-  String get tariffs_title_full => 'Subscribe and unlock\nfull access';
-
-  @override
-  String get tariffs_tag1 => '🥕 Nutrition recommendations';
-
-  @override
-  String get tariffs_tag2 => '📋 Calorie scanner';
-
-  @override
-  String get tariffs_tag3 => '📋 Macro calculation';
-
-  @override
-  String get tariffs_tag4 => '😀 Emotion tracker';
-
-  @override
-  String get tariffs_trial => 'Free trial';
-
-  @override
-  String get tariffs_monthly => 'Monthly';
-
-  @override
-  String get tariffs_yearly => 'Yearly';
-
-  @override
-  String get tariffs_quarterly => '3 months';
-
-  @override
-  String get tariffs_per_3days => '/ 3 days';
-
-  @override
-  String get tariffs_per_day => '/ day';
-
-  @override
-  String get tariffs_per_3mo => '/ 3 mo';
-
-  @override
-  String get tariffs_trial_then => 'Then 2,990 ₽/year';
-
-  @override
-  String get tariffs_monthly_billing => 'Monthly billing';
-
-  @override
-  String get tariffs_yearly_save => '2,990 ₽ / Save 8,890 ₽';
-
-  @override
-  String get tariffs_best_value => 'Best value';
-
-  @override
-  String tariffs_no_discount(String price) {
-    return 'Without discount $price';
-  }
-
-  @override
-  String get tariffs_no_plans => 'No plans available';
-
-  @override
-  String get tariffs_cancel_anytime =>
-      'Cancel anytime in your account settings';
-
-  @override
-  String get tariffs_optimal_months =>
-      'Optimal results are achieved after 3 months';
-
-  @override
-  String get tariffs_email_hint => 'Email for receipt';
-
-  @override
-  String get tariffs_email_error => 'Enter a valid email';
-
-  @override
-  String get tariffs_pay_error => 'Payment failed. Please try again.';
-
-  @override
-  String get tariffs_get_plan => 'Get my plan';
-
-  @override
-  String get tariffs_load_error => 'Failed to load tariffs';
-
-  @override
-  String get tariffs_sale_ends => 'SALE ENDS IN';
-
-  @override
-  String get tariffs_benefit1 => '🥗 Nutritionist consultation';
-
-  @override
-  String get tariffs_benefit2 => '🎥 Video recipes';
-
-  @override
-  String get tariffs_benefit3 => '🍽️ Meal plan';
-
-  @override
-  String get tariffs_benefit4 => '📋 Nutrition guide';
-
-  @override
-  String get tariffs_payment_title => 'Payment';
 
   @override
   String get nav_chat => 'AI Chat';
@@ -989,4 +843,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chat_suggestion_3 => '🌙 Is it okay to eat after 6 PM?';
+
+  @override
+  String get recogV2_title => 'Recognized';
+
+  @override
+  String get recogV2_save => 'Save to diary';
+
+  @override
+  String get recogV2_saving => 'Saving...';
+
+  @override
+  String get recogV2_saved => 'Saved';
+
+  @override
+  String get recogV2_composition => 'COMPOSITION';
+
+  @override
+  String get recogV2_macros => 'MAIN NUTRIENTS';
+
+  @override
+  String get recogV2_carbs_detail => 'CARBOHYDRATES';
+
+  @override
+  String get recogV2_fats_detail => 'FATS';
+
+  @override
+  String get recogV2_micro => 'MICRONUTRIENTS';
+
+  @override
+  String get recogV2_source_fatsecret => 'FatSecret';
+
+  @override
+  String get recogV2_source_claude => 'AI';
+
+  @override
+  String get recogV2_source_cache => 'Cache';
+
+  @override
+  String get recogV2_gi_low => 'Low GI';
+
+  @override
+  String get recogV2_gi_medium => 'Medium GI';
+
+  @override
+  String get recogV2_gi_high => 'High GI';
+
+  @override
+  String get recogV2_net_carbs => 'Net carbs';
+
+  @override
+  String get recogV2_fiber => 'Fiber';
+
+  @override
+  String get recogV2_sugar_alcohols => 'Sugar alcohols';
+
+  @override
+  String get recogV2_sat_fat => 'Saturated';
+
+  @override
+  String get recogV2_mono_fat => 'Monounsaturated';
+
+  @override
+  String get recogV2_poly_fat => 'Polyunsaturated';
+
+  @override
+  String get recogV2_mg => 'mg';
+
+  @override
+  String get recogV2_sodium => 'Sodium';
+
+  @override
+  String get recogV2_cholesterol => 'Cholesterol';
+
+  @override
+  String get recogV2_potassium => 'Potassium';
+
+  @override
+  String get recogV2_meal_type => 'MEAL TYPE';
+
+  @override
+  String get recogV2_add_ingredient => 'Add ingredient';
+
+  @override
+  String get recogV2_search_ingredient => 'Search ingredient';
+
+  @override
+  String get recogV2_search_hint => 'E.g. chicken breast 150g';
+
+  @override
+  String get recogV2_no_items => 'Nothing selected';
+
+  @override
+  String get recogV2_total => 'Total';
+
+  @override
+  String get recogV2_per100g => 'per 100 g';
+
+  @override
+  String get recogV2_add_breakfast => 'Add to breakfast';
+
+  @override
+  String get recogV2_add_lunch => 'Add to lunch';
+
+  @override
+  String get recogV2_add_dinner => 'Add to dinner';
+
+  @override
+  String get recogV2_add_snack => 'Add to snack';
+
+  @override
+  String get recogV2_add_meal => 'Add to meal';
 }

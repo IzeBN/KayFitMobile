@@ -29,7 +29,18 @@ mixin _$MacroStats {
   double get fatGoal => throw _privateConstructorUsedError;
   double get carbsEaten => throw _privateConstructorUsedError;
   double get carbsGoal => throw _privateConstructorUsedError;
-  int get compulsiveCount => throw _privateConstructorUsedError;
+  int get compulsiveCount =>
+      throw _privateConstructorUsedError; // ── New: extended nutrients ──
+  double get netCarbsEaten => throw _privateConstructorUsedError;
+  double get netCarbsGoal => throw _privateConstructorUsedError;
+  double get sugarEaten => throw _privateConstructorUsedError;
+  double get sugarGoal => throw _privateConstructorUsedError;
+  double get fiberEaten => throw _privateConstructorUsedError;
+  double get fiberGoal => throw _privateConstructorUsedError;
+  double get saturatedFatEaten => throw _privateConstructorUsedError;
+  double get saturatedFatGoal => throw _privateConstructorUsedError;
+  double get unsaturatedFatEaten => throw _privateConstructorUsedError;
+  double get unsaturatedFatGoal => throw _privateConstructorUsedError;
 
   /// Serializes this MacroStats to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +69,16 @@ abstract class $MacroStatsCopyWith<$Res> {
     double carbsEaten,
     double carbsGoal,
     int compulsiveCount,
+    double netCarbsEaten,
+    double netCarbsGoal,
+    double sugarEaten,
+    double sugarGoal,
+    double fiberEaten,
+    double fiberGoal,
+    double saturatedFatEaten,
+    double saturatedFatGoal,
+    double unsaturatedFatEaten,
+    double unsaturatedFatGoal,
   });
 }
 
@@ -85,6 +106,16 @@ class _$MacroStatsCopyWithImpl<$Res, $Val extends MacroStats>
     Object? carbsEaten = null,
     Object? carbsGoal = null,
     Object? compulsiveCount = null,
+    Object? netCarbsEaten = null,
+    Object? netCarbsGoal = null,
+    Object? sugarEaten = null,
+    Object? sugarGoal = null,
+    Object? fiberEaten = null,
+    Object? fiberGoal = null,
+    Object? saturatedFatEaten = null,
+    Object? saturatedFatGoal = null,
+    Object? unsaturatedFatEaten = null,
+    Object? unsaturatedFatGoal = null,
   }) {
     return _then(
       _value.copyWith(
@@ -124,6 +155,46 @@ class _$MacroStatsCopyWithImpl<$Res, $Val extends MacroStats>
                 ? _value.compulsiveCount
                 : compulsiveCount // ignore: cast_nullable_to_non_nullable
                       as int,
+            netCarbsEaten: null == netCarbsEaten
+                ? _value.netCarbsEaten
+                : netCarbsEaten // ignore: cast_nullable_to_non_nullable
+                      as double,
+            netCarbsGoal: null == netCarbsGoal
+                ? _value.netCarbsGoal
+                : netCarbsGoal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            sugarEaten: null == sugarEaten
+                ? _value.sugarEaten
+                : sugarEaten // ignore: cast_nullable_to_non_nullable
+                      as double,
+            sugarGoal: null == sugarGoal
+                ? _value.sugarGoal
+                : sugarGoal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            fiberEaten: null == fiberEaten
+                ? _value.fiberEaten
+                : fiberEaten // ignore: cast_nullable_to_non_nullable
+                      as double,
+            fiberGoal: null == fiberGoal
+                ? _value.fiberGoal
+                : fiberGoal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            saturatedFatEaten: null == saturatedFatEaten
+                ? _value.saturatedFatEaten
+                : saturatedFatEaten // ignore: cast_nullable_to_non_nullable
+                      as double,
+            saturatedFatGoal: null == saturatedFatGoal
+                ? _value.saturatedFatGoal
+                : saturatedFatGoal // ignore: cast_nullable_to_non_nullable
+                      as double,
+            unsaturatedFatEaten: null == unsaturatedFatEaten
+                ? _value.unsaturatedFatEaten
+                : unsaturatedFatEaten // ignore: cast_nullable_to_non_nullable
+                      as double,
+            unsaturatedFatGoal: null == unsaturatedFatGoal
+                ? _value.unsaturatedFatGoal
+                : unsaturatedFatGoal // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -149,6 +220,16 @@ abstract class _$$MacroStatsImplCopyWith<$Res>
     double carbsEaten,
     double carbsGoal,
     int compulsiveCount,
+    double netCarbsEaten,
+    double netCarbsGoal,
+    double sugarEaten,
+    double sugarGoal,
+    double fiberEaten,
+    double fiberGoal,
+    double saturatedFatEaten,
+    double saturatedFatGoal,
+    double unsaturatedFatEaten,
+    double unsaturatedFatGoal,
   });
 }
 
@@ -175,6 +256,16 @@ class __$$MacroStatsImplCopyWithImpl<$Res>
     Object? carbsEaten = null,
     Object? carbsGoal = null,
     Object? compulsiveCount = null,
+    Object? netCarbsEaten = null,
+    Object? netCarbsGoal = null,
+    Object? sugarEaten = null,
+    Object? sugarGoal = null,
+    Object? fiberEaten = null,
+    Object? fiberGoal = null,
+    Object? saturatedFatEaten = null,
+    Object? saturatedFatGoal = null,
+    Object? unsaturatedFatEaten = null,
+    Object? unsaturatedFatGoal = null,
   }) {
     return _then(
       _$MacroStatsImpl(
@@ -214,6 +305,46 @@ class __$$MacroStatsImplCopyWithImpl<$Res>
             ? _value.compulsiveCount
             : compulsiveCount // ignore: cast_nullable_to_non_nullable
                   as int,
+        netCarbsEaten: null == netCarbsEaten
+            ? _value.netCarbsEaten
+            : netCarbsEaten // ignore: cast_nullable_to_non_nullable
+                  as double,
+        netCarbsGoal: null == netCarbsGoal
+            ? _value.netCarbsGoal
+            : netCarbsGoal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        sugarEaten: null == sugarEaten
+            ? _value.sugarEaten
+            : sugarEaten // ignore: cast_nullable_to_non_nullable
+                  as double,
+        sugarGoal: null == sugarGoal
+            ? _value.sugarGoal
+            : sugarGoal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        fiberEaten: null == fiberEaten
+            ? _value.fiberEaten
+            : fiberEaten // ignore: cast_nullable_to_non_nullable
+                  as double,
+        fiberGoal: null == fiberGoal
+            ? _value.fiberGoal
+            : fiberGoal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        saturatedFatEaten: null == saturatedFatEaten
+            ? _value.saturatedFatEaten
+            : saturatedFatEaten // ignore: cast_nullable_to_non_nullable
+                  as double,
+        saturatedFatGoal: null == saturatedFatGoal
+            ? _value.saturatedFatGoal
+            : saturatedFatGoal // ignore: cast_nullable_to_non_nullable
+                  as double,
+        unsaturatedFatEaten: null == unsaturatedFatEaten
+            ? _value.unsaturatedFatEaten
+            : unsaturatedFatEaten // ignore: cast_nullable_to_non_nullable
+                  as double,
+        unsaturatedFatGoal: null == unsaturatedFatGoal
+            ? _value.unsaturatedFatGoal
+            : unsaturatedFatGoal // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -232,6 +363,16 @@ class _$MacroStatsImpl implements _MacroStats {
     required this.carbsEaten,
     required this.carbsGoal,
     this.compulsiveCount = 0,
+    this.netCarbsEaten = 0,
+    this.netCarbsGoal = 0,
+    this.sugarEaten = 0,
+    this.sugarGoal = 0,
+    this.fiberEaten = 0,
+    this.fiberGoal = 0,
+    this.saturatedFatEaten = 0,
+    this.saturatedFatGoal = 0,
+    this.unsaturatedFatEaten = 0,
+    this.unsaturatedFatGoal = 0,
   });
 
   factory _$MacroStatsImpl.fromJson(Map<String, dynamic> json) =>
@@ -256,10 +397,41 @@ class _$MacroStatsImpl implements _MacroStats {
   @override
   @JsonKey()
   final int compulsiveCount;
+  // ── New: extended nutrients ──
+  @override
+  @JsonKey()
+  final double netCarbsEaten;
+  @override
+  @JsonKey()
+  final double netCarbsGoal;
+  @override
+  @JsonKey()
+  final double sugarEaten;
+  @override
+  @JsonKey()
+  final double sugarGoal;
+  @override
+  @JsonKey()
+  final double fiberEaten;
+  @override
+  @JsonKey()
+  final double fiberGoal;
+  @override
+  @JsonKey()
+  final double saturatedFatEaten;
+  @override
+  @JsonKey()
+  final double saturatedFatGoal;
+  @override
+  @JsonKey()
+  final double unsaturatedFatEaten;
+  @override
+  @JsonKey()
+  final double unsaturatedFatGoal;
 
   @override
   String toString() {
-    return 'MacroStats(caloriesEaten: $caloriesEaten, caloriesGoal: $caloriesGoal, proteinEaten: $proteinEaten, proteinGoal: $proteinGoal, fatEaten: $fatEaten, fatGoal: $fatGoal, carbsEaten: $carbsEaten, carbsGoal: $carbsGoal, compulsiveCount: $compulsiveCount)';
+    return 'MacroStats(caloriesEaten: $caloriesEaten, caloriesGoal: $caloriesGoal, proteinEaten: $proteinEaten, proteinGoal: $proteinGoal, fatEaten: $fatEaten, fatGoal: $fatGoal, carbsEaten: $carbsEaten, carbsGoal: $carbsGoal, compulsiveCount: $compulsiveCount, netCarbsEaten: $netCarbsEaten, netCarbsGoal: $netCarbsGoal, sugarEaten: $sugarEaten, sugarGoal: $sugarGoal, fiberEaten: $fiberEaten, fiberGoal: $fiberGoal, saturatedFatEaten: $saturatedFatEaten, saturatedFatGoal: $saturatedFatGoal, unsaturatedFatEaten: $unsaturatedFatEaten, unsaturatedFatGoal: $unsaturatedFatGoal)';
   }
 
   @override
@@ -283,12 +455,32 @@ class _$MacroStatsImpl implements _MacroStats {
             (identical(other.carbsGoal, carbsGoal) ||
                 other.carbsGoal == carbsGoal) &&
             (identical(other.compulsiveCount, compulsiveCount) ||
-                other.compulsiveCount == compulsiveCount));
+                other.compulsiveCount == compulsiveCount) &&
+            (identical(other.netCarbsEaten, netCarbsEaten) ||
+                other.netCarbsEaten == netCarbsEaten) &&
+            (identical(other.netCarbsGoal, netCarbsGoal) ||
+                other.netCarbsGoal == netCarbsGoal) &&
+            (identical(other.sugarEaten, sugarEaten) ||
+                other.sugarEaten == sugarEaten) &&
+            (identical(other.sugarGoal, sugarGoal) ||
+                other.sugarGoal == sugarGoal) &&
+            (identical(other.fiberEaten, fiberEaten) ||
+                other.fiberEaten == fiberEaten) &&
+            (identical(other.fiberGoal, fiberGoal) ||
+                other.fiberGoal == fiberGoal) &&
+            (identical(other.saturatedFatEaten, saturatedFatEaten) ||
+                other.saturatedFatEaten == saturatedFatEaten) &&
+            (identical(other.saturatedFatGoal, saturatedFatGoal) ||
+                other.saturatedFatGoal == saturatedFatGoal) &&
+            (identical(other.unsaturatedFatEaten, unsaturatedFatEaten) ||
+                other.unsaturatedFatEaten == unsaturatedFatEaten) &&
+            (identical(other.unsaturatedFatGoal, unsaturatedFatGoal) ||
+                other.unsaturatedFatGoal == unsaturatedFatGoal));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     caloriesEaten,
     caloriesGoal,
@@ -299,7 +491,17 @@ class _$MacroStatsImpl implements _MacroStats {
     carbsEaten,
     carbsGoal,
     compulsiveCount,
-  );
+    netCarbsEaten,
+    netCarbsGoal,
+    sugarEaten,
+    sugarGoal,
+    fiberEaten,
+    fiberGoal,
+    saturatedFatEaten,
+    saturatedFatGoal,
+    unsaturatedFatEaten,
+    unsaturatedFatGoal,
+  ]);
 
   /// Create a copy of MacroStats
   /// with the given fields replaced by the non-null parameter values.
@@ -326,6 +528,16 @@ abstract class _MacroStats implements MacroStats {
     required final double carbsEaten,
     required final double carbsGoal,
     final int compulsiveCount,
+    final double netCarbsEaten,
+    final double netCarbsGoal,
+    final double sugarEaten,
+    final double sugarGoal,
+    final double fiberEaten,
+    final double fiberGoal,
+    final double saturatedFatEaten,
+    final double saturatedFatGoal,
+    final double unsaturatedFatEaten,
+    final double unsaturatedFatGoal,
   }) = _$MacroStatsImpl;
 
   factory _MacroStats.fromJson(Map<String, dynamic> json) =
@@ -348,7 +560,27 @@ abstract class _MacroStats implements MacroStats {
   @override
   double get carbsGoal;
   @override
-  int get compulsiveCount;
+  int get compulsiveCount; // ── New: extended nutrients ──
+  @override
+  double get netCarbsEaten;
+  @override
+  double get netCarbsGoal;
+  @override
+  double get sugarEaten;
+  @override
+  double get sugarGoal;
+  @override
+  double get fiberEaten;
+  @override
+  double get fiberGoal;
+  @override
+  double get saturatedFatEaten;
+  @override
+  double get saturatedFatGoal;
+  @override
+  double get unsaturatedFatEaten;
+  @override
+  double get unsaturatedFatGoal;
 
   /// Create a copy of MacroStats
   /// with the given fields replaced by the non-null parameter values.

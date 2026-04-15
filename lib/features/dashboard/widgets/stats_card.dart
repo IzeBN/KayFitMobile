@@ -135,7 +135,7 @@ class _StatsCardState extends State<StatsCard>
 
           // ── Bottom: macros ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
             child: Row(
               children: [
                 _AnimatedMacro(
@@ -166,6 +166,29 @@ class _StatsCardState extends State<StatsCard>
                   softColor: AppColors.supportSoft,
                   unit: l10n.macro_g,
                   parentCtrl: _ctrl,
+                ),
+              ],
+            ),
+          ),
+
+          // ── Citation note ────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, size: 12, color: AppColors.textMuted),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    Localizations.localeOf(context).languageCode == 'ru'
+                        ? 'На основе формулы Mifflin-St Jeor. Не является медицинской рекомендацией.'
+                        : 'Based on Mifflin-St Jeor formula. Not medical advice.',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                      height: 1.3,
+                    ),
+                  ),
                 ),
               ],
             ),

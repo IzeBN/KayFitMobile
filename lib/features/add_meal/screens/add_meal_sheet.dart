@@ -5,13 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
+import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
-import 'package:dio/dio.dart';
+import '../../../shared/utils/nutrient_parser.dart';
+import 'barcode_scanner_screen_v2.dart';
+import 'recognition_result_sheet_v2.dart';
 
 enum _InputMode { choose, text, voice, photo }
 enum _LoadingType { none, voice, photo, parsing }
@@ -62,7 +65,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
   final Set<int> _selected = {};
   final Map<int, double?> _itemWeights = {};
 
-  String _lang = 'en';
+  String _lang = 'ru';
 
   final _recorder = AudioRecorder();
   bool _isRecording = false;
@@ -127,29 +130,55 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
       {bool manageLoading = true}) async {
     if (manageLoading) setState(() => _loadingType = _LoadingType.parsing);
     try {
-      final resp = await apiDio.post('/api/parse_meal_suggestions',
+      final resp = await apiDio.post('/api/v2/parse_meal_suggestions',
           data: {'text': text, 'language': lang});
-      final items = (resp.data['items'] as List<dynamic>)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
-      if (mounted) {
-        setState(() {
-          _suggestions = items;
-          _selected.addAll(Iterable.generate(items.length));
-          _itemWeights.clear();
-          for (int i = 0; i < items.length; i++) {
-            _itemWeights[i] =
-                (items[i]['weight_grams'] as num?)?.toDouble();
-          }
-        });
-        AnalyticsService.mealParsed(items.length, _mode.name);
+      final rawItems = (resp.data['items'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+
+      if (!mounted) return;
+
+      if (rawItems.isNotEmpty) {
+        final v2items = rawItems.map((raw) {
+          final w = (raw['weight_grams'] as num?)?.toDouble() ?? 100.0;
+          return ingredientV2FromSuggestion(raw, w);
+        }).toList();
+
+        AnalyticsService.mealParsed(v2items.length, _mode.name);
+
+        if (manageLoading) setState(() => _loadingType = _LoadingType.none);
+
+        // Build a summary name from item names
+        final summaryName = v2items.map((i) => i.name).join(', ');
+
+        final saved = await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.92,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, __) => RecognitionResultSheetV2(
+              dishName: summaryName,
+              ingredients: v2items,
+              mealDate: widget.mealDate,
+            ),
+          ),
+        );
+
+        if (saved == true && mounted) {
+          Navigator.of(context).pop();
+        }
+        return; // loading was cleared above before showing the sheet
       }
     } catch (e) {
       _handleError(e);
-    } finally {
-      if (manageLoading && mounted)
-        setState(() => _loadingType = _LoadingType.none);
+      if (manageLoading && mounted) setState(() => _loadingType = _LoadingType.none);
+      return;
     }
+    if (manageLoading && mounted) setState(() => _loadingType = _LoadingType.none);
   }
 
   Future<void> _startRecording() async {
@@ -236,25 +265,47 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
       final form = FormData.fromMap({
         'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
       });
-      final resp =
-          await apiDio.post('/api/recognize_photo?language=$lang', data: form);
+      final resp = await apiDio
+          .post('/api/v2/recognize_photo?language=$lang', data: form);
       if (!mounted) return;
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
       if (error != null && error.isNotEmpty) {
+        setState(() => _loadingType = _LoadingType.none);
         _handleError(Exception(error));
-      } else if (rawItems != null && rawItems.isNotEmpty) {
-        final items =
-            rawItems.map((e) => e as Map<String, dynamic>).toList();
-        setState(() {
-          _suggestions = items;
-          _selected.addAll(Iterable.generate(items.length));
-          _itemWeights.clear();
-          for (int i = 0; i < items.length; i++) {
-            _itemWeights[i] =
-                (items[i]['weight_grams'] as num?)?.toDouble();
-          }
-        });
+        return;
+      }
+      if (rawItems != null && rawItems.isNotEmpty) {
+        final items = rawItems.map((e) => e as Map<String, dynamic>).toList();
+        final v2items = items.map(ingredientV2FromJson).toList();
+
+        final dishName = resp.data['dish_name'] as String? ??
+            items
+                .map((e) => (e['name'] as String?) ?? '')
+                .where((n) => n.isNotEmpty)
+                .join(', ');
+
+        setState(() => _loadingType = _LoadingType.none);
+
+        final saved = await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.92,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, __) => RecognitionResultSheetV2(
+              dishName: dishName,
+              ingredients: v2items,
+              mealDate: widget.mealDate,
+            ),
+          ),
+        );
+
+        if (saved == true && mounted) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       _handleError(e);
@@ -270,27 +321,28 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
     try {
       final items = _selected.map((i) {
         final s = _suggestions[i];
-        final suggestions = s['suggestions'] as List<dynamic>?;
-        final base = suggestions != null && suggestions.isNotEmpty
-            ? Map<String, dynamic>.from(
-                suggestions[0] as Map<String, dynamic>)
-            : Map<String, dynamic>.from(s);
-        final actualWeight = _itemWeights[i] ??
-            (s['weight_grams'] as num?)?.toDouble() ??
-            100.0;
-        final cal100 = (base['calories_per_100g'] as num?)?.toDouble();
-        if (cal100 != null && actualWeight > 0) {
-          final k = actualWeight / 100.0;
-          base['calories'] = (cal100 * k).roundToDouble();
-          base['protein'] =
-              ((base['protein_per_100g'] as num?)?.toDouble() ?? 0) * k;
-          base['fat'] =
-              ((base['fat_per_100g'] as num?)?.toDouble() ?? 0) * k;
-          base['carbs'] =
-              ((base['carbs_per_100g'] as num?)?.toDouble() ?? 0) * k;
-        }
-        base['weight_grams'] = actualWeight;
-        return base;
+        // Override weight if user edited it in the UI
+        final userWeight = _itemWeights[i];
+        final raw = userWeight != null
+            ? {...s, 'weight_grams': userWeight}
+            : s;
+        final ing = ingredientFromJson(Map<String, dynamic>.from(raw));
+
+        return <String, dynamic>{
+          'name': ing.name,
+          'calories': ing.calories,
+          'protein': ing.protein,
+          'fat': ing.fat,
+          'carbs': ing.carbs,
+          'weight': ing.weightGrams,
+          'fiber': ing.fiber,
+          'sugar': ing.sugar,
+          'sugar_alcohols': ing.sugarAlcohols,
+          'net_carbs': ing.netCarbs,
+          'glycemic_index': ing.glycemicIndex,
+          'saturated_fat': ing.saturatedFat,
+          'unsaturated_fat': ing.unsaturatedFat,
+        };
       }).toList();
 
       await apiDio.post('/api/meals/add_selected', data: {
@@ -322,7 +374,10 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
 
   void _handleError(Object e) {
     if (!mounted) return;
-    const msg = 'Something went wrong. Please try again.';
+    final isRu = _lang == 'ru';
+    final msg = isRu
+        ? 'Что-то пошло не так. Попробуйте ещё раз.'
+        : 'Something went wrong. Please try again.';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
@@ -426,6 +481,25 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                       if (source == null) return;
                                       _switchMode(_InputMode.photo);
                                       _pickAndRecognizePhoto(source);
+                                    },
+                                    onBarcode: () async {
+                                      Navigator.of(context).push(
+                                        PageRouteBuilder(
+                                          pageBuilder: (_, a1, a2) =>
+                                              const BarcodeScannerScreenV2(),
+                                          transitionsBuilder:
+                                              (_, a1, a2, child) =>
+                                                  FadeTransition(
+                                                      opacity: a1,
+                                                      child: child),
+                                          transitionDuration: const Duration(
+                                              milliseconds: 250),
+                                        ),
+                                      ).then((result) {
+                                        if (result != null && mounted) {
+                                          Navigator.of(context).pop(result);
+                                        }
+                                      });
                                     },
                                   )
                                 : _mode == _InputMode.text
@@ -545,6 +619,7 @@ class _ChooseView extends StatefulWidget {
   final VoidCallback onText;
   final VoidCallback onVoice;
   final VoidCallback onPhoto;
+  final VoidCallback onBarcode;
 
   const _ChooseView({
     required this.l10n,
@@ -552,6 +627,7 @@ class _ChooseView extends StatefulWidget {
     required this.onText,
     required this.onVoice,
     required this.onPhoto,
+    required this.onBarcode,
   });
 
   @override
@@ -618,6 +694,18 @@ class _ChooseViewState extends State<_ChooseView>
             : 'Describe your meal — AI counts macros',
         badge: '✍️',
         onTap: widget.onText,
+      ),
+      _MethodData(
+        icon: Icons.qr_code_scanner_rounded,
+        gradient: const [Color(0xFF0284C7), Color(0xFF38BDF8)],
+        shadowColor: const Color(0xFF0284C7),
+        bgColor: const Color(0xFFE0F2FE),
+        title: ru ? 'Штрихкод' : 'Barcode',
+        desc: ru
+            ? 'Отсканируй упаковку — получи точный состав'
+            : 'Scan packaging — get exact nutrition facts',
+        badge: '📦',
+        onTap: widget.onBarcode,
       ),
     ];
 

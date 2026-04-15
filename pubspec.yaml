@@ -1,7 +1,7 @@
 name: kayfit
 description: "Kayfit — calorie and nutrition tracker"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0+6
 
 environment:
   sdk: ^3.11.1
@@ -40,6 +40,9 @@ dependencies:
   image_picker: ^1.1.0
   record: ^6.0.0
   permission_handler: ^11.3.0
+
+  # Barcode scanning
+  mobile_scanner: ^6.0.0
 
   # Storage
   shared_preferences: ^2.2.0

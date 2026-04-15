@@ -29,6 +29,7 @@ mixin _$CalculationResult {
   double get carbs => throw _privateConstructorUsedError;
   int? get daysToGoal => throw _privateConstructorUsedError;
   double? get targetWeight => throw _privateConstructorUsedError;
+  double? get currentWeight => throw _privateConstructorUsedError;
   List<dynamic>? get chartData => throw _privateConstructorUsedError;
 
   /// Serializes this CalculationResult to a JSON map.
@@ -57,6 +58,7 @@ abstract class $CalculationResultCopyWith<$Res> {
     double carbs,
     int? daysToGoal,
     double? targetWeight,
+    double? currentWeight,
     List<dynamic>? chartData,
   });
 }
@@ -84,6 +86,7 @@ class _$CalculationResultCopyWithImpl<$Res, $Val extends CalculationResult>
     Object? carbs = null,
     Object? daysToGoal = freezed,
     Object? targetWeight = freezed,
+    Object? currentWeight = freezed,
     Object? chartData = freezed,
   }) {
     return _then(
@@ -120,6 +123,10 @@ class _$CalculationResultCopyWithImpl<$Res, $Val extends CalculationResult>
                 ? _value.targetWeight
                 : targetWeight // ignore: cast_nullable_to_non_nullable
                       as double?,
+            currentWeight: freezed == currentWeight
+                ? _value.currentWeight
+                : currentWeight // ignore: cast_nullable_to_non_nullable
+                      as double?,
             chartData: freezed == chartData
                 ? _value.chartData
                 : chartData // ignore: cast_nullable_to_non_nullable
@@ -148,6 +155,7 @@ abstract class _$$CalculationResultImplCopyWith<$Res>
     double carbs,
     int? daysToGoal,
     double? targetWeight,
+    double? currentWeight,
     List<dynamic>? chartData,
   });
 }
@@ -174,6 +182,7 @@ class __$$CalculationResultImplCopyWithImpl<$Res>
     Object? carbs = null,
     Object? daysToGoal = freezed,
     Object? targetWeight = freezed,
+    Object? currentWeight = freezed,
     Object? chartData = freezed,
   }) {
     return _then(
@@ -210,6 +219,10 @@ class __$$CalculationResultImplCopyWithImpl<$Res>
             ? _value.targetWeight
             : targetWeight // ignore: cast_nullable_to_non_nullable
                   as double?,
+        currentWeight: freezed == currentWeight
+            ? _value.currentWeight
+            : currentWeight // ignore: cast_nullable_to_non_nullable
+                  as double?,
         chartData: freezed == chartData
             ? _value._chartData
             : chartData // ignore: cast_nullable_to_non_nullable
@@ -232,6 +245,7 @@ class _$CalculationResultImpl implements _CalculationResult {
     required this.carbs,
     this.daysToGoal,
     this.targetWeight,
+    this.currentWeight,
     final List<dynamic>? chartData,
   }) : _chartData = chartData;
 
@@ -254,6 +268,8 @@ class _$CalculationResultImpl implements _CalculationResult {
   final int? daysToGoal;
   @override
   final double? targetWeight;
+  @override
+  final double? currentWeight;
   final List<dynamic>? _chartData;
   @override
   List<dynamic>? get chartData {
@@ -266,7 +282,7 @@ class _$CalculationResultImpl implements _CalculationResult {
 
   @override
   String toString() {
-    return 'CalculationResult(bmr: $bmr, tdee: $tdee, targetCalories: $targetCalories, protein: $protein, fat: $fat, carbs: $carbs, daysToGoal: $daysToGoal, targetWeight: $targetWeight, chartData: $chartData)';
+    return 'CalculationResult(bmr: $bmr, tdee: $tdee, targetCalories: $targetCalories, protein: $protein, fat: $fat, carbs: $carbs, daysToGoal: $daysToGoal, targetWeight: $targetWeight, currentWeight: $currentWeight, chartData: $chartData)';
   }
 
   @override
@@ -285,6 +301,8 @@ class _$CalculationResultImpl implements _CalculationResult {
                 other.daysToGoal == daysToGoal) &&
             (identical(other.targetWeight, targetWeight) ||
                 other.targetWeight == targetWeight) &&
+            (identical(other.currentWeight, currentWeight) ||
+                other.currentWeight == currentWeight) &&
             const DeepCollectionEquality().equals(
               other._chartData,
               _chartData,
@@ -303,6 +321,7 @@ class _$CalculationResultImpl implements _CalculationResult {
     carbs,
     daysToGoal,
     targetWeight,
+    currentWeight,
     const DeepCollectionEquality().hash(_chartData),
   );
 
@@ -333,6 +352,7 @@ abstract class _CalculationResult implements CalculationResult {
     required final double carbs,
     final int? daysToGoal,
     final double? targetWeight,
+    final double? currentWeight,
     final List<dynamic>? chartData,
   }) = _$CalculationResultImpl;
 
@@ -355,6 +375,8 @@ abstract class _CalculationResult implements CalculationResult {
   int? get daysToGoal;
   @override
   double? get targetWeight;
+  @override
+  double? get currentWeight;
   @override
   List<dynamic>? get chartData;
 

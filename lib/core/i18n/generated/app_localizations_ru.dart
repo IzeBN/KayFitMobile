@@ -122,6 +122,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journal_ai_banner_btn => 'Спросить';
 
   @override
+  String get journal_delete_title => 'Удалить запись?';
+
+  @override
+  String get journal_delete_body =>
+      'Этот приём пищи будет удалён без возможности восстановления.';
+
+  @override
   String get settings_title => 'Настройки';
 
   @override
@@ -129,9 +136,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_language => 'Язык';
-
-  @override
-  String get settings_subscription => 'Подписка';
 
   @override
   String get settings_logout => 'Выйти';
@@ -401,7 +405,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ob_result_kcalday => 'ккал/день';
 
   @override
-  String get ob_result_accuracy => 'Точность ≈ 94%';
+  String get ob_result_accuracy => 'Оценка с помощью ИИ';
 
   @override
   String get ob_result_next_title => 'Следующий шаг';
@@ -499,36 +503,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get auth_apple => 'Войти через Apple';
 
   @override
-  String get auth_telegram => 'Войти через Telegram';
-
-  @override
   String get auth_email => 'Войти по email';
 
   @override
   String get auth_terms =>
       'Продолжая, вы соглашаетесь с условиями использования';
-
-  @override
-  String get tariffs_title => 'Тарифы';
-
-  @override
-  String get tariffs_subscribe => 'Оформить подписку';
-
-  @override
-  String get tariffs_current => 'Текущий тариф';
-
-  @override
-  String get tariffs_free => 'Бесплатно';
-
-  @override
-  String get tariffs_perMonth => '/ месяц';
-
-  @override
-  String get tariffs_cancel => 'Отменить автопродление';
-
-  @override
-  String get tariffs_cancelConfirm =>
-      'Вы уверены, что хотите отменить автопродление?';
 
   @override
   String get wg_title => 'Рассчитаем ваш путь к цели';
@@ -606,49 +585,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get error_unknown => 'Что-то пошло не так';
 
   @override
-  String get subscription_title => 'Подписка';
-
-  @override
-  String get subscription_none => 'У вас нет активной подписки';
-
-  @override
-  String get subscription_view_tariffs => 'Посмотреть тарифы';
-
-  @override
-  String get subscription_active => 'Активная подписка';
-
-  @override
-  String get subscription_expires => 'Действует до';
-
-  @override
-  String get subscription_amount => 'Стоимость';
-
-  @override
-  String get subscription_auto_renew => 'Автопродление';
-
-  @override
-  String get subscription_auto_renew_on => 'Включено';
-
-  @override
-  String get subscription_auto_renew_off => 'Отключено';
-
-  @override
-  String get subscription_cancel_auto_renew => 'Отменить автопродление';
-
-  @override
-  String get subscription_cancel_auto_renew_title => 'Отмена автопродления';
-
-  @override
-  String get subscription_cancel_auto_renew_confirm =>
-      'Вы уверены, что хотите отменить автопродление подписки?';
-
-  @override
-  String get subscription_cancel_auto_renew_action => 'Отменить';
-
-  @override
-  String get subscription_auto_renew_cancelled => 'Автопродление отменено';
-
-  @override
   String get wg_plan_ready => 'Ваш план готов!';
 
   @override
@@ -672,6 +608,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get wg_weight_forecast => 'Прогноз веса';
+
+  @override
+  String get wg_weight_forecast_gain => 'Прогноз набора массы';
+
+  @override
+  String get wg_weight_forecast_maintain => 'Поддержание веса';
+
+  @override
+  String get wg_personal_calc_gain =>
+      'Набирай мышечную массу — персональный план питания';
+
+  @override
+  String get wg_personal_calc_maintain =>
+      'Поддерживай форму — точный расчёт калорий';
 
   @override
   String get wg_how_to_reach => 'Как достичь цели';
@@ -758,6 +708,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get auth_err_enter_value => 'Введите значение';
 
   @override
+  String get auth_err_invalid_credentials => 'Неверный email или пароль';
+
+  @override
+  String get auth_err_email_already_registered => 'Email уже зарегистрирован';
+
+  @override
+  String get auth_err_invalid_or_expired_token =>
+      'Сессия истекла, войдите снова';
+
+  @override
+  String get auth_err_user_not_found => 'Пользователь не найден';
+
+  @override
+  String get auth_err_account_blocked => 'Аккаунт заблокирован';
+
+  @override
+  String get auth_err_no_password_set =>
+      'У аккаунта нет пароля — используйте другой способ входа';
+
+  @override
+  String get auth_err_unknown => 'Произошла ошибка, попробуйте снова';
+
+  @override
   String get goals_title => 'Цели КБЖУ';
 
   @override
@@ -788,6 +761,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboard_remaining_over => 'Превышение';
 
   @override
+  String get dashboard_details => 'Подробнее';
+
+  @override
   String get edit_meal_title => 'Редактировать блюдо';
 
   @override
@@ -811,25 +787,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get edit_meal_err_invalid_number => 'Введите корректное число';
 
   @override
-  String get addMeal_subscription_needed => 'Нужна подписка';
-
-  @override
-  String get addMeal_subscription_desc =>
-      'Распознавание еды доступно на платном тарифе. Оформите подписку чтобы пользоваться ИИ-функциями.';
-
-  @override
-  String get addMeal_choose_tariff => 'Выбрать тариф';
-
-  @override
   String get addMeal_close => 'Закрыть';
 
   @override
   String addMeal_kcal(String cal) {
     return '$cal ккал';
   }
-
-  @override
-  String get addMeal_subscription_snack => 'Для этой функции нужна подписка';
 
   @override
   String get addMeal_weight_hint => 'Вес (г)';
@@ -851,114 +814,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_terms => 'Пользовательское соглашение';
-
-  @override
-  String get settings_sub_promo =>
-      'Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.';
-
-  @override
-  String get settings_sale_ends => 'Скидка заканчивается через:';
-
-  @override
-  String get settings_sub_active_badge => '✓ Активна';
-
-  @override
-  String get tariffs_title_full => 'Подпишись и открой\nполный доступ';
-
-  @override
-  String get tariffs_tag1 => '🥕 Рекомендации по питанию';
-
-  @override
-  String get tariffs_tag2 => '📋 Сканер калорий';
-
-  @override
-  String get tariffs_tag3 => '📋 Расчет нормы';
-
-  @override
-  String get tariffs_tag4 => '😀 Трекер эмоций';
-
-  @override
-  String get tariffs_trial => 'Пробный период';
-
-  @override
-  String get tariffs_monthly => 'Месяц';
-
-  @override
-  String get tariffs_yearly => 'Год';
-
-  @override
-  String get tariffs_quarterly => '3 месяца';
-
-  @override
-  String get tariffs_per_3days => '/ 3 дня';
-
-  @override
-  String get tariffs_per_day => '/ день';
-
-  @override
-  String get tariffs_per_3mo => '/ 3 мес';
-
-  @override
-  String get tariffs_trial_then => 'Затем 2 990 за год';
-
-  @override
-  String get tariffs_monthly_billing => 'Ежемесячная оплата';
-
-  @override
-  String get tariffs_yearly_save => '2 990 ₽ / Экономия 8 890 ₽';
-
-  @override
-  String get tariffs_best_value => 'Оптимальный выбор';
-
-  @override
-  String tariffs_no_discount(String price) {
-    return 'Без скидки $price';
-  }
-
-  @override
-  String get tariffs_no_plans => 'Тарифы пока не настроены';
-
-  @override
-  String get tariffs_cancel_anytime =>
-      'Подписку можно отменить в любой удобный момент в Личном кабинете';
-
-  @override
-  String get tariffs_optimal_months =>
-      'Оптимальный результат достигается через 3 месяца';
-
-  @override
-  String get tariffs_email_hint => 'Email для чека';
-
-  @override
-  String get tariffs_email_error => 'Введите корректный email';
-
-  @override
-  String get tariffs_pay_error =>
-      'Не удалось создать платёж. Попробуйте ещё раз.';
-
-  @override
-  String get tariffs_get_plan => 'Получить мой план';
-
-  @override
-  String get tariffs_load_error => 'Не удалось загрузить тарифы';
-
-  @override
-  String get tariffs_sale_ends => 'СКИДКА ЗАКАНЧИВАЕТСЯ ЧЕРЕЗ';
-
-  @override
-  String get tariffs_benefit1 => '🥗 Консультация с нутрициологом';
-
-  @override
-  String get tariffs_benefit2 => '🎥 Видео рецепты';
-
-  @override
-  String get tariffs_benefit3 => '🍽️ План питания';
-
-  @override
-  String get tariffs_benefit4 => '📋 Гайд по питанию';
-
-  @override
-  String get tariffs_payment_title => 'Оплата';
 
   @override
   String get nav_chat => 'ИИ Чат';
@@ -989,4 +844,115 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chat_suggestion_3 => '🌙 Можно ли есть после 18:00?';
+
+  @override
+  String get recogV2_title => 'Что распознано';
+
+  @override
+  String get recogV2_save => 'Сохранить в дневник';
+
+  @override
+  String get recogV2_saving => 'Сохраняем...';
+
+  @override
+  String get recogV2_saved => 'Сохранено';
+
+  @override
+  String get recogV2_composition => 'СОСТАВ';
+
+  @override
+  String get recogV2_macros => 'ОСНОВНЫЕ НУТРИЕНТЫ';
+
+  @override
+  String get recogV2_carbs_detail => 'УГЛЕВОДЫ';
+
+  @override
+  String get recogV2_fats_detail => 'ЖИРЫ';
+
+  @override
+  String get recogV2_micro => 'МИКРОНУТРИЕНТЫ';
+
+  @override
+  String get recogV2_source_fatsecret => 'FatSecret';
+
+  @override
+  String get recogV2_source_claude => 'AI';
+
+  @override
+  String get recogV2_source_cache => 'Кэш';
+
+  @override
+  String get recogV2_gi_low => 'Низкий ГИ';
+
+  @override
+  String get recogV2_gi_medium => 'Средний ГИ';
+
+  @override
+  String get recogV2_gi_high => 'Высокий ГИ';
+
+  @override
+  String get recogV2_net_carbs => 'Чистые углеводы';
+
+  @override
+  String get recogV2_fiber => 'Клетчатка';
+
+  @override
+  String get recogV2_sugar_alcohols => 'Сах. спирты';
+
+  @override
+  String get recogV2_sat_fat => 'Насыщенные';
+
+  @override
+  String get recogV2_mono_fat => 'Мононенасыщ.';
+
+  @override
+  String get recogV2_poly_fat => 'Полиненасыщ.';
+
+  @override
+  String get recogV2_mg => 'мг';
+
+  @override
+  String get recogV2_sodium => 'Натрий';
+
+  @override
+  String get recogV2_cholesterol => 'Холестерин';
+
+  @override
+  String get recogV2_potassium => 'Калий';
+
+  @override
+  String get recogV2_meal_type => 'ТИП ПРИЁМА ПИЩИ';
+
+  @override
+  String get recogV2_add_ingredient => 'Добавить ингредиент';
+
+  @override
+  String get recogV2_search_ingredient => 'Поиск ингредиента';
+
+  @override
+  String get recogV2_search_hint => 'Например: куриная грудка 150г';
+
+  @override
+  String get recogV2_no_items => 'Ничего не выбрано';
+
+  @override
+  String get recogV2_total => 'Итого';
+
+  @override
+  String get recogV2_per100g => 'на 100 г';
+
+  @override
+  String get recogV2_add_breakfast => 'Добавить к завтраку';
+
+  @override
+  String get recogV2_add_lunch => 'Добавить к обеду';
+
+  @override
+  String get recogV2_add_dinner => 'Добавить к ужину';
+
+  @override
+  String get recogV2_add_snack => 'Добавить к перекусу';
+
+  @override
+  String get recogV2_add_meal => 'Добавить к приёму пищи';
 }
