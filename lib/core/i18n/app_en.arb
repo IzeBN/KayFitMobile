@@ -411,5 +411,26 @@
   "chat_empty": "Ask me anything about nutrition, your diet, or progress!",
   "chat_suggestion_1": "🥗 What to eat for lunch on a deficit?",
   "chat_suggestion_2": "💪 Daily protein norm for weight loss",
-  "chat_suggestion_3": "🌙 Is it okay to eat after 6 PM?"
+  "chat_suggestion_3": "🌙 Is it okay to eat after 6 PM?",
+
+  "nutrient_details_title": "DETAILS",
+  "nutrient_weight": "Weight",
+  "nutrient_net_carbs": "Net Carbs",
+  "nutrient_fiber": "Fiber",
+  "nutrient_sugar": "Sugar",
+  "nutrient_sugar_alcohols": "Sugar Alcohols",
+  "nutrient_glycemic_index": "Glycemic Index",
+  "nutrient_saturated_fat": "Saturated Fat",
+  "nutrient_unsaturated_fat": "Unsaturated Fat",
+  "nutrient_cholesterol": "Cholesterol",
+  "nutrient_sodium": "Sodium",
+  "nutrient_potassium": "Potassium",
+  "nutrient_calcium": "Calcium",
+  "nutrient_iron": "Iron",
+  "nutrient_vitamin_a": "Vitamin A",
+  "nutrient_vitamin_c": "Vitamin C",
+  "nutrient_vitamin_d": "Vitamin D",
+  "nutrient_vitamin_b12": "Vitamin B12",
+  "nutrient_mg": "mg",
+  "nutrient_mcg": "mcg"
 }

@@ -989,4 +989,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chat_suggestion_3 => '🌙 Is it okay to eat after 6 PM?';
+
+  @override
+  String get nutrient_details_title => 'DETAILS';
+
+  @override
+  String get nutrient_weight => 'Weight';
+
+  @override
+  String get nutrient_net_carbs => 'Net Carbs';
+
+  @override
+  String get nutrient_fiber => 'Fiber';
+
+  @override
+  String get nutrient_sugar => 'Sugar';
+
+  @override
+  String get nutrient_sugar_alcohols => 'Sugar Alcohols';
+
+  @override
+  String get nutrient_glycemic_index => 'Glycemic Index';
+
+  @override
+  String get nutrient_saturated_fat => 'Saturated Fat';
+
+  @override
+  String get nutrient_unsaturated_fat => 'Unsaturated Fat';
+
+  @override
+  String get nutrient_cholesterol => 'Cholesterol';
+
+  @override
+  String get nutrient_sodium => 'Sodium';
+
+  @override
+  String get nutrient_potassium => 'Potassium';
+
+  @override
+  String get nutrient_calcium => 'Calcium';
+
+  @override
+  String get nutrient_iron => 'Iron';
+
+  @override
+  String get nutrient_vitamin_a => 'Vitamin A';
+
+  @override
+  String get nutrient_vitamin_c => 'Vitamin C';
+
+  @override
+  String get nutrient_vitamin_d => 'Vitamin D';
+
+  @override
+  String get nutrient_vitamin_b12 => 'Vitamin B12';
+
+  @override
+  String get nutrient_mg => 'mg';
+
+  @override
+  String get nutrient_mcg => 'mcg';
 }

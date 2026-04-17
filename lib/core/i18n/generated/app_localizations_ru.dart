@@ -989,4 +989,64 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chat_suggestion_3 => '🌙 Можно ли есть после 18:00?';
+
+  @override
+  String get nutrient_details_title => 'ПОДРОБНОСТИ';
+
+  @override
+  String get nutrient_weight => 'Вес';
+
+  @override
+  String get nutrient_net_carbs => 'Чистые углеводы';
+
+  @override
+  String get nutrient_fiber => 'Клетчатка';
+
+  @override
+  String get nutrient_sugar => 'Сахар';
+
+  @override
+  String get nutrient_sugar_alcohols => 'Сахарные спирты';
+
+  @override
+  String get nutrient_glycemic_index => 'Гликемический индекс';
+
+  @override
+  String get nutrient_saturated_fat => 'Насыщ. жиры';
+
+  @override
+  String get nutrient_unsaturated_fat => 'Ненасыщ. жиры';
+
+  @override
+  String get nutrient_cholesterol => 'Холестерин';
+
+  @override
+  String get nutrient_sodium => 'Натрий';
+
+  @override
+  String get nutrient_potassium => 'Калий';
+
+  @override
+  String get nutrient_calcium => 'Кальций';
+
+  @override
+  String get nutrient_iron => 'Железо';
+
+  @override
+  String get nutrient_vitamin_a => 'Витамин A';
+
+  @override
+  String get nutrient_vitamin_c => 'Витамин C';
+
+  @override
+  String get nutrient_vitamin_d => 'Витамин D';
+
+  @override
+  String get nutrient_vitamin_b12 => 'Витамин B12';
+
+  @override
+  String get nutrient_mg => 'мг';
+
+  @override
+  String get nutrient_mcg => 'мкг';
 }

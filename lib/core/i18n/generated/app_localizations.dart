@@ -1957,6 +1957,66 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'🌙 Можно ли есть после 18:00?'**
   String get chat_suggestion_3;
+
+  /// No description provided for @nutrient_details_title.
+  String get nutrient_details_title;
+
+  /// No description provided for @nutrient_weight.
+  String get nutrient_weight;
+
+  /// No description provided for @nutrient_net_carbs.
+  String get nutrient_net_carbs;
+
+  /// No description provided for @nutrient_fiber.
+  String get nutrient_fiber;
+
+  /// No description provided for @nutrient_sugar.
+  String get nutrient_sugar;
+
+  /// No description provided for @nutrient_sugar_alcohols.
+  String get nutrient_sugar_alcohols;
+
+  /// No description provided for @nutrient_glycemic_index.
+  String get nutrient_glycemic_index;
+
+  /// No description provided for @nutrient_saturated_fat.
+  String get nutrient_saturated_fat;
+
+  /// No description provided for @nutrient_unsaturated_fat.
+  String get nutrient_unsaturated_fat;
+
+  /// No description provided for @nutrient_cholesterol.
+  String get nutrient_cholesterol;
+
+  /// No description provided for @nutrient_sodium.
+  String get nutrient_sodium;
+
+  /// No description provided for @nutrient_potassium.
+  String get nutrient_potassium;
+
+  /// No description provided for @nutrient_calcium.
+  String get nutrient_calcium;
+
+  /// No description provided for @nutrient_iron.
+  String get nutrient_iron;
+
+  /// No description provided for @nutrient_vitamin_a.
+  String get nutrient_vitamin_a;
+
+  /// No description provided for @nutrient_vitamin_c.
+  String get nutrient_vitamin_c;
+
+  /// No description provided for @nutrient_vitamin_d.
+  String get nutrient_vitamin_d;
+
+  /// No description provided for @nutrient_vitamin_b12.
+  String get nutrient_vitamin_b12;
+
+  /// No description provided for @nutrient_mg.
+  String get nutrient_mg;
+
+  /// No description provided for @nutrient_mcg.
+  String get nutrient_mcg;
 }
 
 class _AppLocalizationsDelegate

@@ -66,7 +66,11 @@
       "Bash(python3.exe --version)",
       "Bash(where python3:*)",
       "Bash(where python:*)",
-      "Bash(ls \"C:/Data/projects/Calories/backend/\"AuthKey*.p8)"
+      "Bash(ls \"C:/Data/projects/Calories/backend/\"AuthKey*.p8)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(find /c/Data/projects/KayFitMobile/lib -type f -name meal_item* -o -name *stats*)",
+      "Bash(dart analyze:*)"
     ]
   }
 }

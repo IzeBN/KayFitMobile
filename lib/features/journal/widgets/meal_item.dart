@@ -278,11 +278,13 @@ class _MealActionsSheet extends StatefulWidget {
   final Meal meal;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final ScrollController? scrollController;
 
   const _MealActionsSheet({
     required this.meal,
     this.onEdit,
     this.onDelete,
+    this.scrollController,
   });
 
   static void show(
@@ -295,10 +297,17 @@ class _MealActionsSheet extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _MealActionsSheet(
-        meal: meal,
-        onEdit: onEdit,
-        onDelete: onDelete,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, scrollController) => _MealActionsSheet(
+          meal: meal,
+          onEdit: onEdit,
+          onDelete: onDelete,
+          scrollController: scrollController,
+        ),
       ),
     );
   }
@@ -362,7 +371,9 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
             color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
-          child: Column(
+          child: SingleChildScrollView(
+            controller: widget.scrollController,
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Handle
@@ -521,6 +532,13 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
                     height: 1, color: AppColors.border.withValues(alpha: 0.6)),
               ),
 
+              // ── Details section ──────────────────────────────────────────
+              if (_hasExtendedNutrients(meal))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: _NutrientDetailsSection(meal: meal),
+                ),
+
               // ── Action buttons ─────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -572,7 +590,125 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
                   height: MediaQuery.of(context).padding.bottom + 24),
             ],
           ),
+          ),
         ),
+      ),
+    );
+  }
+
+  bool _hasExtendedNutrients(Meal meal) =>
+      meal.fiber != null || meal.sugar != null || meal.netCarbs != null ||
+      meal.saturatedFat != null || meal.sodium != null || meal.vitaminC != null ||
+      meal.vitaminA != null || meal.calcium != null || meal.iron != null ||
+      meal.potassium != null || meal.vitaminD != null || meal.vitaminB12 != null ||
+      meal.cholesterol != null || meal.glycemicIndex != null;
+}
+
+// ─── Nutrient details section ────────────────────────────────────────────────
+
+class _NutrientDetailsSection extends StatelessWidget {
+  final Meal meal;
+  const _NutrientDetailsSection({required this.meal});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final items = <_NutrientRow>[];
+
+    if (meal.weight != null) items.insert(0, _NutrientRow(l10n.nutrient_weight, '${meal.weight!.toStringAsFixed(0)} ${l10n.macro_g}'));
+
+    // Углеводы детально
+    if (meal.netCarbs != null) items.add(_NutrientRow(l10n.nutrient_net_carbs, '${meal.netCarbs!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.fiber != null) items.add(_NutrientRow(l10n.nutrient_fiber, '${meal.fiber!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.sugar != null) items.add(_NutrientRow(l10n.nutrient_sugar, '${meal.sugar!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.sugarAlcohols != null) items.add(_NutrientRow(l10n.nutrient_sugar_alcohols, '${meal.sugarAlcohols!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.glycemicIndex != null) items.add(_NutrientRow(l10n.nutrient_glycemic_index, '${meal.glycemicIndex}'));
+
+    // Жиры детально
+    if (meal.saturatedFat != null) items.add(_NutrientRow(l10n.nutrient_saturated_fat, '${meal.saturatedFat!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.unsaturatedFat != null) items.add(_NutrientRow(l10n.nutrient_unsaturated_fat, '${meal.unsaturatedFat!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.cholesterol != null) items.add(_NutrientRow(l10n.nutrient_cholesterol, '${meal.cholesterol!.toStringAsFixed(1)} ${l10n.macro_g}'));
+
+    // Минералы
+    if (meal.sodium != null) items.add(_NutrientRow(l10n.nutrient_sodium, '${meal.sodium!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));
+    if (meal.potassium != null) items.add(_NutrientRow(l10n.nutrient_potassium, '${meal.potassium!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));
+    if (meal.calcium != null) items.add(_NutrientRow(l10n.nutrient_calcium, '${meal.calcium!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));
+    if (meal.iron != null) items.add(_NutrientRow(l10n.nutrient_iron, '${meal.iron!.toStringAsFixed(2)} ${l10n.nutrient_mg}'));
+
+    // Витамины
+    if (meal.vitaminA != null) items.add(_NutrientRow(l10n.nutrient_vitamin_a, '${meal.vitaminA!.toStringAsFixed(0)} ${l10n.nutrient_mcg}'));
+    if (meal.vitaminC != null) items.add(_NutrientRow(l10n.nutrient_vitamin_c, '${meal.vitaminC!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));
+    if (meal.vitaminD != null) items.add(_NutrientRow(l10n.nutrient_vitamin_d, '${meal.vitaminD!.toStringAsFixed(1)} ${l10n.nutrient_mcg}'));
+    if (meal.vitaminB12 != null) items.add(_NutrientRow(l10n.nutrient_vitamin_b12, '${meal.vitaminB12!.toStringAsFixed(2)} ${l10n.nutrient_mcg}'));
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.nutrient_details_title,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textMuted,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: items.map((row) => _NutrientTile(label: row.label, value: row.value)).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _NutrientRow {
+  final String label;
+  final String value;
+  const _NutrientRow(this.label, this.value);
+}
+
+class _NutrientTile extends StatelessWidget {
+  final String label;
+  final String value;
+  const _NutrientTile({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.text,
+            ),
+          ),
+        ],
       ),
     );
   }

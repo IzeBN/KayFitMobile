@@ -15,6 +15,22 @@ class Meal with _$Meal {
     double? weight,
     String? emotion,
     String? createdAt,
+    @JsonKey(name: 'net_carbs') double? netCarbs,
+    double? fiber,
+    double? sugar,
+    @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
+    @JsonKey(name: 'glycemic_index') int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
+    double? sodium,
+    double? cholesterol,
+    double? iron,
+    double? calcium,
+    double? potassium,
+    @JsonKey(name: 'vitamin_a') double? vitaminA,
+    @JsonKey(name: 'vitamin_c') double? vitaminC,
+    @JsonKey(name: 'vitamin_d') double? vitaminD,
+    @JsonKey(name: 'vitamin_b12') double? vitaminB12,
   }) = _Meal;
 
   factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);

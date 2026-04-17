@@ -31,6 +31,31 @@ mixin _$Meal {
   String? get emotion => throw _privateConstructorUsedError;
   @JsonKey(name: 'time')
   String? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'net_carbs')
+  double? get netCarbs => throw _privateConstructorUsedError;
+  double? get fiber => throw _privateConstructorUsedError;
+  double? get sugar => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sugar_alcohols')
+  double? get sugarAlcohols => throw _privateConstructorUsedError;
+  @JsonKey(name: 'glycemic_index')
+  int? get glycemicIndex => throw _privateConstructorUsedError;
+  @JsonKey(name: 'saturated_fat')
+  double? get saturatedFat => throw _privateConstructorUsedError;
+  @JsonKey(name: 'unsaturated_fat')
+  double? get unsaturatedFat => throw _privateConstructorUsedError;
+  double? get sodium => throw _privateConstructorUsedError;
+  double? get cholesterol => throw _privateConstructorUsedError;
+  double? get iron => throw _privateConstructorUsedError;
+  double? get calcium => throw _privateConstructorUsedError;
+  double? get potassium => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_a')
+  double? get vitaminA => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_c')
+  double? get vitaminC => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_d')
+  double? get vitaminD => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_b12')
+  double? get vitaminB12 => throw _privateConstructorUsedError;
 
   /// Serializes this Meal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -56,6 +81,22 @@ abstract class $MealCopyWith<$Res> {
     double? weight,
     String? emotion,
     @JsonKey(name: 'time') String? createdAt,
+    @JsonKey(name: 'net_carbs') double? netCarbs,
+    double? fiber,
+    double? sugar,
+    @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
+    @JsonKey(name: 'glycemic_index') int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
+    double? sodium,
+    double? cholesterol,
+    double? iron,
+    double? calcium,
+    double? potassium,
+    @JsonKey(name: 'vitamin_a') double? vitaminA,
+    @JsonKey(name: 'vitamin_c') double? vitaminC,
+    @JsonKey(name: 'vitamin_d') double? vitaminD,
+    @JsonKey(name: 'vitamin_b12') double? vitaminB12,
   });
 }
 
@@ -83,6 +124,22 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
     Object? weight = freezed,
     Object? emotion = freezed,
     Object? createdAt = freezed,
+    Object? netCarbs = freezed,
+    Object? fiber = freezed,
+    Object? sugar = freezed,
+    Object? sugarAlcohols = freezed,
+    Object? glycemicIndex = freezed,
+    Object? saturatedFat = freezed,
+    Object? unsaturatedFat = freezed,
+    Object? sodium = freezed,
+    Object? cholesterol = freezed,
+    Object? iron = freezed,
+    Object? calcium = freezed,
+    Object? potassium = freezed,
+    Object? vitaminA = freezed,
+    Object? vitaminC = freezed,
+    Object? vitaminD = freezed,
+    Object? vitaminB12 = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -122,6 +179,70 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
                       as String?,
+            netCarbs: freezed == netCarbs
+                ? _value.netCarbs
+                : netCarbs // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            fiber: freezed == fiber
+                ? _value.fiber
+                : fiber // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sugar: freezed == sugar
+                ? _value.sugar
+                : sugar // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sugarAlcohols: freezed == sugarAlcohols
+                ? _value.sugarAlcohols
+                : sugarAlcohols // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            glycemicIndex: freezed == glycemicIndex
+                ? _value.glycemicIndex
+                : glycemicIndex // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            saturatedFat: freezed == saturatedFat
+                ? _value.saturatedFat
+                : saturatedFat // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            unsaturatedFat: freezed == unsaturatedFat
+                ? _value.unsaturatedFat
+                : unsaturatedFat // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sodium: freezed == sodium
+                ? _value.sodium
+                : sodium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            cholesterol: freezed == cholesterol
+                ? _value.cholesterol
+                : cholesterol // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            iron: freezed == iron
+                ? _value.iron
+                : iron // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            calcium: freezed == calcium
+                ? _value.calcium
+                : calcium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            potassium: freezed == potassium
+                ? _value.potassium
+                : potassium // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminA: freezed == vitaminA
+                ? _value.vitaminA
+                : vitaminA // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminC: freezed == vitaminC
+                ? _value.vitaminC
+                : vitaminC // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminD: freezed == vitaminD
+                ? _value.vitaminD
+                : vitaminD // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminB12: freezed == vitaminB12
+                ? _value.vitaminB12
+                : vitaminB12 // ignore: cast_nullable_to_non_nullable
+                      as double?,
           )
           as $Val,
     );
@@ -146,6 +267,22 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     double? weight,
     String? emotion,
     @JsonKey(name: 'time') String? createdAt,
+    @JsonKey(name: 'net_carbs') double? netCarbs,
+    double? fiber,
+    double? sugar,
+    @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
+    @JsonKey(name: 'glycemic_index') int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
+    double? sodium,
+    double? cholesterol,
+    double? iron,
+    double? calcium,
+    double? potassium,
+    @JsonKey(name: 'vitamin_a') double? vitaminA,
+    @JsonKey(name: 'vitamin_c') double? vitaminC,
+    @JsonKey(name: 'vitamin_d') double? vitaminD,
+    @JsonKey(name: 'vitamin_b12') double? vitaminB12,
   });
 }
 
@@ -170,6 +307,22 @@ class __$$MealImplCopyWithImpl<$Res>
     Object? weight = freezed,
     Object? emotion = freezed,
     Object? createdAt = freezed,
+    Object? netCarbs = freezed,
+    Object? fiber = freezed,
+    Object? sugar = freezed,
+    Object? sugarAlcohols = freezed,
+    Object? glycemicIndex = freezed,
+    Object? saturatedFat = freezed,
+    Object? unsaturatedFat = freezed,
+    Object? sodium = freezed,
+    Object? cholesterol = freezed,
+    Object? iron = freezed,
+    Object? calcium = freezed,
+    Object? potassium = freezed,
+    Object? vitaminA = freezed,
+    Object? vitaminC = freezed,
+    Object? vitaminD = freezed,
+    Object? vitaminB12 = freezed,
   }) {
     return _then(
       _$MealImpl(
@@ -209,6 +362,70 @@ class __$$MealImplCopyWithImpl<$Res>
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as String?,
+        netCarbs: freezed == netCarbs
+            ? _value.netCarbs
+            : netCarbs // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        fiber: freezed == fiber
+            ? _value.fiber
+            : fiber // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sugar: freezed == sugar
+            ? _value.sugar
+            : sugar // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sugarAlcohols: freezed == sugarAlcohols
+            ? _value.sugarAlcohols
+            : sugarAlcohols // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        glycemicIndex: freezed == glycemicIndex
+            ? _value.glycemicIndex
+            : glycemicIndex // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        saturatedFat: freezed == saturatedFat
+            ? _value.saturatedFat
+            : saturatedFat // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        unsaturatedFat: freezed == unsaturatedFat
+            ? _value.unsaturatedFat
+            : unsaturatedFat // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sodium: freezed == sodium
+            ? _value.sodium
+            : sodium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        cholesterol: freezed == cholesterol
+            ? _value.cholesterol
+            : cholesterol // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        iron: freezed == iron
+            ? _value.iron
+            : iron // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        calcium: freezed == calcium
+            ? _value.calcium
+            : calcium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        potassium: freezed == potassium
+            ? _value.potassium
+            : potassium // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminA: freezed == vitaminA
+            ? _value.vitaminA
+            : vitaminA // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminC: freezed == vitaminC
+            ? _value.vitaminC
+            : vitaminC // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminD: freezed == vitaminD
+            ? _value.vitaminD
+            : vitaminD // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminB12: freezed == vitaminB12
+            ? _value.vitaminB12
+            : vitaminB12 // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -227,6 +444,22 @@ class _$MealImpl implements _Meal {
     this.weight,
     this.emotion,
     @JsonKey(name: 'time') this.createdAt,
+    @JsonKey(name: 'net_carbs') this.netCarbs,
+    this.fiber,
+    this.sugar,
+    @JsonKey(name: 'sugar_alcohols') this.sugarAlcohols,
+    @JsonKey(name: 'glycemic_index') this.glycemicIndex,
+    @JsonKey(name: 'saturated_fat') this.saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') this.unsaturatedFat,
+    this.sodium,
+    this.cholesterol,
+    this.iron,
+    this.calcium,
+    this.potassium,
+    @JsonKey(name: 'vitamin_a') this.vitaminA,
+    @JsonKey(name: 'vitamin_c') this.vitaminC,
+    @JsonKey(name: 'vitamin_d') this.vitaminD,
+    @JsonKey(name: 'vitamin_b12') this.vitaminB12,
   });
 
   factory _$MealImpl.fromJson(Map<String, dynamic> json) =>
@@ -251,10 +484,51 @@ class _$MealImpl implements _Meal {
   @override
   @JsonKey(name: 'time')
   final String? createdAt;
+  @override
+  @JsonKey(name: 'net_carbs')
+  final double? netCarbs;
+  @override
+  final double? fiber;
+  @override
+  final double? sugar;
+  @override
+  @JsonKey(name: 'sugar_alcohols')
+  final double? sugarAlcohols;
+  @override
+  @JsonKey(name: 'glycemic_index')
+  final int? glycemicIndex;
+  @override
+  @JsonKey(name: 'saturated_fat')
+  final double? saturatedFat;
+  @override
+  @JsonKey(name: 'unsaturated_fat')
+  final double? unsaturatedFat;
+  @override
+  final double? sodium;
+  @override
+  final double? cholesterol;
+  @override
+  final double? iron;
+  @override
+  final double? calcium;
+  @override
+  final double? potassium;
+  @override
+  @JsonKey(name: 'vitamin_a')
+  final double? vitaminA;
+  @override
+  @JsonKey(name: 'vitamin_c')
+  final double? vitaminC;
+  @override
+  @JsonKey(name: 'vitamin_d')
+  final double? vitaminD;
+  @override
+  @JsonKey(name: 'vitamin_b12')
+  final double? vitaminB12;
 
   @override
   String toString() {
-    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt)';
+    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, netCarbs: $netCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, potassium: $potassium, vitaminA: $vitaminA, vitaminC: $vitaminC, vitaminD: $vitaminD, vitaminB12: $vitaminB12)';
   }
 
   @override
@@ -272,12 +546,39 @@ class _$MealImpl implements _Meal {
             (identical(other.weight, weight) || other.weight == weight) &&
             (identical(other.emotion, emotion) || other.emotion == emotion) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.netCarbs, netCarbs) ||
+                other.netCarbs == netCarbs) &&
+            (identical(other.fiber, fiber) || other.fiber == fiber) &&
+            (identical(other.sugar, sugar) || other.sugar == sugar) &&
+            (identical(other.sugarAlcohols, sugarAlcohols) ||
+                other.sugarAlcohols == sugarAlcohols) &&
+            (identical(other.glycemicIndex, glycemicIndex) ||
+                other.glycemicIndex == glycemicIndex) &&
+            (identical(other.saturatedFat, saturatedFat) ||
+                other.saturatedFat == saturatedFat) &&
+            (identical(other.unsaturatedFat, unsaturatedFat) ||
+                other.unsaturatedFat == unsaturatedFat) &&
+            (identical(other.sodium, sodium) || other.sodium == sodium) &&
+            (identical(other.cholesterol, cholesterol) ||
+                other.cholesterol == cholesterol) &&
+            (identical(other.iron, iron) || other.iron == iron) &&
+            (identical(other.calcium, calcium) || other.calcium == calcium) &&
+            (identical(other.potassium, potassium) ||
+                other.potassium == potassium) &&
+            (identical(other.vitaminA, vitaminA) ||
+                other.vitaminA == vitaminA) &&
+            (identical(other.vitaminC, vitaminC) ||
+                other.vitaminC == vitaminC) &&
+            (identical(other.vitaminD, vitaminD) ||
+                other.vitaminD == vitaminD) &&
+            (identical(other.vitaminB12, vitaminB12) ||
+                other.vitaminB12 == vitaminB12));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     name,
@@ -288,7 +589,23 @@ class _$MealImpl implements _Meal {
     weight,
     emotion,
     createdAt,
-  );
+    netCarbs,
+    fiber,
+    sugar,
+    sugarAlcohols,
+    glycemicIndex,
+    saturatedFat,
+    unsaturatedFat,
+    sodium,
+    cholesterol,
+    iron,
+    calcium,
+    potassium,
+    vitaminA,
+    vitaminC,
+    vitaminD,
+    vitaminB12,
+  ]);
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.
@@ -315,6 +632,22 @@ abstract class _Meal implements Meal {
     final double? weight,
     final String? emotion,
     @JsonKey(name: 'time') final String? createdAt,
+    @JsonKey(name: 'net_carbs') final double? netCarbs,
+    final double? fiber,
+    final double? sugar,
+    @JsonKey(name: 'sugar_alcohols') final double? sugarAlcohols,
+    @JsonKey(name: 'glycemic_index') final int? glycemicIndex,
+    @JsonKey(name: 'saturated_fat') final double? saturatedFat,
+    @JsonKey(name: 'unsaturated_fat') final double? unsaturatedFat,
+    final double? sodium,
+    final double? cholesterol,
+    final double? iron,
+    final double? calcium,
+    final double? potassium,
+    @JsonKey(name: 'vitamin_a') final double? vitaminA,
+    @JsonKey(name: 'vitamin_c') final double? vitaminC,
+    @JsonKey(name: 'vitamin_d') final double? vitaminD,
+    @JsonKey(name: 'vitamin_b12') final double? vitaminB12,
   }) = _$MealImpl;
 
   factory _Meal.fromJson(Map<String, dynamic> json) = _$MealImpl.fromJson;
@@ -338,6 +671,47 @@ abstract class _Meal implements Meal {
   @override
   @JsonKey(name: 'time')
   String? get createdAt;
+  @override
+  @JsonKey(name: 'net_carbs')
+  double? get netCarbs;
+  @override
+  double? get fiber;
+  @override
+  double? get sugar;
+  @override
+  @JsonKey(name: 'sugar_alcohols')
+  double? get sugarAlcohols;
+  @override
+  @JsonKey(name: 'glycemic_index')
+  int? get glycemicIndex;
+  @override
+  @JsonKey(name: 'saturated_fat')
+  double? get saturatedFat;
+  @override
+  @JsonKey(name: 'unsaturated_fat')
+  double? get unsaturatedFat;
+  @override
+  double? get sodium;
+  @override
+  double? get cholesterol;
+  @override
+  double? get iron;
+  @override
+  double? get calcium;
+  @override
+  double? get potassium;
+  @override
+  @JsonKey(name: 'vitamin_a')
+  double? get vitaminA;
+  @override
+  @JsonKey(name: 'vitamin_c')
+  double? get vitaminC;
+  @override
+  @JsonKey(name: 'vitamin_d')
+  double? get vitaminD;
+  @override
+  @JsonKey(name: 'vitamin_b12')
+  double? get vitaminB12;
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.

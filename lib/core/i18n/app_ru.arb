@@ -411,5 +411,26 @@
   "chat_empty": "Спросите меня о питании, диете или прогрессе!",
   "chat_suggestion_1": "🥗 Что съесть на обед при дефиците?",
   "chat_suggestion_2": "💪 Норма белка для похудения",
-  "chat_suggestion_3": "🌙 Можно ли есть после 18:00?"
+  "chat_suggestion_3": "🌙 Можно ли есть после 18:00?",
+
+  "nutrient_details_title": "ПОДРОБНОСТИ",
+  "nutrient_weight": "Вес",
+  "nutrient_net_carbs": "Чистые углеводы",
+  "nutrient_fiber": "Клетчатка",
+  "nutrient_sugar": "Сахар",
+  "nutrient_sugar_alcohols": "Сахарные спирты",
+  "nutrient_glycemic_index": "Гликемический индекс",
+  "nutrient_saturated_fat": "Насыщ. жиры",
+  "nutrient_unsaturated_fat": "Ненасыщ. жиры",
+  "nutrient_cholesterol": "Холестерин",
+  "nutrient_sodium": "Натрий",
+  "nutrient_potassium": "Калий",
+  "nutrient_calcium": "Кальций",
+  "nutrient_iron": "Железо",
+  "nutrient_vitamin_a": "Витамин A",
+  "nutrient_vitamin_c": "Витамин C",
+  "nutrient_vitamin_d": "Витамин D",
+  "nutrient_vitamin_b12": "Витамин B12",
+  "nutrient_mg": "мг",
+  "nutrient_mcg": "мкг"
 }

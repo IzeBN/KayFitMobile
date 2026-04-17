@@ -34,7 +34,9 @@ class AuthNotifier extends _$AuthNotifier {
       final token = await TokenStorage.getAccess();
       if (token == null) {
         await _clearCache();
-        state = const AsyncValue.data(null);
+        if (!backgroundRefresh) {
+          state = const AsyncValue.data(null);
+        }
         return;
       }
 
@@ -80,7 +82,9 @@ class AuthNotifier extends _$AuthNotifier {
 
       await TokenStorage.clear();
       await _clearCache();
-      state = const AsyncValue.data(null);
+      if (!backgroundRefresh) {
+        state = const AsyncValue.data(null);
+      }
     } catch (e) {
       debugPrint('[auth] checkSession error: $e');
       if (!backgroundRefresh) state = const AsyncValue.data(null);
