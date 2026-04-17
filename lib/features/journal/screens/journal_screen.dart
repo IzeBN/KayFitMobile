@@ -6,15 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import '../widgets/meal_item.dart';
-import '../widgets/day_summary_card.dart';
-import '../widgets/meal_group_card.dart';
 import '../../add_meal/screens/add_meal_sheet.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/models/meal.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
-import '../../way_to_goal/providers/way_to_goal_provider.dart';
 
 part 'journal_screen.g.dart';
 
@@ -132,35 +129,6 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
   }
 
   Future<void> _deleteMeal(BuildContext context, int id) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.journal_delete_title,
-            style: const TextStyle(
-                fontWeight: FontWeight.w700, fontSize: 18)),
-        content: Text(l10n.journal_delete_body,
-            style: const TextStyle(
-                color: AppColors.textMuted, fontSize: 14)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.common_cancel,
-                style: const TextStyle(color: AppColors.textMuted)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.common_delete,
-                style: const TextStyle(
-                    color: AppColors.accentOver,
-                    fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
     try {
       await apiDio.delete('/api/meals/$id');
       ref.invalidate(journalDayMealsProvider(_dateKey));
@@ -200,9 +168,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
         : DateFormat('d MMMM', locale).format(_selectedDate);
 
     return Scaffold(
-      backgroundColor: NutrientColors.bg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: NutrientColors.bg,
+        backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: Row(
@@ -331,27 +299,27 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                       ],
                     );
                   }
-                  final calcAsync = ref.watch(calculationResultProvider);
-                  final calGoal = calcAsync.valueOrNull?.targetCalories ?? 2000.0;
-                  final proteinGoal = calcAsync.valueOrNull?.protein ?? 130.0;
-                  final fatGoal = calcAsync.valueOrNull?.fat ?? 67.0;
-                  final carbsGoal = calcAsync.valueOrNull?.carbs ?? 200.0;
-
                   return RefreshIndicator(
                     color: AppColors.accent,
                     onRefresh: () async =>
                         ref.invalidate(journalDayMealsProvider(_dateKey)),
-                    child: _MealGroupedList(
-                      meals: list,
-                      calGoal: calGoal,
-                      proteinGoal: proteinGoal,
-                      fatGoal: fatGoal,
-                      carbsGoal: carbsGoal,
-                      onDeleteMeal: (id) => _deleteMeal(context, id),
-                      onEditMeal: (id) => context.push('/meals/$id/edit'),
-                      onChatTap: () {
-                        AnalyticsService.journalAiBannerTapped();
-                        context.go('/chat');
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(top: 8, bottom: 100),
+                      itemCount: list.length + 1,
+                      itemBuilder: (ctx, i) {
+                        if (i == 0) {
+                          return _AiNutritionistBanner(
+                              onTap: () {
+                                AnalyticsService.journalAiBannerTapped();
+                                context.go('/chat');
+                              });
+                        }
+                        final meal = list[i - 1];
+                        return MealItem(
+                          meal: meal,
+                          onDelete: () => _deleteMeal(ctx, meal.id),
+                          onEdit: () => context.push('/meals/${meal.id}/edit'),
+                        );
                       },
                     ),
                   );
@@ -469,119 +437,6 @@ class _WeekStrip extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // _AiNutritionistBanner
 // ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// _MealGroupedList — groups meals by mealType and shows day summary + groups
-// ---------------------------------------------------------------------------
-
-class _MealGroupedList extends StatelessWidget {
-  final List<Meal> meals;
-  final double calGoal;
-  final double proteinGoal;
-  final double fatGoal;
-  final double carbsGoal;
-  final void Function(int id) onDeleteMeal;
-  final void Function(int id) onEditMeal;
-  final VoidCallback onChatTap;
-
-  const _MealGroupedList({
-    required this.meals,
-    required this.calGoal,
-    required this.proteinGoal,
-    required this.fatGoal,
-    required this.carbsGoal,
-    required this.onDeleteMeal,
-    required this.onEditMeal,
-    required this.onChatTap,
-  });
-
-  String _inferMealType(Meal m) {
-    if (m.mealType != null && m.mealType!.isNotEmpty) return m.mealType!;
-    final raw = m.createdAt;
-    if (raw == null) return 'snack';
-    final dt = DateTime.tryParse(raw)?.toLocal();
-    if (dt == null) return 'snack';
-    if (dt.hour < 11) return 'breakfast';
-    if (dt.hour < 15) return 'lunch';
-    if (dt.hour < 18) return 'snack';
-    return 'dinner';
-  }
-
-  String _timeStr(Meal m) {
-    final raw = m.createdAt;
-    if (raw == null) return '';
-    final dt = DateTime.tryParse(raw)?.toLocal();
-    if (dt == null) return '';
-    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Group by meal type
-    final groups = <String, List<Meal>>{};
-    for (final m in meals) {
-      final type = _inferMealType(m);
-      groups.putIfAbsent(type, () => []).add(m);
-    }
-
-    // Compute day totals
-    final totalCal = meals.fold<double>(0, (s, m) => s + m.calories);
-    final totalProtein = meals.fold<double>(0, (s, m) => s + m.protein);
-    final totalFat = meals.fold<double>(0, (s, m) => s + m.fat);
-    final totalNetCarbs = meals.fold<double>(0, (s, m) => s + (m.netCarbs ?? m.carbs));
-    final totalSugar = meals.fold<double>(0, (s, m) => s + (m.sugar ?? 0));
-    final totalFiber = meals.fold<double>(0, (s, m) => s + (m.fiber ?? 0));
-    final totalSatFat = meals.fold<double>(0, (s, m) => s + (m.saturatedFat ?? 0));
-    final totalUnsatFat = meals.fold<double>(0, (s, m) => s + (m.unsaturatedFat ?? 0));
-
-    // Order: breakfast, lunch, snack, dinner
-    const order = ['breakfast', 'lunch', 'snack', 'dinner'];
-
-    return ListView(
-      padding: const EdgeInsets.only(top: 0, bottom: 100),
-      children: [
-        _AiNutritionistBanner(onTap: onChatTap),
-
-        // Day summary
-        DaySummaryCard(
-          netCarbs: totalNetCarbs, netCarbsGoal: carbsGoal,
-          sugar: totalSugar, sugarGoal: 50,
-          fiber: totalFiber, fiberGoal: 25,
-          protein: totalProtein, proteinGoal: proteinGoal,
-          goodFat: totalUnsatFat, goodFatGoal: fatGoal * 0.7,
-          satFat: totalSatFat, satFatGoal: fatGoal * 0.3,
-          calories: totalCal, caloriesGoal: calGoal,
-        ),
-
-        // Meal groups
-        ...order.where((t) => groups.containsKey(t)).map((type) {
-          final groupMeals = groups[type]!;
-          final firstTime = _timeStr(groupMeals.first);
-          return MealGroupCard(
-            mealType: type,
-            time: firstTime,
-            meals: groupMeals,
-            onDeleteMeal: onDeleteMeal,
-            onEditMeal: onEditMeal,
-          );
-        }),
-
-        // Ungrouped meals (fallback for meals without mealType)
-        ...groups.entries
-            .where((e) => !order.contains(e.key))
-            .map((e) => MealGroupCard(
-                  mealType: e.key,
-                  time: _timeStr(e.value.first),
-                  meals: e.value,
-                  onDeleteMeal: onDeleteMeal,
-                  onEditMeal: onEditMeal,
-                )),
-
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-}
 
 class _AiNutritionistBanner extends StatefulWidget {
   final VoidCallback onTap;

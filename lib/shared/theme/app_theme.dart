@@ -65,28 +65,6 @@ class AppShadow {
       ];
 }
 
-// ── Calm nutrient palette (non-judgmental, matches prototype) ──
-class NutrientColors {
-  static const netCarbs = Color(0xFF2D6A4F);
-  static const netCarbsSoft = Color(0xFFE9F5EE);
-  static const sugar = Color(0xFFC2855A);
-  static const sugarSoft = Color(0xFFFDF4EC);
-  static const fiber = Color(0xFF7BAE7F);
-  static const fiberSoft = Color(0xFFEDF6EE);
-  static const fatGood = Color(0xFF5B8A72);
-  static const fatGoodSoft = Color(0xFFECF3EF);
-  static const fatBad = Color(0xFF9B8579);
-  static const fatBadSoft = Color(0xFFF3EDEA);
-  static const protein = Color(0xFF7B6B8A);
-  static const proteinSoft = Color(0xFFF1EEF4);
-  static const kcal = Color(0xFF9CA3AF);
-  static const kcalSoft = Color(0xFFF3F4F6);
-  static const bg = Color(0xFFF7F7F5);
-  static const border = Color(0xFFE8E8E6);
-  static const secondary = Color(0xFF6E6E73);
-  static const tertiary = Color(0xFFAEAEB2);
-}
-
 class AppTheme {
   static ThemeData get light => ThemeData(
         useMaterial3: true,

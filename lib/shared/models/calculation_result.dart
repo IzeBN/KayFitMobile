@@ -16,7 +16,6 @@ class CalculationResult with _$CalculationResult {
     required double carbs,
     int? daysToGoal,
     double? targetWeight,
-    double? currentWeight,
     List<dynamic>? chartData,
   }) = _CalculationResult;
 

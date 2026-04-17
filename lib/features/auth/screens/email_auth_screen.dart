@@ -423,7 +423,7 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
       AnalyticsService.loginSuccess('email');
       await _afterLogin();
     } on DioException catch (e) {
-      final reason = _extractDetail(e, AppLocalizations.of(context)!);
+      final reason = _extractDetail(e);
       AnalyticsService.loginFailed('email', reason);
       _showError(reason);
     } catch (e) {
@@ -555,7 +555,7 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
       AnalyticsService.registerSuccess();
       await _afterLogin();
     } on DioException catch (e) {
-      final reason = _extractDetail(e, AppLocalizations.of(context)!);
+      final reason = _extractDetail(e);
       AnalyticsService.registerFailed(reason);
       _showError(reason);
     } catch (e) {
@@ -669,30 +669,17 @@ String? _validateEmail(String? v, AppLocalizations l10n) {
   return null;
 }
 
-String _extractDetail(DioException e, AppLocalizations l10n) {
-  String? code;
+String _extractDetail(DioException e) {
   try {
     final data = e.response?.data;
     if (data is Map) {
       final detail = data['detail'];
-      if (detail is String) code = detail;
+      if (detail is String) return detail;
       if (detail is List && detail.isNotEmpty) {
         final first = detail.first;
-        if (first is Map) code = first['msg']?.toString();
+        if (first is Map) return first['msg']?.toString() ?? '$e';
       }
     }
   } catch (_) {}
-  return _localizeAuthError(code ?? e.message ?? '', l10n);
-}
-
-String _localizeAuthError(String code, AppLocalizations l10n) {
-  switch (code) {
-    case 'invalid_credentials':     return l10n.auth_err_invalid_credentials;
-    case 'email_already_registered': return l10n.auth_err_email_already_registered;
-    case 'invalid_or_expired_token': return l10n.auth_err_invalid_or_expired_token;
-    case 'user_not_found':          return l10n.auth_err_user_not_found;
-    case 'account_blocked':         return l10n.auth_err_account_blocked;
-    case 'no_password_set':         return l10n.auth_err_no_password_set;
-    default:                        return code.isNotEmpty ? code : l10n.auth_err_unknown;
-  }
+  return e.message ?? '$e';
 }
