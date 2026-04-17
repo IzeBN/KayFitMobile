@@ -1958,64 +1958,496 @@ abstract class AppLocalizations {
   /// **'🌙 Можно ли есть после 18:00?'**
   String get chat_suggestion_3;
 
+  /// No description provided for @recogV2_composition.
+  ///
+  /// In ru, this message translates to:
+  /// **'СОСТАВ'**
+  String get recogV2_composition;
+
+  /// No description provided for @recogV2_meal_type.
+  ///
+  /// In ru, this message translates to:
+  /// **'ТИП ПРИЁМА ПИЩИ'**
+  String get recogV2_meal_type;
+
+  /// No description provided for @recogV2_saving.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранение...'**
+  String get recogV2_saving;
+
+  /// No description provided for @recogV2_add_breakfast.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить завтрак'**
+  String get recogV2_add_breakfast;
+
+  /// No description provided for @recogV2_add_lunch.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить обед'**
+  String get recogV2_add_lunch;
+
+  /// No description provided for @recogV2_add_dinner.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить ужин'**
+  String get recogV2_add_dinner;
+
+  /// No description provided for @recogV2_add_snack.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить перекус'**
+  String get recogV2_add_snack;
+
+  /// No description provided for @recogV2_add_meal.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить приём пищи'**
+  String get recogV2_add_meal;
+
+  /// No description provided for @recogV2_macros.
+  ///
+  /// In ru, this message translates to:
+  /// **'МАКРОНУТРИЕНТЫ'**
+  String get recogV2_macros;
+
+  /// No description provided for @recogV2_carbs_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'УГЛЕВОДЫ ДЕТАЛЬНО'**
+  String get recogV2_carbs_detail;
+
+  /// No description provided for @recogV2_net_carbs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Чистые углеводы'**
+  String get recogV2_net_carbs;
+
+  /// No description provided for @recogV2_fiber.
+  ///
+  /// In ru, this message translates to:
+  /// **'Клетчатка'**
+  String get recogV2_fiber;
+
+  /// No description provided for @recogV2_sugar_alcohols.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахарные спирты'**
+  String get recogV2_sugar_alcohols;
+
+  /// No description provided for @recogV2_fats_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'ЖИРЫ ДЕТАЛЬНО'**
+  String get recogV2_fats_detail;
+
+  /// No description provided for @recogV2_sat_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Насыщенные'**
+  String get recogV2_sat_fat;
+
+  /// No description provided for @recogV2_mono_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Мононенасыщенные'**
+  String get recogV2_mono_fat;
+
+  /// No description provided for @recogV2_poly_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Полиненасыщенные'**
+  String get recogV2_poly_fat;
+
+  /// No description provided for @recogV2_micro.
+  ///
+  /// In ru, this message translates to:
+  /// **'МИКРОНУТРИЕНТЫ'**
+  String get recogV2_micro;
+
+  /// No description provided for @recogV2_sodium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Натрий'**
+  String get recogV2_sodium;
+
+  /// No description provided for @recogV2_cholesterol.
+  ///
+  /// In ru, this message translates to:
+  /// **'Холестерин'**
+  String get recogV2_cholesterol;
+
+  /// No description provided for @recogV2_potassium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Калий'**
+  String get recogV2_potassium;
+
+  /// No description provided for @recogV2_mg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мг'**
+  String get recogV2_mg;
+
+  /// No description provided for @recogV2_gi_low.
+  ///
+  /// In ru, this message translates to:
+  /// **'низкий'**
+  String get recogV2_gi_low;
+
+  /// No description provided for @recogV2_gi_medium.
+  ///
+  /// In ru, this message translates to:
+  /// **'средний'**
+  String get recogV2_gi_medium;
+
+  /// No description provided for @recogV2_gi_high.
+  ///
+  /// In ru, this message translates to:
+  /// **'высокий'**
+  String get recogV2_gi_high;
+
+  /// No description provided for @recogV2_gi_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'ГИ'**
+  String get recogV2_gi_label;
+
+  /// No description provided for @recogV2_search_ingredient.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поиск ингредиента'**
+  String get recogV2_search_ingredient;
+
+  /// No description provided for @recogV2_search_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: куриная грудка'**
+  String get recogV2_search_hint;
+
+  /// No description provided for @nds_section_basic.
+  ///
+  /// In ru, this message translates to:
+  /// **'Основные'**
+  String get nds_section_basic;
+
+  /// No description provided for @nds_section_carbs_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'Углеводы детально'**
+  String get nds_section_carbs_detail;
+
+  /// No description provided for @nds_section_fats_detail.
+  ///
+  /// In ru, this message translates to:
+  /// **'Жиры детально'**
+  String get nds_section_fats_detail;
+
+  /// No description provided for @nds_section_minerals.
+  ///
+  /// In ru, this message translates to:
+  /// **'Минералы'**
+  String get nds_section_minerals;
+
+  /// No description provided for @nds_section_vitamins.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамины'**
+  String get nds_section_vitamins;
+
+  /// No description provided for @nds_nutrient_calories.
+  ///
+  /// In ru, this message translates to:
+  /// **'Калории'**
+  String get nds_nutrient_calories;
+
+  /// No description provided for @nds_nutrient_protein.
+  ///
+  /// In ru, this message translates to:
+  /// **'Белки'**
+  String get nds_nutrient_protein;
+
+  /// No description provided for @nds_nutrient_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Жиры'**
+  String get nds_nutrient_fat;
+
+  /// No description provided for @nds_nutrient_carbs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Углеводы'**
+  String get nds_nutrient_carbs;
+
+  /// No description provided for @nds_nutrient_fiber.
+  ///
+  /// In ru, this message translates to:
+  /// **'Клетчатка'**
+  String get nds_nutrient_fiber;
+
+  /// No description provided for @nds_nutrient_sugar_alcohols.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахарные спирты'**
+  String get nds_nutrient_sugar_alcohols;
+
+  /// No description provided for @nds_nutrient_net_carbs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Чистые углеводы'**
+  String get nds_nutrient_net_carbs;
+
+  /// No description provided for @nds_nutrient_gi.
+  ///
+  /// In ru, this message translates to:
+  /// **'Гликемич. индекс'**
+  String get nds_nutrient_gi;
+
+  /// No description provided for @nds_nutrient_sat_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Насыщенные'**
+  String get nds_nutrient_sat_fat;
+
+  /// No description provided for @nds_nutrient_mono_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Мононенасыщенные'**
+  String get nds_nutrient_mono_fat;
+
+  /// No description provided for @nds_nutrient_poly_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Полиненасыщенные'**
+  String get nds_nutrient_poly_fat;
+
+  /// No description provided for @nds_nutrient_sodium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Натрий'**
+  String get nds_nutrient_sodium;
+
+  /// No description provided for @nds_nutrient_cholesterol.
+  ///
+  /// In ru, this message translates to:
+  /// **'Холестерин'**
+  String get nds_nutrient_cholesterol;
+
+  /// No description provided for @nds_nutrient_potassium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Калий'**
+  String get nds_nutrient_potassium;
+
+  /// No description provided for @nds_nutrient_calcium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кальций'**
+  String get nds_nutrient_calcium;
+
+  /// No description provided for @nds_nutrient_iron.
+  ///
+  /// In ru, this message translates to:
+  /// **'Железо'**
+  String get nds_nutrient_iron;
+
+  /// No description provided for @nds_nutrient_vitamin_a.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин A'**
+  String get nds_nutrient_vitamin_a;
+
+  /// No description provided for @nds_nutrient_vitamin_c.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин C'**
+  String get nds_nutrient_vitamin_c;
+
+  /// No description provided for @nds_nutrient_vitamin_d.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин D'**
+  String get nds_nutrient_vitamin_d;
+
+  /// No description provided for @nds_gi_low.
+  ///
+  /// In ru, this message translates to:
+  /// **'низкий'**
+  String get nds_gi_low;
+
+  /// No description provided for @nds_gi_medium.
+  ///
+  /// In ru, this message translates to:
+  /// **'средний'**
+  String get nds_gi_medium;
+
+  /// No description provided for @nds_gi_high.
+  ///
+  /// In ru, this message translates to:
+  /// **'высокий'**
+  String get nds_gi_high;
+
+  /// No description provided for @nds_source_cache.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кэш'**
+  String get nds_source_cache;
+
+  /// No description provided for @nds_unit_kcal.
+  ///
+  /// In ru, this message translates to:
+  /// **'ккал'**
+  String get nds_unit_kcal;
+
+  /// No description provided for @nds_unit_g.
+  ///
+  /// In ru, this message translates to:
+  /// **'г'**
+  String get nds_unit_g;
+
+  /// No description provided for @nds_unit_mg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мг'**
+  String get nds_unit_mg;
+
+  /// No description provided for @nds_unit_mcg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мкг'**
+  String get nds_unit_mcg;
+
+  /// No description provided for @nds_per100g.
+  ///
+  /// In ru, this message translates to:
+  /// **'/100г'**
+  String get nds_per100g;
+
+  /// No description provided for @nds_weight_g.
+  ///
+  /// In ru, this message translates to:
+  /// **'{w} г'**
+  String nds_weight_g(String w);
+
   /// No description provided for @nutrient_details_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'ПОДРОБНОСТИ'**
   String get nutrient_details_title;
 
   /// No description provided for @nutrient_weight.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вес'**
   String get nutrient_weight;
 
   /// No description provided for @nutrient_net_carbs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Чистые углеводы'**
   String get nutrient_net_carbs;
 
   /// No description provided for @nutrient_fiber.
+  ///
+  /// In ru, this message translates to:
+  /// **'Клетчатка'**
   String get nutrient_fiber;
 
   /// No description provided for @nutrient_sugar.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахар'**
   String get nutrient_sugar;
 
   /// No description provided for @nutrient_sugar_alcohols.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахарные спирты'**
   String get nutrient_sugar_alcohols;
 
   /// No description provided for @nutrient_glycemic_index.
+  ///
+  /// In ru, this message translates to:
+  /// **'Гликемический индекс'**
   String get nutrient_glycemic_index;
 
   /// No description provided for @nutrient_saturated_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Насыщ. жиры'**
   String get nutrient_saturated_fat;
 
   /// No description provided for @nutrient_unsaturated_fat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ненасыщ. жиры'**
   String get nutrient_unsaturated_fat;
 
   /// No description provided for @nutrient_cholesterol.
+  ///
+  /// In ru, this message translates to:
+  /// **'Холестерин'**
   String get nutrient_cholesterol;
 
   /// No description provided for @nutrient_sodium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Натрий'**
   String get nutrient_sodium;
 
   /// No description provided for @nutrient_potassium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Калий'**
   String get nutrient_potassium;
 
   /// No description provided for @nutrient_calcium.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кальций'**
   String get nutrient_calcium;
 
   /// No description provided for @nutrient_iron.
+  ///
+  /// In ru, this message translates to:
+  /// **'Железо'**
   String get nutrient_iron;
 
   /// No description provided for @nutrient_vitamin_a.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин A'**
   String get nutrient_vitamin_a;
 
   /// No description provided for @nutrient_vitamin_c.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин C'**
   String get nutrient_vitamin_c;
 
   /// No description provided for @nutrient_vitamin_d.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин D'**
   String get nutrient_vitamin_d;
 
   /// No description provided for @nutrient_vitamin_b12.
+  ///
+  /// In ru, this message translates to:
+  /// **'Витамин B12'**
   String get nutrient_vitamin_b12;
 
   /// No description provided for @nutrient_mg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мг'**
   String get nutrient_mg;
 
   /// No description provided for @nutrient_mcg.
+  ///
+  /// In ru, this message translates to:
+  /// **'мкг'**
   String get nutrient_mcg;
 }
 

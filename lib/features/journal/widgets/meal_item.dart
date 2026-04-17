@@ -844,7 +844,7 @@ class _AnimatedBar extends StatelessWidget {
       flex: (fraction * 100).round().clamp(1, 100),
       child: AnimatedBuilder(
         animation: anim,
-        builder: (_, __) => FractionallySizedBox(
+        builder: (_, _) => FractionallySizedBox(
           widthFactor: anim.value / fraction.clamp(0.001, 1.0),
           alignment: Alignment.centerLeft,
           child: Container(

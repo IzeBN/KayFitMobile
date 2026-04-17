@@ -1190,7 +1190,7 @@ class _GiBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'ГИ $gi',
+            '${l10n.recogV2_gi_label} $gi',
             style: TextStyle(
                 fontSize: 11, fontWeight: FontWeight.w800, color: color),
           ),

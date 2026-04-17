@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/nutrients_v2.dart';
@@ -44,6 +45,8 @@ class NutrientDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       maxChildSize: 0.95,
@@ -68,7 +71,11 @@ class NutrientDetailSheet extends StatelessWidget {
             ),
 
             // Header: название + вес
-            _NdsHeader(name: name, weightGrams: weightGrams),
+            _NdsHeader(
+              name: name,
+              weightGrams: weightGrams,
+              unitGrams: l10n.nds_unit_g,
+            ),
 
             // Source badge
             Padding(
@@ -87,54 +94,85 @@ class NutrientDetailSheet extends StatelessWidget {
                 controller: scrollController,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                 children: [
-                  _NdsSection('Основные', [
-                    _NdsRow.required('Калории', total.calories, 'ккал',
-                        per100g.calories),
-                    _NdsRow.required(
-                        'Белки', total.protein, 'г', per100g.protein),
-                    _NdsRow.required('Жиры', total.fat, 'г', per100g.fat),
-                    _NdsRow.required(
-                        'Углеводы', total.carbs, 'г', per100g.carbs),
+                  _NdsSection(l10n.nds_section_basic, [
+                    _NdsRow.required(l10n.nds_nutrient_calories, total.calories,
+                        l10n.nds_unit_kcal, per100g.calories,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.required(l10n.nds_nutrient_protein, total.protein,
+                        l10n.nds_unit_g, per100g.protein,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.required(l10n.nds_nutrient_fat, total.fat,
+                        l10n.nds_unit_g, per100g.fat,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.required(l10n.nds_nutrient_carbs, total.carbs,
+                        l10n.nds_unit_g, per100g.carbs,
+                        per100gLabel: l10n.nds_per100g),
                   ]),
-                  _NdsSection('Углеводы детально', [
+                  _NdsSection(l10n.nds_section_carbs_detail, [
+                    _NdsRow.optional(l10n.nds_nutrient_fiber, total.fiber,
+                        l10n.nds_unit_g, per100g.fiber,
+                        per100gLabel: l10n.nds_per100g),
                     _NdsRow.optional(
-                        'Клетчатка', total.fiber, 'г', per100g.fiber),
-                    _NdsRow.optional('Сахарные спирты', total.sugarAlcohols,
-                        'г', per100g.sugarAlcohols),
-                    _NdsRow.optional(
-                        'Чистые углеводы', total.netCarbs, 'г', per100g.netCarbs),
-                    _NdsRow.gi(per100g.glycemicIndex,
-                        per100g.glycemicIndexCategory),
+                        l10n.nds_nutrient_sugar_alcohols, total.sugarAlcohols,
+                        l10n.nds_unit_g, per100g.sugarAlcohols,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_net_carbs, total.netCarbs,
+                        l10n.nds_unit_g, per100g.netCarbs,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.gi(
+                      per100g.glycemicIndex,
+                      per100g.glycemicIndexCategory,
+                      giLabel: l10n.nds_nutrient_gi,
+                      lowLabel: l10n.nds_gi_low,
+                      mediumLabel: l10n.nds_gi_medium,
+                      highLabel: l10n.nds_gi_high,
+                    ),
                   ]),
-                  _NdsSection('Жиры детально', [
-                    _NdsRow.optional('Насыщенные', total.saturatedFat, 'г',
-                        per100g.saturatedFat),
-                    _NdsRow.optional('Мононенасыщенные',
-                        total.monounsaturatedFat, 'г',
-                        per100g.monounsaturatedFat),
-                    _NdsRow.optional('Полиненасыщенные',
-                        total.polyunsaturatedFat, 'г',
-                        per100g.polyunsaturatedFat),
+                  _NdsSection(l10n.nds_section_fats_detail, [
+                    _NdsRow.optional(l10n.nds_nutrient_sat_fat,
+                        total.saturatedFat, l10n.nds_unit_g,
+                        per100g.saturatedFat,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_mono_fat,
+                        total.monounsaturatedFat, l10n.nds_unit_g,
+                        per100g.monounsaturatedFat,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_poly_fat,
+                        total.polyunsaturatedFat, l10n.nds_unit_g,
+                        per100g.polyunsaturatedFat,
+                        per100gLabel: l10n.nds_per100g),
                   ]),
-                  _NdsSection('Минералы', [
-                    _NdsRow.optional('Натрий', total.sodiumMg, 'мг',
-                        per100g.sodiumMg),
-                    _NdsRow.optional('Холестерин', total.cholesterolMg, 'мг',
-                        per100g.cholesterolMg),
-                    _NdsRow.optional('Калий', total.potassiumMg, 'мг',
-                        per100g.potassiumMg),
-                    _NdsRow.optional('Кальций', total.calciumMg, 'мг',
-                        per100g.calciumMg),
-                    _NdsRow.optional(
-                        'Железо', total.ironMg, 'мг', per100g.ironMg),
+                  _NdsSection(l10n.nds_section_minerals, [
+                    _NdsRow.optional(l10n.nds_nutrient_sodium, total.sodiumMg,
+                        l10n.nds_unit_mg, per100g.sodiumMg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_cholesterol,
+                        total.cholesterolMg, l10n.nds_unit_mg,
+                        per100g.cholesterolMg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_potassium,
+                        total.potassiumMg, l10n.nds_unit_mg,
+                        per100g.potassiumMg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_calcium, total.calciumMg,
+                        l10n.nds_unit_mg, per100g.calciumMg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_iron, total.ironMg,
+                        l10n.nds_unit_mg, per100g.ironMg,
+                        per100gLabel: l10n.nds_per100g),
                   ]),
-                  _NdsSection('Витамины', [
-                    _NdsRow.optional('Витамин A', total.vitaminAMcg, 'мкг',
-                        per100g.vitaminAMcg),
-                    _NdsRow.optional('Витамин C', total.vitaminCMg, 'мг',
-                        per100g.vitaminCMg),
-                    _NdsRow.optional('Витамин D', total.vitaminDMcg, 'мкг',
-                        per100g.vitaminDMcg),
+                  _NdsSection(l10n.nds_section_vitamins, [
+                    _NdsRow.optional(l10n.nds_nutrient_vitamin_a,
+                        total.vitaminAMcg, l10n.nds_unit_mcg,
+                        per100g.vitaminAMcg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_vitamin_c,
+                        total.vitaminCMg, l10n.nds_unit_mg, per100g.vitaminCMg,
+                        per100gLabel: l10n.nds_per100g),
+                    _NdsRow.optional(l10n.nds_nutrient_vitamin_d,
+                        total.vitaminDMcg, l10n.nds_unit_mcg,
+                        per100g.vitaminDMcg,
+                        per100gLabel: l10n.nds_per100g),
                   ]),
                 ],
               ),
@@ -153,7 +191,12 @@ class NutrientDetailSheet extends StatelessWidget {
 class _NdsHeader extends StatelessWidget {
   final String name;
   final double weightGrams;
-  const _NdsHeader({required this.name, required this.weightGrams});
+  final String unitGrams;
+  const _NdsHeader({
+    required this.name,
+    required this.weightGrams,
+    required this.unitGrams,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +220,7 @@ class _NdsHeader extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            '${weightGrams.toStringAsFixed(0)} г',
+            '${weightGrams.toStringAsFixed(0)} $unitGrams',
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -234,8 +277,8 @@ class _NdsSection extends StatelessWidget {
 /// - [_NdsRow.gi] — гликемический индекс со значком категории
 class _NdsRow extends StatelessWidget {
   final String label;
-  final String valueStr;      // уже отформатированное итоговое значение
-  final String? per100Str;    // "(X/100г)" или null
+  final String valueStr;   // уже отформатированное итоговое значение
+  final String? per100Str; // "(X/100г)" или null
   final bool isLast;
 
   const _NdsRow._({
@@ -251,11 +294,12 @@ class _NdsRow extends StatelessWidget {
     String unit,
     double per100, {
     bool isLast = false,
+    required String per100gLabel,
   }) {
     return _NdsRow._(
       label: label,
       valueStr: '${total.toStringAsFixed(1)} $unit',
-      per100Str: '(${per100.toStringAsFixed(1)}/100г)',
+      per100Str: '(${per100.toStringAsFixed(1)}$per100gLabel)',
       isLast: isLast,
     );
   }
@@ -266,6 +310,7 @@ class _NdsRow extends StatelessWidget {
     String unit,
     double? per100, {
     bool isLast = false,
+    required String per100gLabel,
   }) {
     if (total == null) {
       return _NdsRow._(label: label, valueStr: 'N/A', isLast: isLast);
@@ -273,25 +318,34 @@ class _NdsRow extends StatelessWidget {
     return _NdsRow._(
       label: label,
       valueStr: '${total.toStringAsFixed(1)} $unit',
-      per100Str: per100 != null ? '(${per100.toStringAsFixed(1)}/100г)' : null,
+      per100Str: per100 != null
+          ? '(${per100.toStringAsFixed(1)}$per100gLabel)'
+          : null,
       isLast: isLast,
     );
   }
 
-  factory _NdsRow.gi(int? gi, String? category, {bool isLast = false}) {
+  factory _NdsRow.gi(
+    int? gi,
+    String? category, {
+    bool isLast = false,
+    required String giLabel,
+    required String lowLabel,
+    required String mediumLabel,
+    required String highLabel,
+  }) {
     if (gi == null) {
-      return _NdsRow._(label: 'Гликемич. индекс', valueStr: 'N/A',
-          isLast: isLast);
+      return _NdsRow._(label: giLabel, valueStr: 'N/A', isLast: isLast);
     }
     final cat =
         category ?? (gi < 55 ? 'low' : gi < 70 ? 'medium' : 'high');
     final label = switch (cat) {
-      'low' => 'низкий',
-      'medium' => 'средний',
-      _ => 'высокий',
+      'low' => lowLabel,
+      'medium' => mediumLabel,
+      _ => highLabel,
     };
     return _NdsRow._(
-      label: 'Гликемич. индекс',
+      label: giLabel,
       valueStr: '$gi · $label',
       isLast: isLast,
     );
@@ -384,7 +438,8 @@ class SourceBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cfg = _sourceConfig(source, sourceUrl);
+    final l10n = AppLocalizations.of(context)!;
+    final cfg = _sourceConfig(source, sourceUrl, l10n);
 
     return GestureDetector(
       onTap: cfg.url != null
@@ -427,7 +482,8 @@ class SourceBadge extends StatelessWidget {
     );
   }
 
-  static _SourceConfig _sourceConfig(String source, String? sourceUrl) {
+  static _SourceConfig _sourceConfig(
+      String source, String? sourceUrl, AppLocalizations l10n) {
     return switch (source.toLowerCase()) {
       'usda' => _SourceConfig(
           icon: Icons.verified_rounded,
@@ -452,7 +508,7 @@ class SourceBadge extends StatelessWidget {
         ),
       'cache' => _SourceConfig(
           icon: Icons.storage_rounded,
-          label: 'Кэш',
+          label: l10n.nds_source_cache,
           color: const Color(0xFF6B7280),
           bg: const Color(0xFFF3F4F6),
           url: null,

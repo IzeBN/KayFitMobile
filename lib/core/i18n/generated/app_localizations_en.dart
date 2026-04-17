@@ -991,6 +991,194 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chat_suggestion_3 => '🌙 Is it okay to eat after 6 PM?';
 
   @override
+  String get recogV2_composition => 'COMPOSITION';
+
+  @override
+  String get recogV2_meal_type => 'MEAL TYPE';
+
+  @override
+  String get recogV2_saving => 'Saving...';
+
+  @override
+  String get recogV2_add_breakfast => 'Add breakfast';
+
+  @override
+  String get recogV2_add_lunch => 'Add lunch';
+
+  @override
+  String get recogV2_add_dinner => 'Add dinner';
+
+  @override
+  String get recogV2_add_snack => 'Add snack';
+
+  @override
+  String get recogV2_add_meal => 'Add meal';
+
+  @override
+  String get recogV2_macros => 'MACRONUTRIENTS';
+
+  @override
+  String get recogV2_carbs_detail => 'CARBS DETAIL';
+
+  @override
+  String get recogV2_net_carbs => 'Net carbs';
+
+  @override
+  String get recogV2_fiber => 'Fiber';
+
+  @override
+  String get recogV2_sugar_alcohols => 'Sugar alcohols';
+
+  @override
+  String get recogV2_fats_detail => 'FATS DETAIL';
+
+  @override
+  String get recogV2_sat_fat => 'Saturated';
+
+  @override
+  String get recogV2_mono_fat => 'Monounsaturated';
+
+  @override
+  String get recogV2_poly_fat => 'Polyunsaturated';
+
+  @override
+  String get recogV2_micro => 'MICRONUTRIENTS';
+
+  @override
+  String get recogV2_sodium => 'Sodium';
+
+  @override
+  String get recogV2_cholesterol => 'Cholesterol';
+
+  @override
+  String get recogV2_potassium => 'Potassium';
+
+  @override
+  String get recogV2_mg => 'mg';
+
+  @override
+  String get recogV2_gi_low => 'low';
+
+  @override
+  String get recogV2_gi_medium => 'medium';
+
+  @override
+  String get recogV2_gi_high => 'high';
+
+  @override
+  String get recogV2_gi_label => 'GI';
+
+  @override
+  String get recogV2_search_ingredient => 'Search ingredient';
+
+  @override
+  String get recogV2_search_hint => 'E.g.: chicken breast';
+
+  @override
+  String get nds_section_basic => 'Basic';
+
+  @override
+  String get nds_section_carbs_detail => 'Carbs detail';
+
+  @override
+  String get nds_section_fats_detail => 'Fats detail';
+
+  @override
+  String get nds_section_minerals => 'Minerals';
+
+  @override
+  String get nds_section_vitamins => 'Vitamins';
+
+  @override
+  String get nds_nutrient_calories => 'Calories';
+
+  @override
+  String get nds_nutrient_protein => 'Protein';
+
+  @override
+  String get nds_nutrient_fat => 'Fat';
+
+  @override
+  String get nds_nutrient_carbs => 'Carbs';
+
+  @override
+  String get nds_nutrient_fiber => 'Fiber';
+
+  @override
+  String get nds_nutrient_sugar_alcohols => 'Sugar alcohols';
+
+  @override
+  String get nds_nutrient_net_carbs => 'Net carbs';
+
+  @override
+  String get nds_nutrient_gi => 'Glycemic index';
+
+  @override
+  String get nds_nutrient_sat_fat => 'Saturated';
+
+  @override
+  String get nds_nutrient_mono_fat => 'Monounsaturated';
+
+  @override
+  String get nds_nutrient_poly_fat => 'Polyunsaturated';
+
+  @override
+  String get nds_nutrient_sodium => 'Sodium';
+
+  @override
+  String get nds_nutrient_cholesterol => 'Cholesterol';
+
+  @override
+  String get nds_nutrient_potassium => 'Potassium';
+
+  @override
+  String get nds_nutrient_calcium => 'Calcium';
+
+  @override
+  String get nds_nutrient_iron => 'Iron';
+
+  @override
+  String get nds_nutrient_vitamin_a => 'Vitamin A';
+
+  @override
+  String get nds_nutrient_vitamin_c => 'Vitamin C';
+
+  @override
+  String get nds_nutrient_vitamin_d => 'Vitamin D';
+
+  @override
+  String get nds_gi_low => 'low';
+
+  @override
+  String get nds_gi_medium => 'medium';
+
+  @override
+  String get nds_gi_high => 'high';
+
+  @override
+  String get nds_source_cache => 'Cache';
+
+  @override
+  String get nds_unit_kcal => 'kcal';
+
+  @override
+  String get nds_unit_g => 'g';
+
+  @override
+  String get nds_unit_mg => 'mg';
+
+  @override
+  String get nds_unit_mcg => 'mcg';
+
+  @override
+  String get nds_per100g => '/100g';
+
+  @override
+  String nds_weight_g(String w) {
+    return '$w g';
+  }
+
+  @override
   String get nutrient_details_title => 'DETAILS';
 
   @override

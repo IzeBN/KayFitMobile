@@ -991,6 +991,194 @@ class AppLocalizationsRu extends AppLocalizations {
   String get chat_suggestion_3 => '🌙 Можно ли есть после 18:00?';
 
   @override
+  String get recogV2_composition => 'СОСТАВ';
+
+  @override
+  String get recogV2_meal_type => 'ТИП ПРИЁМА ПИЩИ';
+
+  @override
+  String get recogV2_saving => 'Сохранение...';
+
+  @override
+  String get recogV2_add_breakfast => 'Добавить завтрак';
+
+  @override
+  String get recogV2_add_lunch => 'Добавить обед';
+
+  @override
+  String get recogV2_add_dinner => 'Добавить ужин';
+
+  @override
+  String get recogV2_add_snack => 'Добавить перекус';
+
+  @override
+  String get recogV2_add_meal => 'Добавить приём пищи';
+
+  @override
+  String get recogV2_macros => 'МАКРОНУТРИЕНТЫ';
+
+  @override
+  String get recogV2_carbs_detail => 'УГЛЕВОДЫ ДЕТАЛЬНО';
+
+  @override
+  String get recogV2_net_carbs => 'Чистые углеводы';
+
+  @override
+  String get recogV2_fiber => 'Клетчатка';
+
+  @override
+  String get recogV2_sugar_alcohols => 'Сахарные спирты';
+
+  @override
+  String get recogV2_fats_detail => 'ЖИРЫ ДЕТАЛЬНО';
+
+  @override
+  String get recogV2_sat_fat => 'Насыщенные';
+
+  @override
+  String get recogV2_mono_fat => 'Мононенасыщенные';
+
+  @override
+  String get recogV2_poly_fat => 'Полиненасыщенные';
+
+  @override
+  String get recogV2_micro => 'МИКРОНУТРИЕНТЫ';
+
+  @override
+  String get recogV2_sodium => 'Натрий';
+
+  @override
+  String get recogV2_cholesterol => 'Холестерин';
+
+  @override
+  String get recogV2_potassium => 'Калий';
+
+  @override
+  String get recogV2_mg => 'мг';
+
+  @override
+  String get recogV2_gi_low => 'низкий';
+
+  @override
+  String get recogV2_gi_medium => 'средний';
+
+  @override
+  String get recogV2_gi_high => 'высокий';
+
+  @override
+  String get recogV2_gi_label => 'ГИ';
+
+  @override
+  String get recogV2_search_ingredient => 'Поиск ингредиента';
+
+  @override
+  String get recogV2_search_hint => 'Например: куриная грудка';
+
+  @override
+  String get nds_section_basic => 'Основные';
+
+  @override
+  String get nds_section_carbs_detail => 'Углеводы детально';
+
+  @override
+  String get nds_section_fats_detail => 'Жиры детально';
+
+  @override
+  String get nds_section_minerals => 'Минералы';
+
+  @override
+  String get nds_section_vitamins => 'Витамины';
+
+  @override
+  String get nds_nutrient_calories => 'Калории';
+
+  @override
+  String get nds_nutrient_protein => 'Белки';
+
+  @override
+  String get nds_nutrient_fat => 'Жиры';
+
+  @override
+  String get nds_nutrient_carbs => 'Углеводы';
+
+  @override
+  String get nds_nutrient_fiber => 'Клетчатка';
+
+  @override
+  String get nds_nutrient_sugar_alcohols => 'Сахарные спирты';
+
+  @override
+  String get nds_nutrient_net_carbs => 'Чистые углеводы';
+
+  @override
+  String get nds_nutrient_gi => 'Гликемич. индекс';
+
+  @override
+  String get nds_nutrient_sat_fat => 'Насыщенные';
+
+  @override
+  String get nds_nutrient_mono_fat => 'Мононенасыщенные';
+
+  @override
+  String get nds_nutrient_poly_fat => 'Полиненасыщенные';
+
+  @override
+  String get nds_nutrient_sodium => 'Натрий';
+
+  @override
+  String get nds_nutrient_cholesterol => 'Холестерин';
+
+  @override
+  String get nds_nutrient_potassium => 'Калий';
+
+  @override
+  String get nds_nutrient_calcium => 'Кальций';
+
+  @override
+  String get nds_nutrient_iron => 'Железо';
+
+  @override
+  String get nds_nutrient_vitamin_a => 'Витамин A';
+
+  @override
+  String get nds_nutrient_vitamin_c => 'Витамин C';
+
+  @override
+  String get nds_nutrient_vitamin_d => 'Витамин D';
+
+  @override
+  String get nds_gi_low => 'низкий';
+
+  @override
+  String get nds_gi_medium => 'средний';
+
+  @override
+  String get nds_gi_high => 'высокий';
+
+  @override
+  String get nds_source_cache => 'Кэш';
+
+  @override
+  String get nds_unit_kcal => 'ккал';
+
+  @override
+  String get nds_unit_g => 'г';
+
+  @override
+  String get nds_unit_mg => 'мг';
+
+  @override
+  String get nds_unit_mcg => 'мкг';
+
+  @override
+  String get nds_per100g => '/100г';
+
+  @override
+  String nds_weight_g(String w) {
+    return '$w г';
+  }
+
+  @override
   String get nutrient_details_title => 'ПОДРОБНОСТИ';
 
   @override
