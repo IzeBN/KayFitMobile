@@ -6,60 +6,22 @@ import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 
-enum _GoalMode { lose, gain, maintain }
-
-_GoalMode _detectGoalMode(CalculationResult calc, List<String> goals) {
-  // 1. Weight direction — most reliable, set by provider from actual data
-  final cw = calc.currentWeight;
-  final tw = calc.targetWeight;
-  if (cw != null && tw != null) {
-    if (tw - cw > 0.5) return _GoalMode.gain;
-    if ((tw - cw).abs() <= 0.5) return _GoalMode.maintain;
-    return _GoalMode.lose;
-  }
-
-  // 2. Explicit goals
-  if (goals.contains('gain_muscle')) return _GoalMode.gain;
-  if (goals.contains('maintain_weight')) return _GoalMode.maintain;
-
-  // 3. Calorie diff (provider sets tdee+400 for gain)
-  final diff = calc.targetCalories - calc.tdee;
-  if (diff > 50) return _GoalMode.gain;
-  if (diff.abs() <= 50) return _GoalMode.maintain;
-  return _GoalMode.lose;
-}
-
 /// Shared plan-result view used by WayToGoalScreen and OnboardingScreen (_ResultStep).
 /// Pass [footer] to inject a CTA button at the bottom.
-/// Pass [goals] to adapt content based on selected onboarding goals.
 class PlanResultView extends StatelessWidget {
   final CalculationResult calc;
   final AppLocalizations l10n;
   final Widget? footer;
-  final List<String> goals;
 
   const PlanResultView({
     super.key,
     required this.calc,
     required this.l10n,
     this.footer,
-    this.goals = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    final mode = _detectGoalMode(calc, goals);
-    final heroEmoji = switch (mode) {
-      _GoalMode.gain => '💪',
-      _GoalMode.maintain => '⚖️',
-      _GoalMode.lose => '🎯',
-    };
-    final heroSubtitle = switch (mode) {
-      _GoalMode.gain => l10n.wg_personal_calc_gain,
-      _GoalMode.maintain => l10n.wg_personal_calc_maintain,
-      _GoalMode.lose => l10n.wg_personal_calc,
-    };
-
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
       children: [
@@ -75,7 +37,7 @@ class PlanResultView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text(heroEmoji, style: const TextStyle(fontSize: 40)),
+              const Text('🎯', style: TextStyle(fontSize: 40)),
               const SizedBox(height: 12),
               Text(
                 l10n.wg_plan_ready,
@@ -88,7 +50,7 @@ class PlanResultView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                heroSubtitle,
+                l10n.wg_personal_calc,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.85),
@@ -216,7 +178,7 @@ class PlanResultView extends StatelessWidget {
 
         // ── Weight forecast chart ────────────────────────────────────────────
         const SizedBox(height: 12),
-        _WeightChart(calc: calc, l10n: l10n, mode: mode),
+        _WeightChart(calc: calc, l10n: l10n),
 
         const SizedBox(height: 12),
 
@@ -368,36 +330,12 @@ class _FeatureRow extends StatelessWidget {
 
 // ── Scientific source citation ───────────────────────────────────────────────
 
-class _CitationCard extends StatefulWidget {
+class _CitationCard extends StatelessWidget {
   final AppLocalizations l10n;
   const _CitationCard({required this.l10n});
 
-  @override
-  State<_CitationCard> createState() => _CitationCardState();
-}
-
-class _CitationCardState extends State<_CitationCard> {
   static const _pubmedUrl = 'https://pubmed.ncbi.nlm.nih.gov/2305711/';
   static const _whoUrl = 'https://www.who.int/news-room/fact-sheets/detail/healthy-diet';
-
-  late final TapGestureRecognizer _pubmedRecognizer;
-  late final TapGestureRecognizer _whoRecognizer;
-
-  @override
-  void initState() {
-    super.initState();
-    _pubmedRecognizer = TapGestureRecognizer()
-      ..onTap = () => launchUrl(Uri.parse(_pubmedUrl), mode: LaunchMode.externalApplication);
-    _whoRecognizer = TapGestureRecognizer()
-      ..onTap = () => launchUrl(Uri.parse(_whoUrl), mode: LaunchMode.externalApplication);
-  }
-
-  @override
-  void dispose() {
-    _pubmedRecognizer.dispose();
-    _whoRecognizer.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -441,7 +379,11 @@ class _CitationCardState extends State<_CitationCard> {
                       color: Color(0xFF3B82F6),
                       decoration: TextDecoration.underline,
                     ),
-                    recognizer: _pubmedRecognizer,
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_pubmedUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
                   ),
                   const TextSpan(text: '  ·  '),
                   TextSpan(
@@ -451,7 +393,11 @@ class _CitationCardState extends State<_CitationCard> {
                       color: Color(0xFF3B82F6),
                       decoration: TextDecoration.underline,
                     ),
-                    recognizer: _whoRecognizer,
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_whoUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
                   ),
                   TextSpan(text: disclaimerText),
                 ],
@@ -469,67 +415,47 @@ class _CitationCardState extends State<_CitationCard> {
 class _WeightChart extends StatelessWidget {
   final CalculationResult calc;
   final AppLocalizations l10n;
-  final _GoalMode mode;
-
-  const _WeightChart({
-    required this.calc,
-    required this.l10n,
-    required this.mode,
-  });
+  const _WeightChart({required this.calc, required this.l10n});
 
   List<FlSpot> _buildSpots() {
-    const steps = 6;
-    final cw = calc.currentWeight;
-    final tw = calc.targetWeight;
-
-    if (mode == _GoalMode.gain) {
-      // startW = current weight (e.g. 77), endW = target weight (e.g. 80)
-      final startW = cw ?? (tw != null ? tw - 3.0 : 70.0);
-      final endW = tw ?? (startW + 5.0);
-      final kgGain = (endW - startW).abs().clamp(0.5, 50.0);
-      final projDays = calc.daysToGoal?.toDouble() ??
-          (kgGain * 7700 / 400).clamp(30.0, 365.0);
-      return List.generate(steps + 1, (i) {
-        final t = i / steps;
-        return FlSpot(projDays * t, startW + kgGain * t);
-      });
-    }
-
-    if (mode == _GoalMode.maintain) {
-      final w = cw ?? tw ?? 70.0;
-      return [
-        FlSpot(0, w),
-        FlSpot(30, w),
-        FlSpot(60, w),
-        FlSpot(90, w),
-      ];
-    }
-
-    // Lose — build from actual weights, ignore backend chartData
-    final startW = cw ?? (tw != null ? tw + 5.0 : null);
-    final endW = tw;
-    if (startW != null && endW != null) {
-      final kgLoss = (startW - endW).abs().clamp(0.5, 50.0);
-      final projDays = calc.daysToGoal?.toDouble() ??
-          (kgLoss * 7700 / (calc.tdee - calc.targetCalories).clamp(100.0, 1000.0))
-              .clamp(30.0, 365.0);
-      return List.generate(steps + 1, (i) {
-        final t = i / steps;
-        return FlSpot(projDays * t, startW - kgLoss * t);
-      });
-    }
-
-    // Last resort: backend chartData
     if (calc.chartData != null && (calc.chartData as List).isNotEmpty) {
+      final list = calc.chartData as List;
       final spots = <FlSpot>[];
-      for (final item in calc.chartData as List) {
+      for (final item in list) {
         if (item is Map) {
           final day = (item['day'] as num?)?.toDouble();
           final weight = (item['weight'] as num?)?.toDouble();
-          if (day != null && weight != null) spots.add(FlSpot(day, weight));
+          if (day != null && weight != null) {
+            spots.add(FlSpot(day, weight));
+          }
         }
       }
       if (spots.isNotEmpty) return spots;
+    }
+
+    final targetW = calc.targetWeight;
+    final deficit = calc.tdee - calc.targetCalories;
+
+    if (calc.daysToGoal != null && targetW != null) {
+      final days = calc.daysToGoal!.toDouble();
+      final totalKgLoss = deficit > 0 ? (deficit * days / 7700.0) : 0.0;
+      final startW = targetW + totalKgLoss;
+      const steps = 6;
+      return List.generate(steps + 1, (i) {
+        final t = i / steps;
+        return FlSpot(days * t, startW - totalKgLoss * t);
+      });
+    }
+
+    if (targetW != null && deficit > 0) {
+      const projDays = 90.0;
+      final totalKgLoss = deficit * projDays / 7700.0;
+      final startW = targetW + totalKgLoss;
+      const steps = 6;
+      return List.generate(steps + 1, (i) {
+        final t = i / steps;
+        return FlSpot(projDays * t, startW - totalKgLoss * t);
+      });
     }
 
     return [];
@@ -556,11 +482,7 @@ class _WeightChart extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 12),
             child: Text(
-              switch (mode) {
-                _GoalMode.gain => l10n.wg_weight_forecast_gain,
-                _GoalMode.maintain => l10n.wg_weight_forecast_maintain,
-                _ => l10n.wg_weight_forecast,
-              },
+              l10n.wg_weight_forecast,
               style: const TextStyle(
                   fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
             ),

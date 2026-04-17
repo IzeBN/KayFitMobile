@@ -12,13 +12,10 @@ import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/stats_card.dart';
 import '../../journal/widgets/meal_item.dart';
-import '../../journal/widgets/day_summary_card.dart';
-import '../../journal/widgets/meal_group_card.dart';
 import '../../add_meal/screens/add_meal_sheet.dart';
 import '../../way_to_goal/providers/way_to_goal_provider.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/models/meal.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 
@@ -224,7 +221,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           slivers: [
             _DashboardAppBar(l10n: l10n),
 
-            // ── Day Summary (nutrient cards with progress) ──────────────
+            // ── Stats card (animated from top) ────────────────────────────
             SliverToBoxAdapter(
               child: stats.when(
                 data: (s) {
@@ -248,22 +245,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           child: child,
                         ),
                       ),
-                      child: DaySummaryCard(
-                        netCarbs: s.netCarbsEaten > 0 ? s.netCarbsEaten : s.carbsEaten,
-                        netCarbsGoal: s.netCarbsGoal > 0 ? s.netCarbsGoal : s.carbsGoal,
-                        sugar: s.sugarEaten,
-                        sugarGoal: s.sugarGoal > 0 ? s.sugarGoal : 50,
-                        fiber: s.fiberEaten,
-                        fiberGoal: s.fiberGoal > 0 ? s.fiberGoal : 25,
-                        protein: s.proteinEaten,
-                        proteinGoal: s.proteinGoal,
-                        goodFat: s.unsaturatedFatEaten,
-                        goodFatGoal: s.unsaturatedFatGoal > 0 ? s.unsaturatedFatGoal : s.fatGoal * 0.7,
-                        satFat: s.saturatedFatEaten,
-                        satFatGoal: s.saturatedFatGoal > 0 ? s.saturatedFatGoal : s.fatGoal * 0.3,
-                        calories: s.caloriesEaten,
-                        caloriesGoal: s.caloriesGoal,
-                      ),
+                      child: StatsCard(stats: s),
                     );
                   }
                   if (calc.valueOrNull != null) return const SizedBox.shrink();
@@ -305,7 +287,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 ),
               ),
 
-            // ── Meal groups (grouped by type) ─────────────────────────────
+            // ── Section title ─────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: _AnimatedListItem(
+                fade: _fadeFor(2),
+                slide: _slideFor(2),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    l10n.dashboard_title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Meals list ────────────────────────────────────────────────
             meals.when(
               data: (list) {
                 if (list.isEmpty) {
@@ -317,50 +318,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     ),
                   );
                 }
-                // Group meals by type
-                final groups = <String, List<Meal>>{};
-                for (final m in list) {
-                  final type = m.mealType ?? _inferMealType(m);
-                  groups.putIfAbsent(type, () => []).add(m);
-                }
-                const order = ['breakfast', 'lunch', 'snack', 'dinner'];
-                final orderedKeys = [
-                  ...order.where((t) => groups.containsKey(t)),
-                  ...groups.keys.where((k) => !order.contains(k)),
-                ];
-
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final type = orderedKeys[index];
-                      final groupMeals = groups[type]!;
-                      final firstTime = _mealTimeStr(groupMeals.first);
-                      return _AnimatedListItem(
-                        fade: _fadeFor(index + 2),
-                        slide: _slideFor(index + 2),
-                        child: MealGroupCard(
-                          mealType: type,
-                          time: firstTime,
-                          meals: groupMeals,
-                        ),
-                      );
-                    },
-                    childCount: orderedKeys.length,
+                    (context, index) => _AnimatedListItem(
+                      fade: _fadeFor(index + 3),
+                      slide: _slideFor(index + 3),
+                      child: MealItem(
+                        meal: list[index],
+                        onDelete: () =>
+                            _deleteMeal(context, ref, list[index].id),
+                        onEdit: () =>
+                            context.push('/meals/${list[index].id}/edit'),
+                      ),
+                    ),
+                    childCount: list.length,
                   ),
                 );
               },
               loading: () =>
                   const SliverToBoxAdapter(child: LoadingIndicator()),
               error: (e, _) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Center(
-                    child: Text(
-                      l10n.error_unknown,
-                      style: const TextStyle(color: AppColors.accentOver),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                child: _AnimatedListItem(
+                  fade: _fadeFor(3),
+                  slide: _slideFor(3),
+                  child: _FloatingEmptyMeals(l10n: l10n),
                 ),
               ),
             ),
@@ -388,25 +369,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ),
       ),
     );
-  }
-
-  static String _inferMealType(Meal m) {
-    final raw = m.createdAt;
-    if (raw == null) return 'snack';
-    final dt = DateTime.tryParse(raw)?.toLocal();
-    if (dt == null) return 'snack';
-    if (dt.hour < 11) return 'breakfast';
-    if (dt.hour < 15) return 'lunch';
-    if (dt.hour < 18) return 'snack';
-    return 'dinner';
-  }
-
-  static String _mealTimeStr(Meal m) {
-    final raw = m.createdAt;
-    if (raw == null) return '';
-    final dt = DateTime.tryParse(raw)?.toLocal();
-    if (dt == null) return '';
-    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
 

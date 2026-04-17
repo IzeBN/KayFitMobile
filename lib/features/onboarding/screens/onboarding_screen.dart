@@ -14,11 +14,9 @@ import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../core/storage/onboarding_pending_storage.dart';
-import '../../../core/storage/user_goal_storage.dart';
 import '../../../router.dart';
 import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../way_to_goal/providers/way_to_goal_provider.dart';
 import '../../way_to_goal/widgets/plan_result_view.dart';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
@@ -73,43 +71,21 @@ CalculationResult _calcPreview({
   required String gender,
   required String trainingDays,
   double? targetWeight,
-  List<String> goals = const [],
 }) {
   final offset = gender == 'male' ? 5.0 : -161.0;
   final bmr = 10 * weight + 6.25 * height - 5 * age + offset;
   final tdee = bmr * _getActivityCoef(trainingDays);
-
-  final isGain = goals.contains('gain_muscle') ||
-      (targetWeight != null && targetWeight > weight + 0.5);
-  final isMaintain = !isGain &&
-      (goals.contains('maintain_weight') ||
-          (targetWeight != null && (targetWeight - weight).abs() <= 0.5));
-
-  final double target;
-  if (isGain) {
-    target = tdee + 400;
-  } else if (isMaintain) {
-    target = tdee;
-  } else {
-    target = (tdee - 500).clamp(1200.0, 9999.0);
-  }
-
-  final protein = weight * 1.6;
-  final fat = weight * 0.9;
+  final target = (tdee - 500).clamp(1200.0, 9999.0);
+  final protein = (weight * 1.6);
+  final fat = (weight * 0.9);
   final carbs = ((target - protein * 4 - fat * 9) / 4).clamp(0.0, 9999.0);
-
   int? daysToGoal;
-  if (targetWeight != null) {
-    if (isGain && targetWeight > weight) {
-      daysToGoal = ((targetWeight - weight) * 7700 / 400).round();
-    } else if (!isGain && !isMaintain && targetWeight < weight) {
-      final deficit = tdee - target;
-      if (deficit > 0) {
-        daysToGoal = ((weight - targetWeight) * 7700 / deficit).round();
-      }
+  if (targetWeight != null && targetWeight < weight) {
+    final deficit = tdee - target;
+    if (deficit > 0) {
+      daysToGoal = ((weight - targetWeight) * 7700 / deficit).round();
     }
   }
-
   return CalculationResult(
     bmr: bmr,
     tdee: tdee,
@@ -119,7 +95,6 @@ CalculationResult _calcPreview({
     carbs: carbs,
     daysToGoal: daysToGoal,
     targetWeight: targetWeight,
-    currentWeight: weight,
   );
 }
 
@@ -181,7 +156,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   String? _error;
   bool _showSkipDialog = false;
-  bool _navToLoginStarted = false;
 
   @override
   void initState() {
@@ -235,16 +209,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
       goals: _goals.toList(),
     ));
-    // Also persist to UserGoalStorage — survives onboarding sync/clear
-    if (_goals.isNotEmpty || _weight != null || _targetWeight != null) {
-      UserGoalStorage.save(UserGoalData(
-        goals: _goals.toList(),
-        currentWeight: _weight,
-        targetWeight: _targetWeight,
-      ));
-      // Force calculationResultProvider to re-fetch with new goal data
-      ref.read(goalRevisionProvider.notifier).state++;
-    }
   }
 
   // ── Step handlers ───────────────────────────────────────────────────────────
@@ -357,7 +321,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         gender: _gender.isEmpty ? 'female' : _gender,
         trainingDays: _trainingDays.join(','),
         targetWeight: _targetWeight,
-        goals: _goals.toList(),
       );
 
   // ── Progress ────────────────────────────────────────────────────────────────
@@ -715,14 +678,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _MethodStep(l10n: l10n);
 
       case _Step.result:
-        return _ResultStep(l10n: l10n, preview: _preview, goals: _goals.toList());
+        return _ResultStep(l10n: l10n, preview: _preview);
 
       case _Step.auth:
-        // Auto-navigate to login — guard ensures single navigation even if build re-runs
-        if (!_navToLoginStarted) {
-          _navToLoginStarted = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
-        }
+        // Auto-navigate to login
+        WidgetsBinding.instance.addPostFrameCallback((_) => _navigateToLogin());
         return const Center(child: CircularProgressIndicator(color: OBColors.pink));
     }
   }
@@ -2850,13 +2810,12 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
 class _ResultStep extends StatelessWidget {
   final AppLocalizations l10n;
   final CalculationResult preview;
-  final List<String> goals;
 
-  const _ResultStep({required this.l10n, required this.preview, this.goals = const []});
+  const _ResultStep({required this.l10n, required this.preview});
 
   @override
   Widget build(BuildContext context) {
-    return PlanResultView(calc: preview, l10n: l10n, goals: goals);
+    return PlanResultView(calc: preview, l10n: l10n);
   }
 }
 

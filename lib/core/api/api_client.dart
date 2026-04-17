@@ -56,8 +56,6 @@ class _AuthInterceptor extends Interceptor {
 
   final Dio _dio;
   bool _isRefreshing = false;
-  // Queued requests waiting for the in-progress token refresh to complete.
-  final List<({RequestOptions opts, ErrorInterceptorHandler handler})> _queue = [];
 
   @override
   Future<void> onRequest(
@@ -104,8 +102,9 @@ class _AuthInterceptor extends Interceptor {
       }
 
       if (_isRefreshing) {
-        // Queue this request; it will be retried after the refresh completes.
-        _queue.add((opts: err.requestOptions, handler: handler));
+        // Another request is already refreshing — just reject so the caller
+        // gets a clean error; the logout will happen from the refreshing request.
+        handler.next(err);
         return;
       }
 
@@ -115,7 +114,6 @@ class _AuthInterceptor extends Interceptor {
         if (refreshToken == null) {
           await _handleLogout();
           handler.next(err);
-          _rejectQueue(err);
           return;
         }
 
@@ -134,40 +132,14 @@ class _AuthInterceptor extends Interceptor {
         opts.headers['Authorization'] = 'Bearer $newAccess';
         final retryResp = await _dio.fetch(opts);
         handler.resolve(retryResp);
-        await _retryQueue(newAccess);
       } catch (_) {
         await _handleLogout();
         handler.next(err);
-        _rejectQueue(err);
       } finally {
         _isRefreshing = false;
       }
     } else {
       handler.next(err);
-    }
-  }
-
-  Future<void> _retryQueue(String newAccess) async {
-    final pending = List.of(_queue);
-    _queue.clear();
-    for (final item in pending) {
-      try {
-        item.opts.headers['Authorization'] = 'Bearer $newAccess';
-        final retryResp = await _dio.fetch(item.opts);
-        item.handler.resolve(retryResp);
-      } catch (e) {
-        item.handler.next(e is DioException
-            ? e
-            : DioException(requestOptions: item.opts, error: e));
-      }
-    }
-  }
-
-  void _rejectQueue(DioException err) {
-    final pending = List.of(_queue);
-    _queue.clear();
-    for (final item in pending) {
-      item.handler.next(err);
     }
   }
 

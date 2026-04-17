@@ -22,7 +22,6 @@ class WayToGoalScreen extends ConsumerWidget {
     AnalyticsService.wayToGoalOpened();
 
     final result = ref.watch(calculationResultProvider);
-    final goalsAsync = ref.watch(onboardingGoalsProvider);
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -38,7 +37,6 @@ class WayToGoalScreen extends ConsumerWidget {
           child: PlanResultView(
             calc: calc,
             l10n: l10n,
-            goals: goalsAsync.valueOrNull ?? const [],
             footer: GestureDetector(
               onTap: () {
                 AnalyticsService.wayToGoalStartDiaryTapped();
