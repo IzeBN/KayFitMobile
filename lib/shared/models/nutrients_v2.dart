@@ -19,6 +19,11 @@ class NutrientsV2 with _$NutrientsV2 {
     @JsonKey(name: 'sodium_mg') double? sodiumMg,
     @JsonKey(name: 'cholesterol_mg') double? cholesterolMg,
     @JsonKey(name: 'potassium_mg') double? potassiumMg,
+    @JsonKey(name: 'calcium_mg') double? calciumMg,
+    @JsonKey(name: 'iron_mg') double? ironMg,
+    @JsonKey(name: 'vitamin_a_mcg') double? vitaminAMcg,
+    @JsonKey(name: 'vitamin_c_mg') double? vitaminCMg,
+    @JsonKey(name: 'vitamin_d_mcg') double? vitaminDMcg,
     @JsonKey(name: 'glycemic_index') int? glycemicIndex,
     @JsonKey(name: 'glycemic_index_category') String? glycemicIndexCategory,
   }) = _NutrientsV2;

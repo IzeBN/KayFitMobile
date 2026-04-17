@@ -31,6 +31,8 @@ class Meal with _$Meal {
     @JsonKey(name: 'vitamin_c') double? vitaminC,
     @JsonKey(name: 'vitamin_d') double? vitaminD,
     @JsonKey(name: 'vitamin_b12') double? vitaminB12,
+    String? source,
+    @JsonKey(name: 'source_url') String? sourceUrl,
   }) = _Meal;
 
   factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);

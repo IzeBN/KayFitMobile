@@ -14,6 +14,7 @@ import '../../../shared/models/nutrients_v2.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/utils/nutrient_parser.dart';
 import '../../../shared/widgets/meal_type_picker.dart';
+import '../../../shared/widgets/nutrient_detail_sheet.dart';
 
 /// Full-screen bottom sheet shown after v2 AI recognition (photo / text / voice).
 ///
@@ -181,6 +182,8 @@ class _RecognitionResultSheetV2State
           'saturated_fat': n.saturatedFat,
           'unsaturated_fat': mono + poly,
           'glycemic_index': item.nutrientsPer100g.glycemicIndex,
+          'source': item.source,
+          'source_url': item.sourceUrl,
         };
       }).toList();
 
@@ -670,6 +673,23 @@ class _IngredientTileState extends State<_IngredientTile>
     super.dispose();
   }
 
+  void _showDetailSheet(BuildContext context) {
+    final item = widget.item;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => NutrientDetailSheet(
+        name: item.name,
+        weightGrams: item.weightGrams,
+        per100g: item.nutrientsPer100g,
+        total: item.nutrientsTotal,
+        source: item.source,
+        sourceUrl: item.sourceUrl,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
@@ -688,6 +708,7 @@ class _IngredientTileState extends State<_IngredientTile>
           // ── Row: checkbox / name / weight / cal / expand chevron ──
           InkWell(
             onTap: widget.onTap,
+            onLongPress: () => _showDetailSheet(context),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -733,6 +754,12 @@ class _IngredientTileState extends State<_IngredientTile>
                               fontSize: 13, fontWeight: FontWeight.w600),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        SourceBadge(
+                          source: item.source,
+                          sourceUrl: item.sourceUrl,
+                          compact: true,
                         ),
                         const SizedBox(height: 4),
                         Row(

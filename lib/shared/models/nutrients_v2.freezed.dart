@@ -42,6 +42,16 @@ mixin _$NutrientsV2 {
   double? get cholesterolMg => throw _privateConstructorUsedError;
   @JsonKey(name: 'potassium_mg')
   double? get potassiumMg => throw _privateConstructorUsedError;
+  @JsonKey(name: 'calcium_mg')
+  double? get calciumMg => throw _privateConstructorUsedError;
+  @JsonKey(name: 'iron_mg')
+  double? get ironMg => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_a_mcg')
+  double? get vitaminAMcg => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_c_mg')
+  double? get vitaminCMg => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vitamin_d_mcg')
+  double? get vitaminDMcg => throw _privateConstructorUsedError;
   @JsonKey(name: 'glycemic_index')
   int? get glycemicIndex => throw _privateConstructorUsedError;
   @JsonKey(name: 'glycemic_index_category')
@@ -78,6 +88,11 @@ abstract class $NutrientsV2CopyWith<$Res> {
     @JsonKey(name: 'sodium_mg') double? sodiumMg,
     @JsonKey(name: 'cholesterol_mg') double? cholesterolMg,
     @JsonKey(name: 'potassium_mg') double? potassiumMg,
+    @JsonKey(name: 'calcium_mg') double? calciumMg,
+    @JsonKey(name: 'iron_mg') double? ironMg,
+    @JsonKey(name: 'vitamin_a_mcg') double? vitaminAMcg,
+    @JsonKey(name: 'vitamin_c_mg') double? vitaminCMg,
+    @JsonKey(name: 'vitamin_d_mcg') double? vitaminDMcg,
     @JsonKey(name: 'glycemic_index') int? glycemicIndex,
     @JsonKey(name: 'glycemic_index_category') String? glycemicIndexCategory,
   });
@@ -111,6 +126,11 @@ class _$NutrientsV2CopyWithImpl<$Res, $Val extends NutrientsV2>
     Object? sodiumMg = freezed,
     Object? cholesterolMg = freezed,
     Object? potassiumMg = freezed,
+    Object? calciumMg = freezed,
+    Object? ironMg = freezed,
+    Object? vitaminAMcg = freezed,
+    Object? vitaminCMg = freezed,
+    Object? vitaminDMcg = freezed,
     Object? glycemicIndex = freezed,
     Object? glycemicIndexCategory = freezed,
   }) {
@@ -168,6 +188,26 @@ class _$NutrientsV2CopyWithImpl<$Res, $Val extends NutrientsV2>
                 ? _value.potassiumMg
                 : potassiumMg // ignore: cast_nullable_to_non_nullable
                       as double?,
+            calciumMg: freezed == calciumMg
+                ? _value.calciumMg
+                : calciumMg // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            ironMg: freezed == ironMg
+                ? _value.ironMg
+                : ironMg // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminAMcg: freezed == vitaminAMcg
+                ? _value.vitaminAMcg
+                : vitaminAMcg // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminCMg: freezed == vitaminCMg
+                ? _value.vitaminCMg
+                : vitaminCMg // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            vitaminDMcg: freezed == vitaminDMcg
+                ? _value.vitaminDMcg
+                : vitaminDMcg // ignore: cast_nullable_to_non_nullable
+                      as double?,
             glycemicIndex: freezed == glycemicIndex
                 ? _value.glycemicIndex
                 : glycemicIndex // ignore: cast_nullable_to_non_nullable
@@ -205,6 +245,11 @@ abstract class _$$NutrientsV2ImplCopyWith<$Res>
     @JsonKey(name: 'sodium_mg') double? sodiumMg,
     @JsonKey(name: 'cholesterol_mg') double? cholesterolMg,
     @JsonKey(name: 'potassium_mg') double? potassiumMg,
+    @JsonKey(name: 'calcium_mg') double? calciumMg,
+    @JsonKey(name: 'iron_mg') double? ironMg,
+    @JsonKey(name: 'vitamin_a_mcg') double? vitaminAMcg,
+    @JsonKey(name: 'vitamin_c_mg') double? vitaminCMg,
+    @JsonKey(name: 'vitamin_d_mcg') double? vitaminDMcg,
     @JsonKey(name: 'glycemic_index') int? glycemicIndex,
     @JsonKey(name: 'glycemic_index_category') String? glycemicIndexCategory,
   });
@@ -237,6 +282,11 @@ class __$$NutrientsV2ImplCopyWithImpl<$Res>
     Object? sodiumMg = freezed,
     Object? cholesterolMg = freezed,
     Object? potassiumMg = freezed,
+    Object? calciumMg = freezed,
+    Object? ironMg = freezed,
+    Object? vitaminAMcg = freezed,
+    Object? vitaminCMg = freezed,
+    Object? vitaminDMcg = freezed,
     Object? glycemicIndex = freezed,
     Object? glycemicIndexCategory = freezed,
   }) {
@@ -294,6 +344,26 @@ class __$$NutrientsV2ImplCopyWithImpl<$Res>
             ? _value.potassiumMg
             : potassiumMg // ignore: cast_nullable_to_non_nullable
                   as double?,
+        calciumMg: freezed == calciumMg
+            ? _value.calciumMg
+            : calciumMg // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        ironMg: freezed == ironMg
+            ? _value.ironMg
+            : ironMg // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminAMcg: freezed == vitaminAMcg
+            ? _value.vitaminAMcg
+            : vitaminAMcg // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminCMg: freezed == vitaminCMg
+            ? _value.vitaminCMg
+            : vitaminCMg // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        vitaminDMcg: freezed == vitaminDMcg
+            ? _value.vitaminDMcg
+            : vitaminDMcg // ignore: cast_nullable_to_non_nullable
+                  as double?,
         glycemicIndex: freezed == glycemicIndex
             ? _value.glycemicIndex
             : glycemicIndex // ignore: cast_nullable_to_non_nullable
@@ -324,6 +394,11 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
     @JsonKey(name: 'sodium_mg') this.sodiumMg,
     @JsonKey(name: 'cholesterol_mg') this.cholesterolMg,
     @JsonKey(name: 'potassium_mg') this.potassiumMg,
+    @JsonKey(name: 'calcium_mg') this.calciumMg,
+    @JsonKey(name: 'iron_mg') this.ironMg,
+    @JsonKey(name: 'vitamin_a_mcg') this.vitaminAMcg,
+    @JsonKey(name: 'vitamin_c_mg') this.vitaminCMg,
+    @JsonKey(name: 'vitamin_d_mcg') this.vitaminDMcg,
     @JsonKey(name: 'glycemic_index') this.glycemicIndex,
     @JsonKey(name: 'glycemic_index_category') this.glycemicIndexCategory,
   });
@@ -366,6 +441,21 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
   @JsonKey(name: 'potassium_mg')
   final double? potassiumMg;
   @override
+  @JsonKey(name: 'calcium_mg')
+  final double? calciumMg;
+  @override
+  @JsonKey(name: 'iron_mg')
+  final double? ironMg;
+  @override
+  @JsonKey(name: 'vitamin_a_mcg')
+  final double? vitaminAMcg;
+  @override
+  @JsonKey(name: 'vitamin_c_mg')
+  final double? vitaminCMg;
+  @override
+  @JsonKey(name: 'vitamin_d_mcg')
+  final double? vitaminDMcg;
+  @override
   @JsonKey(name: 'glycemic_index')
   final int? glycemicIndex;
   @override
@@ -374,7 +464,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
 
   @override
   String toString() {
-    return 'NutrientsV2(calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, fiber: $fiber, sugarAlcohols: $sugarAlcohols, netCarbs: $netCarbs, saturatedFat: $saturatedFat, monounsaturatedFat: $monounsaturatedFat, polyunsaturatedFat: $polyunsaturatedFat, sodiumMg: $sodiumMg, cholesterolMg: $cholesterolMg, potassiumMg: $potassiumMg, glycemicIndex: $glycemicIndex, glycemicIndexCategory: $glycemicIndexCategory)';
+    return 'NutrientsV2(calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, fiber: $fiber, sugarAlcohols: $sugarAlcohols, netCarbs: $netCarbs, saturatedFat: $saturatedFat, monounsaturatedFat: $monounsaturatedFat, polyunsaturatedFat: $polyunsaturatedFat, sodiumMg: $sodiumMg, cholesterolMg: $cholesterolMg, potassiumMg: $potassiumMg, calciumMg: $calciumMg, ironMg: $ironMg, vitaminAMcg: $vitaminAMcg, vitaminCMg: $vitaminCMg, vitaminDMcg: $vitaminDMcg, glycemicIndex: $glycemicIndex, glycemicIndexCategory: $glycemicIndexCategory)';
   }
 
   @override
@@ -404,6 +494,15 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
                 other.cholesterolMg == cholesterolMg) &&
             (identical(other.potassiumMg, potassiumMg) ||
                 other.potassiumMg == potassiumMg) &&
+            (identical(other.calciumMg, calciumMg) ||
+                other.calciumMg == calciumMg) &&
+            (identical(other.ironMg, ironMg) || other.ironMg == ironMg) &&
+            (identical(other.vitaminAMcg, vitaminAMcg) ||
+                other.vitaminAMcg == vitaminAMcg) &&
+            (identical(other.vitaminCMg, vitaminCMg) ||
+                other.vitaminCMg == vitaminCMg) &&
+            (identical(other.vitaminDMcg, vitaminDMcg) ||
+                other.vitaminDMcg == vitaminDMcg) &&
             (identical(other.glycemicIndex, glycemicIndex) ||
                 other.glycemicIndex == glycemicIndex) &&
             (identical(other.glycemicIndexCategory, glycemicIndexCategory) ||
@@ -412,7 +511,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     calories,
     protein,
@@ -427,9 +526,14 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
     sodiumMg,
     cholesterolMg,
     potassiumMg,
+    calciumMg,
+    ironMg,
+    vitaminAMcg,
+    vitaminCMg,
+    vitaminDMcg,
     glycemicIndex,
     glycemicIndexCategory,
-  );
+  ]);
 
   /// Create a copy of NutrientsV2
   /// with the given fields replaced by the non-null parameter values.
@@ -460,6 +564,11 @@ abstract class _NutrientsV2 implements NutrientsV2 {
     @JsonKey(name: 'sodium_mg') final double? sodiumMg,
     @JsonKey(name: 'cholesterol_mg') final double? cholesterolMg,
     @JsonKey(name: 'potassium_mg') final double? potassiumMg,
+    @JsonKey(name: 'calcium_mg') final double? calciumMg,
+    @JsonKey(name: 'iron_mg') final double? ironMg,
+    @JsonKey(name: 'vitamin_a_mcg') final double? vitaminAMcg,
+    @JsonKey(name: 'vitamin_c_mg') final double? vitaminCMg,
+    @JsonKey(name: 'vitamin_d_mcg') final double? vitaminDMcg,
     @JsonKey(name: 'glycemic_index') final int? glycemicIndex,
     @JsonKey(name: 'glycemic_index_category')
     final String? glycemicIndexCategory,
@@ -502,6 +611,21 @@ abstract class _NutrientsV2 implements NutrientsV2 {
   @override
   @JsonKey(name: 'potassium_mg')
   double? get potassiumMg;
+  @override
+  @JsonKey(name: 'calcium_mg')
+  double? get calciumMg;
+  @override
+  @JsonKey(name: 'iron_mg')
+  double? get ironMg;
+  @override
+  @JsonKey(name: 'vitamin_a_mcg')
+  double? get vitaminAMcg;
+  @override
+  @JsonKey(name: 'vitamin_c_mg')
+  double? get vitaminCMg;
+  @override
+  @JsonKey(name: 'vitamin_d_mcg')
+  double? get vitaminDMcg;
   @override
   @JsonKey(name: 'glycemic_index')
   int? get glycemicIndex;

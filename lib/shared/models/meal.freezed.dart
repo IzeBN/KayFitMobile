@@ -29,7 +29,6 @@ mixin _$Meal {
   double get carbs => throw _privateConstructorUsedError;
   double? get weight => throw _privateConstructorUsedError;
   String? get emotion => throw _privateConstructorUsedError;
-  @JsonKey(name: 'time')
   String? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'net_carbs')
   double? get netCarbs => throw _privateConstructorUsedError;
@@ -56,6 +55,9 @@ mixin _$Meal {
   double? get vitaminD => throw _privateConstructorUsedError;
   @JsonKey(name: 'vitamin_b12')
   double? get vitaminB12 => throw _privateConstructorUsedError;
+  String? get source => throw _privateConstructorUsedError;
+  @JsonKey(name: 'source_url')
+  String? get sourceUrl => throw _privateConstructorUsedError;
 
   /// Serializes this Meal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -80,7 +82,7 @@ abstract class $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    @JsonKey(name: 'time') String? createdAt,
+    String? createdAt,
     @JsonKey(name: 'net_carbs') double? netCarbs,
     double? fiber,
     double? sugar,
@@ -97,6 +99,8 @@ abstract class $MealCopyWith<$Res> {
     @JsonKey(name: 'vitamin_c') double? vitaminC,
     @JsonKey(name: 'vitamin_d') double? vitaminD,
     @JsonKey(name: 'vitamin_b12') double? vitaminB12,
+    String? source,
+    @JsonKey(name: 'source_url') String? sourceUrl,
   });
 }
 
@@ -140,6 +144,8 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
     Object? vitaminC = freezed,
     Object? vitaminD = freezed,
     Object? vitaminB12 = freezed,
+    Object? source = freezed,
+    Object? sourceUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -243,6 +249,14 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
                 ? _value.vitaminB12
                 : vitaminB12 // ignore: cast_nullable_to_non_nullable
                       as double?,
+            source: freezed == source
+                ? _value.source
+                : source // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            sourceUrl: freezed == sourceUrl
+                ? _value.sourceUrl
+                : sourceUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -266,7 +280,7 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     double carbs,
     double? weight,
     String? emotion,
-    @JsonKey(name: 'time') String? createdAt,
+    String? createdAt,
     @JsonKey(name: 'net_carbs') double? netCarbs,
     double? fiber,
     double? sugar,
@@ -283,6 +297,8 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     @JsonKey(name: 'vitamin_c') double? vitaminC,
     @JsonKey(name: 'vitamin_d') double? vitaminD,
     @JsonKey(name: 'vitamin_b12') double? vitaminB12,
+    String? source,
+    @JsonKey(name: 'source_url') String? sourceUrl,
   });
 }
 
@@ -323,6 +339,8 @@ class __$$MealImplCopyWithImpl<$Res>
     Object? vitaminC = freezed,
     Object? vitaminD = freezed,
     Object? vitaminB12 = freezed,
+    Object? source = freezed,
+    Object? sourceUrl = freezed,
   }) {
     return _then(
       _$MealImpl(
@@ -426,6 +444,14 @@ class __$$MealImplCopyWithImpl<$Res>
             ? _value.vitaminB12
             : vitaminB12 // ignore: cast_nullable_to_non_nullable
                   as double?,
+        source: freezed == source
+            ? _value.source
+            : source // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        sourceUrl: freezed == sourceUrl
+            ? _value.sourceUrl
+            : sourceUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -443,7 +469,7 @@ class _$MealImpl implements _Meal {
     required this.carbs,
     this.weight,
     this.emotion,
-    @JsonKey(name: 'time') this.createdAt,
+    this.createdAt,
     @JsonKey(name: 'net_carbs') this.netCarbs,
     this.fiber,
     this.sugar,
@@ -460,6 +486,8 @@ class _$MealImpl implements _Meal {
     @JsonKey(name: 'vitamin_c') this.vitaminC,
     @JsonKey(name: 'vitamin_d') this.vitaminD,
     @JsonKey(name: 'vitamin_b12') this.vitaminB12,
+    this.source,
+    @JsonKey(name: 'source_url') this.sourceUrl,
   });
 
   factory _$MealImpl.fromJson(Map<String, dynamic> json) =>
@@ -482,7 +510,6 @@ class _$MealImpl implements _Meal {
   @override
   final String? emotion;
   @override
-  @JsonKey(name: 'time')
   final String? createdAt;
   @override
   @JsonKey(name: 'net_carbs')
@@ -525,10 +552,15 @@ class _$MealImpl implements _Meal {
   @override
   @JsonKey(name: 'vitamin_b12')
   final double? vitaminB12;
+  @override
+  final String? source;
+  @override
+  @JsonKey(name: 'source_url')
+  final String? sourceUrl;
 
   @override
   String toString() {
-    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, netCarbs: $netCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, potassium: $potassium, vitaminA: $vitaminA, vitaminC: $vitaminC, vitaminD: $vitaminD, vitaminB12: $vitaminB12)';
+    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, netCarbs: $netCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, potassium: $potassium, vitaminA: $vitaminA, vitaminC: $vitaminC, vitaminD: $vitaminD, vitaminB12: $vitaminB12, source: $source, sourceUrl: $sourceUrl)';
   }
 
   @override
@@ -573,7 +605,10 @@ class _$MealImpl implements _Meal {
             (identical(other.vitaminD, vitaminD) ||
                 other.vitaminD == vitaminD) &&
             (identical(other.vitaminB12, vitaminB12) ||
-                other.vitaminB12 == vitaminB12));
+                other.vitaminB12 == vitaminB12) &&
+            (identical(other.source, source) || other.source == source) &&
+            (identical(other.sourceUrl, sourceUrl) ||
+                other.sourceUrl == sourceUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -605,6 +640,8 @@ class _$MealImpl implements _Meal {
     vitaminC,
     vitaminD,
     vitaminB12,
+    source,
+    sourceUrl,
   ]);
 
   /// Create a copy of Meal
@@ -631,7 +668,7 @@ abstract class _Meal implements Meal {
     required final double carbs,
     final double? weight,
     final String? emotion,
-    @JsonKey(name: 'time') final String? createdAt,
+    final String? createdAt,
     @JsonKey(name: 'net_carbs') final double? netCarbs,
     final double? fiber,
     final double? sugar,
@@ -648,6 +685,8 @@ abstract class _Meal implements Meal {
     @JsonKey(name: 'vitamin_c') final double? vitaminC,
     @JsonKey(name: 'vitamin_d') final double? vitaminD,
     @JsonKey(name: 'vitamin_b12') final double? vitaminB12,
+    final String? source,
+    @JsonKey(name: 'source_url') final String? sourceUrl,
   }) = _$MealImpl;
 
   factory _Meal.fromJson(Map<String, dynamic> json) = _$MealImpl.fromJson;
@@ -669,7 +708,6 @@ abstract class _Meal implements Meal {
   @override
   String? get emotion;
   @override
-  @JsonKey(name: 'time')
   String? get createdAt;
   @override
   @JsonKey(name: 'net_carbs')
@@ -712,6 +750,11 @@ abstract class _Meal implements Meal {
   @override
   @JsonKey(name: 'vitamin_b12')
   double? get vitaminB12;
+  @override
+  String? get source;
+  @override
+  @JsonKey(name: 'source_url')
+  String? get sourceUrl;
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.

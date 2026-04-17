@@ -10,6 +10,7 @@ class IngredientV2 {
   final NutrientsV2 nutrientsPer100g;
   final NutrientsV2 nutrientsTotal;
   final String source;
+  final String? sourceUrl;
   final bool selected;
 
   const IngredientV2({
@@ -18,6 +19,7 @@ class IngredientV2 {
     required this.nutrientsPer100g,
     required this.nutrientsTotal,
     this.source = 'claude',
+    this.sourceUrl,
     this.selected = true,
   });
 
@@ -38,6 +40,7 @@ class IngredientV2 {
       nutrientsPer100g: per100,
       nutrientsTotal: total,
       source: item['source'] as String? ?? 'claude',
+      sourceUrl: item['source_url'] as String?,
     );
   }
 
@@ -56,6 +59,7 @@ class IngredientV2 {
       nutrientsPer100g: per100,
       nutrientsTotal: total,
       source: item['source'] as String? ?? 'claude',
+      sourceUrl: item['source_url'] as String?,
     );
   }
 
@@ -65,6 +69,7 @@ class IngredientV2 {
     NutrientsV2? nutrientsPer100g,
     NutrientsV2? nutrientsTotal,
     String? source,
+    String? sourceUrl,
     bool? selected,
   }) {
     return IngredientV2(
@@ -73,6 +78,7 @@ class IngredientV2 {
       nutrientsPer100g: nutrientsPer100g ?? this.nutrientsPer100g,
       nutrientsTotal: nutrientsTotal ?? this.nutrientsTotal,
       source: source ?? this.source,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
       selected: selected ?? this.selected,
     );
   }
@@ -123,6 +129,14 @@ NutrientsV2 _scaleNutrients(NutrientsV2 per100, double factor) {
         per100.cholesterolMg != null ? per100.cholesterolMg! * factor : null,
     potassiumMg:
         per100.potassiumMg != null ? per100.potassiumMg! * factor : null,
+    calciumMg: per100.calciumMg != null ? per100.calciumMg! * factor : null,
+    ironMg: per100.ironMg != null ? per100.ironMg! * factor : null,
+    vitaminAMcg:
+        per100.vitaminAMcg != null ? per100.vitaminAMcg! * factor : null,
+    vitaminCMg:
+        per100.vitaminCMg != null ? per100.vitaminCMg! * factor : null,
+    vitaminDMcg:
+        per100.vitaminDMcg != null ? per100.vitaminDMcg! * factor : null,
     glycemicIndex: per100.glycemicIndex,
     glycemicIndexCategory: per100.glycemicIndexCategory,
   );

@@ -15,7 +15,7 @@ _$MealImpl _$$MealImplFromJson(Map<String, dynamic> json) => _$MealImpl(
   carbs: (json['carbs'] as num).toDouble(),
   weight: (json['weight'] as num?)?.toDouble(),
   emotion: json['emotion'] as String?,
-  createdAt: json['time'] as String?,
+  createdAt: json['createdAt'] as String?,
   netCarbs: (json['net_carbs'] as num?)?.toDouble(),
   fiber: (json['fiber'] as num?)?.toDouble(),
   sugar: (json['sugar'] as num?)?.toDouble(),
@@ -32,6 +32,8 @@ _$MealImpl _$$MealImplFromJson(Map<String, dynamic> json) => _$MealImpl(
   vitaminC: (json['vitamin_c'] as num?)?.toDouble(),
   vitaminD: (json['vitamin_d'] as num?)?.toDouble(),
   vitaminB12: (json['vitamin_b12'] as num?)?.toDouble(),
+  source: json['source'] as String?,
+  sourceUrl: json['source_url'] as String?,
 );
 
 Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
@@ -44,7 +46,7 @@ Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
       'carbs': instance.carbs,
       'weight': instance.weight,
       'emotion': instance.emotion,
-      'time': instance.createdAt,
+      'createdAt': instance.createdAt,
       'net_carbs': instance.netCarbs,
       'fiber': instance.fiber,
       'sugar': instance.sugar,
@@ -61,4 +63,6 @@ Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
       'vitamin_c': instance.vitaminC,
       'vitamin_d': instance.vitaminD,
       'vitamin_b12': instance.vitaminB12,
+      'source': instance.source,
+      'source_url': instance.sourceUrl,
     };
