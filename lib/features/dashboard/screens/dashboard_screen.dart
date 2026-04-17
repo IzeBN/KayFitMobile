@@ -18,6 +18,7 @@ import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
+import '../../../shared/models/meal.dart';
 
 // SharedPreferences key tracking how many times way-to-goal was opened
 const _kWayToGoalOpenedKey = 'way_to_goal_opened_count';
@@ -245,7 +246,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           child: child,
                         ),
                       ),
-                      child: StatsCard(stats: s),
+                      child: StatsCard(stats: s, meals: meals.valueOrNull),
                     );
                   }
                   if (calc.valueOrNull != null) return const SizedBox.shrink();

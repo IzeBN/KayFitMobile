@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'package:dio/dio.dart';
+import 'barcode_scanner_screen_v2.dart';
 
 enum _InputMode { choose, text, voice, photo }
 enum _LoadingType { none, voice, photo, parsing }
@@ -123,11 +124,19 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
     }
   }
 
+  Future<void> _openBarcodeScanner() async {
+    HapticFeedback.selectionClick();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreenV2()),
+    );
+    if (saved == true && mounted) Navigator.pop(context);
+  }
+
   Future<void> _parseText(String text, String lang,
       {bool manageLoading = true}) async {
     if (manageLoading) setState(() => _loadingType = _LoadingType.parsing);
     try {
-      final resp = await apiDio.post('/api/parse_meal_suggestions',
+      final resp = await apiDio.post('/api/v2/parse_meal_suggestions',
           data: {'text': text, 'language': lang});
       final items = (resp.data['items'] as List<dynamic>)
           .map((e) => e as Map<String, dynamic>)
@@ -237,7 +246,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
         'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
       });
       final resp =
-          await apiDio.post('/api/recognize_photo?language=$lang', data: form);
+          await apiDio.post('/api/v2/recognize_photo?language=$lang', data: form);
       if (!mounted) return;
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
@@ -270,27 +279,47 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
     try {
       final items = _selected.map((i) {
         final s = _suggestions[i];
-        final suggestions = s['suggestions'] as List<dynamic>?;
-        final base = suggestions != null && suggestions.isNotEmpty
-            ? Map<String, dynamic>.from(
-                suggestions[0] as Map<String, dynamic>)
-            : Map<String, dynamic>.from(s);
         final actualWeight = _itemWeights[i] ??
             (s['weight_grams'] as num?)?.toDouble() ??
             100.0;
-        final cal100 = (base['calories_per_100g'] as num?)?.toDouble();
-        if (cal100 != null && actualWeight > 0) {
-          final k = actualWeight / 100.0;
-          base['calories'] = (cal100 * k).roundToDouble();
-          base['protein'] =
-              ((base['protein_per_100g'] as num?)?.toDouble() ?? 0) * k;
-          base['fat'] =
-              ((base['fat_per_100g'] as num?)?.toDouble() ?? 0) * k;
-          base['carbs'] =
-              ((base['carbs_per_100g'] as num?)?.toDouble() ?? 0) * k;
+        // v2 format: nutrients_per_100g is a nested dict
+        final n100 = s['nutrients_per_100g'] as Map<String, dynamic>? ?? {};
+        final k = actualWeight / 100.0;
+        double _scale(String key) =>
+            ((n100[key] as num?)?.toDouble() ?? 0) * k;
+        double? _scaleN(String key) {
+          final v = (n100[key] as num?)?.toDouble();
+          return v != null ? v * k : null;
         }
-        base['weight_grams'] = actualWeight;
-        return base;
+        return <String, dynamic>{
+          'name': s['name'],
+          'weight_grams': actualWeight,
+          'calories': _scale('calories'),
+          'protein': _scale('protein'),
+          'fat': _scale('fat'),
+          'carbs': _scale('carbs'),
+          'fiber': _scaleN('fiber'),
+          'sugar': _scaleN('sugar'),
+          'sugar_alcohols': _scaleN('sugar_alcohols'),
+          'net_carbs': _scaleN('net_carbs'),
+          'saturated_fat': _scaleN('saturated_fat'),
+          'glycemic_index': n100['glycemic_index'],
+          'sodium_mg': _scaleN('sodium_mg'),
+          'potassium_mg': _scaleN('potassium_mg'),
+          'calcium_mg': _scaleN('calcium_mg'),
+          'iron_mg': _scaleN('iron_mg'),
+          'magnesium_mg': _scaleN('magnesium_mg'),
+          'phosphorus_mg': _scaleN('phosphorus_mg'),
+          'zinc_mg': _scaleN('zinc_mg'),
+          'selenium_mcg': _scaleN('selenium_mcg'),
+          'manganese_mg': _scaleN('manganese_mg'),
+          'copper_mg': _scaleN('copper_mg'),
+          'cholesterol_mg': _scaleN('cholesterol_mg'),
+          'vitamin_c_mg': _scaleN('vitamin_c_mg'),
+          'vitamin_d_mcg': _scaleN('vitamin_d_mcg'),
+          'source': s['source'],
+          'source_url': s['source_url'],
+        };
       }).toList();
 
       await apiDio.post('/api/meals/add_selected', data: {
@@ -427,6 +456,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                       _switchMode(_InputMode.photo);
                                       _pickAndRecognizePhoto(source);
                                     },
+                                    onBarcode: _openBarcodeScanner,
                                   )
                                 : _mode == _InputMode.text
                                     ? _TextView(
@@ -439,14 +469,16 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                           _parseText(_textController.text, _lang);
                                         },
                                       )
-                                    : _VoiceView(
-                                        isRecording: _isRecording,
-                                        recordStart: _recordStart,
-                                        l10n: l10n,
-                                        onToggle: _isRecording
-                                            ? _stopRecordingAndTranscribe
-                                            : _startRecording,
-                                      ),
+                                    : _mode == _InputMode.photo
+                                        ? const SizedBox.shrink()
+                                        : _VoiceView(
+                                            isRecording: _isRecording,
+                                            recordStart: _recordStart,
+                                            l10n: l10n,
+                                            onToggle: _isRecording
+                                                ? _stopRecordingAndTranscribe
+                                                : _startRecording,
+                                          ),
                       ),
                     ),
                   ),
@@ -545,6 +577,7 @@ class _ChooseView extends StatefulWidget {
   final VoidCallback onText;
   final VoidCallback onVoice;
   final VoidCallback onPhoto;
+  final VoidCallback onBarcode;
 
   const _ChooseView({
     required this.l10n,
@@ -552,6 +585,7 @@ class _ChooseView extends StatefulWidget {
     required this.onText,
     required this.onVoice,
     required this.onPhoto,
+    required this.onBarcode,
   });
 
   @override
@@ -582,42 +616,52 @@ class _ChooseViewState extends State<_ChooseView>
     final l10n = widget.l10n;
     final ru = widget.isRu;
 
+    const unifiedGradient = [Color(0xFF6366F1), Color(0xFF8B5CF6)];
+    const unifiedShadow = Color(0xFF6366F1);
+    const unifiedBg = Color(0xFFF5F3FF);
+
     final methods = [
       _MethodData(
         icon: Icons.camera_alt_rounded,
-        gradient: const [Color(0xFF7C3AED), Color(0xFFA855F7)],
-        shadowColor: const Color(0xFF7C3AED),
-        bgColor: const Color(0xFFF5F3FF),
-        title: ru ? 'Фото блюда' : 'Photo',
+        gradient: unifiedGradient,
+        shadowColor: unifiedShadow,
+        bgColor: unifiedBg,
+        title: l10n.addMeal_photo,
         desc: ru
             ? 'Сфотографируй — AI распознает состав за 5 сек'
             : 'Take a photo — AI identifies macros in 5 sec',
-        badge: '📸',
         onTap: widget.onPhoto,
       ),
       _MethodData(
         icon: Icons.mic_rounded,
-        gradient: const [Color(0xFF059669), Color(0xFF10B981)],
-        shadowColor: const Color(0xFF059669),
-        bgColor: const Color(0xFFF0FDF4),
-        title: ru ? 'Голосом' : 'By voice',
+        gradient: unifiedGradient,
+        shadowColor: unifiedShadow,
+        bgColor: unifiedBg,
+        title: l10n.addMeal_voice,
         desc: ru
             ? '«Съел борщ 300 мл» — просто скажи'
             : 'Say "I ate soup 300ml" — that\'s it',
-        badge: '🎤',
         onTap: widget.onVoice,
       ),
       _MethodData(
         icon: Icons.edit_rounded,
-        gradient: const [Color(0xFFEA580C), Color(0xFFF97316)],
-        shadowColor: const Color(0xFFEA580C),
-        bgColor: const Color(0xFFFFF7ED),
-        title: ru ? 'Текстом' : 'Type it',
+        gradient: unifiedGradient,
+        shadowColor: unifiedShadow,
+        bgColor: unifiedBg,
+        title: l10n.addMeal_text,
         desc: ru
             ? 'Напиши что съел — AI посчитает КБЖУ'
             : 'Describe your meal — AI counts macros',
-        badge: '✍️',
         onTap: widget.onText,
+      ),
+      _MethodData(
+        icon: Icons.qr_code_scanner_rounded,
+        gradient: unifiedGradient,
+        shadowColor: unifiedShadow,
+        bgColor: unifiedBg,
+        title: l10n.addMeal_barcode,
+        desc: l10n.addMeal_barcode_desc,
+        onTap: widget.onBarcode,
       ),
     ];
 
@@ -658,7 +702,6 @@ class _MethodData {
   final Color bgColor;
   final String title;
   final String desc;
-  final String badge;
   final VoidCallback onTap;
 
   const _MethodData({
@@ -668,7 +711,6 @@ class _MethodData {
     required this.bgColor,
     required this.title,
     required this.desc,
-    required this.badge,
     required this.onTap,
   });
 }
@@ -755,23 +797,14 @@ class _MethodCardState extends State<_MethodCard>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            d.badge,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            d.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.text,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        d.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -981,12 +1014,8 @@ class _VoiceViewState extends State<_VoiceView>
 
           Text(
             recording
-                ? (Localizations.localeOf(context).languageCode == 'ru'
-                    ? 'Нажмите ещё раз чтобы остановить'
-                    : 'Tap again to stop')
-                : (Localizations.localeOf(context).languageCode == 'ru'
-                    ? 'Нажмите чтобы начать запись'
-                    : 'Tap to start recording'),
+                ? l10n.addMeal_voice_tap_stop
+                : l10n.addMeal_voice_tap_start,
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textMuted,
@@ -1231,7 +1260,7 @@ class _TextViewState extends State<_TextView> {
                             color: Colors.white, size: 18),
                         const SizedBox(width: 8),
                         Text(
-                          ru ? 'Распознать с помощью AI' : 'Recognize with AI',
+                          l10n.addMeal_recognize_ai,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
@@ -1306,16 +1335,12 @@ class _SuggestionsViewState extends State<_SuggestionsView>
     final l10n = widget.l10n;
     final canAdd = widget.selected.isNotEmpty && widget.emotion != null;
 
-    // Calculate totals for selected
+    // Calculate totals for selected (v2 format: nutrients_per_100g)
     double totalCal = 0;
     for (final i in widget.selected) {
       final s = widget.suggestions[i];
-      final sug = (s['suggestions'] as List<dynamic>?)?.isNotEmpty == true
-          ? s['suggestions'][0] as Map<String, dynamic>
-          : s;
-      final cal100 = (sug['calories_per_100g'] as num?)?.toDouble() ??
-          (sug['calories'] as num?)?.toDouble() ??
-          0.0;
+      final n100 = s['nutrients_per_100g'] as Map<String, dynamic>?;
+      final cal100 = (n100?['calories'] as num?)?.toDouble() ?? 0.0;
       final weight = widget.itemWeights[i] ?? 100.0;
       totalCal += cal100 > 0 ? cal100 * weight / 100 : 0;
     }
@@ -1395,9 +1420,11 @@ class _SuggestionsViewState extends State<_SuggestionsView>
 
         const SizedBox(height: 14),
 
-        // Emotion section
+        // Meal type section
         Text(
-          l10n.addMeal_emotionTitle,
+          Localizations.localeOf(context).languageCode == 'ru'
+              ? 'Тип приёма пищи'
+              : 'Meal type',
           style: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 15,
@@ -1405,7 +1432,7 @@ class _SuggestionsViewState extends State<_SuggestionsView>
           ),
         ),
         const SizedBox(height: 10),
-        _AnimatedEmotionPicker(
+        _MealTypePicker(
           selected: widget.emotion,
           onSelect: widget.onEmotionSelect,
         ),
@@ -1499,6 +1526,7 @@ class _MealResultCard extends StatefulWidget {
 
 class _MealResultCardState extends State<_MealResultCard> {
   late final TextEditingController _wCtrl;
+  bool _expanded = false;
 
   @override
   void initState() {
@@ -1518,18 +1546,25 @@ class _MealResultCardState extends State<_MealResultCard> {
     final item = widget.item;
     final l10n = widget.l10n;
     final name = item['name'] as String? ?? '';
-    final sug = (item['suggestions'] as List<dynamic>?)?.isNotEmpty == true
-        ? item['suggestions'][0] as Map<String, dynamic>
-        : item;
-    final cal100 = (sug['calories_per_100g'] as num?)?.toDouble() ??
-        (sug['calories'] as num?)?.toDouble() ??
-        0.0;
+    // v2 response: nutrients_per_100g dict
+    final n100 = item['nutrients_per_100g'] as Map<String, dynamic>?;
+    final cal100 = (n100?['calories'] as num?)?.toDouble() ?? 0.0;
     final currentWeight = widget.weight ?? 100.0;
     final displayCal = cal100 > 0
         ? (cal100 * currentWeight / 100).toStringAsFixed(0)
-        : (sug['calories'] as num?)?.toStringAsFixed(0) ?? '?';
+        : '?';
 
     final sel = widget.selected;
+
+    // Nutrition per 100g for expanded row
+    final protein100 = (n100?['protein'] as num?)?.toDouble();
+    final fat100 = (n100?['fat'] as num?)?.toDouble();
+    final carbs100 = (n100?['carbs'] as num?)?.toDouble();
+    final fiber100 = (n100?['fiber'] as num?)?.toDouble();
+
+    final hasNutrition = protein100 != null || fat100 != null || carbs100 != null;
+
+    String _fmt(double? v) => v != null ? v.toStringAsFixed(1) : '?';
 
     return GestureDetector(
       onTap: widget.onToggle,
@@ -1547,6 +1582,7 @@ class _MealResultCardState extends State<_MealResultCard> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -1595,7 +1631,7 @@ class _MealResultCardState extends State<_MealResultCard> {
                   ),
                   // Weight field
                   SizedBox(
-                    width: 80,
+                    width: 72,
                     height: 36,
                     child: TextField(
                       controller: _wCtrl,
@@ -1608,7 +1644,7 @@ class _MealResultCardState extends State<_MealResultCard> {
                             fontSize: 12, color: AppColors.textMuted),
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
+                            horizontal: 8, vertical: 8),
                         filled: true,
                         fillColor: sel
                             ? Colors.white
@@ -1636,8 +1672,99 @@ class _MealResultCardState extends State<_MealResultCard> {
                           widget.onWeightChange(double.tryParse(v)),
                     ),
                   ),
+                  // Expand chevron
+                  if (hasNutrition) ...[
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () => setState(() => _expanded = !_expanded),
+                      behavior: HitTestBehavior.opaque,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: AnimatedRotation(
+                          turns: _expanded ? 0.5 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: const Icon(
+                            Icons.expand_more_rounded,
+                            size: 20,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
+              // Expandable nutrition detail row
+              if (hasNutrition)
+                AnimatedCrossFade(
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: sel
+                            ? Colors.white.withValues(alpha: 0.6)
+                            : AppColors.bg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${l10n.macro_protein[0]}: ${_fmt(protein100)}${l10n.macro_g}',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${l10n.macro_fat[0]}: ${_fmt(fat100)}${l10n.macro_g}',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${l10n.macro_carbs[0]}: ${_fmt(carbs100)}${l10n.macro_g}',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (fiber100 != null) ...[
+                            const SizedBox(width: 10),
+                            Text(
+                              'F: ${_fmt(fiber100)}${l10n.macro_g}',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                color: AppColors.textMuted,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                          const Spacer(),
+                          Text(
+                            '/100${l10n.macro_g}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  crossFadeState: _expanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 200),
+                ),
             ],
           ),
         ),
@@ -1647,62 +1774,86 @@ class _MealResultCardState extends State<_MealResultCard> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Animated emotion picker — scrollable row of big emoji
+// Meal type picker — icon-based selector replacing emotion emoji row
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _emotions = [
-  ('😊', 'happy'),
-  ('😌', 'calm'),
-  ('😴', 'tired'),
-  ('🤤', 'hungry'),
-  ('😔', 'sad'),
-  ('😰', 'anxious'),
-  ('😑', 'bored'),
-  ('😠', 'angry'),
-  ('😟', 'worried'),
-  ('😐', 'neutral'),
-  ('💬', 'other'),
+const _mealTypes = [
+  (Icons.wb_sunny_outlined, 'breakfast'),
+  (Icons.restaurant_menu_rounded, 'lunch'),
+  (Icons.dinner_dining_rounded, 'dinner'),
+  (Icons.cookie_outlined, 'snack'),
+  (Icons.more_horiz_rounded, 'other'),
 ];
 
-class _AnimatedEmotionPicker extends StatelessWidget {
+String _mealTypeLabel(String type, bool isRu) {
+  switch (type) {
+    case 'breakfast':
+      return isRu ? 'Завтрак' : 'Breakfast';
+    case 'lunch':
+      return isRu ? 'Обед' : 'Lunch';
+    case 'dinner':
+      return isRu ? 'Ужин' : 'Dinner';
+    case 'snack':
+      return isRu ? 'Перекус' : 'Snack';
+    default:
+      return isRu ? 'Другое' : 'Other';
+  }
+}
+
+class _MealTypePicker extends StatelessWidget {
   final String? selected;
   final ValueChanged<String> onSelect;
 
-  const _AnimatedEmotionPicker(
-      {required this.selected, required this.onSelect});
+  const _MealTypePicker({required this.selected, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
     return SizedBox(
-      height: 68,
+      height: 76,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: _emotions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemCount: _mealTypes.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, i) {
-          final e = _emotions[i];
-          final sel = selected == e.$2;
+          final (icon, value) = _mealTypes[i];
+          final sel = selected == value;
           return GestureDetector(
-            onTap: () => onSelect(e.$2),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutBack,
-              width: sel ? 64 : 56,
-              height: sel ? 64 : 56,
-              decoration: BoxDecoration(
-                color: sel ? AppColors.accentSoft : AppColors.bg,
-                borderRadius: BorderRadius.circular(sel ? 18 : 14),
-                border: Border.all(
-                  color: sel ? AppColors.accent : AppColors.border,
-                  width: sel ? 2 : 1,
+            onTap: () => onSelect(value),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: sel ? AppColors.accentSoft : AppColors.bg,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: sel ? AppColors.accent : AppColors.border,
+                      width: sel ? 2 : 1,
+                    ),
+                    boxShadow: sel ? AppShadow.sm : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    icon,
+                    size: 24,
+                    color: sel ? AppColors.accent : AppColors.textMuted,
+                  ),
                 ),
-                boxShadow: sel ? AppShadow.sm : null,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                e.$1,
-                style: TextStyle(fontSize: sel ? 28 : 24),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  _mealTypeLabel(value, isRu),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
+                    color: sel ? AppColors.accent : AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -1813,9 +1964,7 @@ class _RecognizingOverlayState extends State<_RecognizingOverlay>
           ),
           const SizedBox(height: 6),
           Text(
-            Localizations.localeOf(context).languageCode == 'ru'
-                ? 'AI анализирует данные...'
-                : 'AI is analyzing...',
+            AppLocalizations.of(context)!.addMeal_ai_analyzing,
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textMuted,
@@ -1890,9 +2039,7 @@ class _SavingOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                Localizations.localeOf(context).languageCode == 'ru'
-                    ? 'Сохраняем...'
-                    : 'Saving...',
+                AppLocalizations.of(context)!.addMeal_saving,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   color: AppColors.text,

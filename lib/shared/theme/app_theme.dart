@@ -65,6 +65,29 @@ class AppShadow {
       ];
 }
 
+/// Semantic colors for the nutrient detail sheet and recognition result sheet.
+class NutrientColors {
+  // Layout
+  static const bg       = Color(0xFFF9FAFB);
+  static const border   = Color(0xFFE5E7EB);
+  static const secondary  = Color(0xFF6B7280);   // muted text
+  static const tertiary   = Color(0xFF9CA3AF);   // extra muted
+
+  // Macros
+  static const kcal          = Color(0xFFEA580C); // orange — energy
+  static const protein       = Color(0xFF16A34A); // green
+  static const proteinSoft   = Color(0xFFDCFCE7);
+  static const fatGood       = Color(0xFFF59E0B); // amber — fat
+  static const fatGoodSoft   = Color(0xFFFEF3C7);
+  static const fatBad        = Color(0xFFDC2626); // red — saturated
+  static const netCarbs      = Color(0xFF6366F1); // indigo — carbs
+  static const netCarbsSoft  = Color(0xFFEEF2FF);
+
+  // Sub-macros
+  static const fiber      = Color(0xFF0EA5E9); // sky blue
+  static const sugar      = Color(0xFFF97316); // orange-red
+}
+
 class AppTheme {
   static ThemeData get light => ThemeData(
         useMaterial3: true,

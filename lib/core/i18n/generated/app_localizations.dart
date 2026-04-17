@@ -1682,6 +1682,84 @@ abstract class AppLocalizations {
   /// **'Настройки'**
   String get addMeal_open_settings;
 
+  /// No description provided for @addMeal_barcode.
+  ///
+  /// In ru, this message translates to:
+  /// **'Штрихкод'**
+  String get addMeal_barcode;
+
+  /// No description provided for @addMeal_barcode_desc.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сканируй — найдём продукт мгновенно'**
+  String get addMeal_barcode_desc;
+
+  /// No description provided for @addMeal_voice_tap_stop.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нажмите ещё раз чтобы остановить'**
+  String get addMeal_voice_tap_stop;
+
+  /// No description provided for @addMeal_voice_tap_start.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нажмите чтобы начать запись'**
+  String get addMeal_voice_tap_start;
+
+  /// No description provided for @addMeal_recognize_ai.
+  ///
+  /// In ru, this message translates to:
+  /// **'Распознать с помощью AI'**
+  String get addMeal_recognize_ai;
+
+  /// No description provided for @addMeal_saving.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохраняем...'**
+  String get addMeal_saving;
+
+  /// No description provided for @addMeal_ai_analyzing.
+  ///
+  /// In ru, this message translates to:
+  /// **'AI анализирует данные...'**
+  String get addMeal_ai_analyzing;
+
+  /// No description provided for @barcode_scan_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Наведите камеру на штрихкод'**
+  String get barcode_scan_hint;
+
+  /// No description provided for @barcode_loading.
+  ///
+  /// In ru, this message translates to:
+  /// **'Определяем продукт...'**
+  String get barcode_loading;
+
+  /// No description provided for @barcode_manual_btn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ввести вручную'**
+  String get barcode_manual_btn;
+
+  /// No description provided for @barcode_manual_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введите штрихкод'**
+  String get barcode_manual_title;
+
+  /// No description provided for @barcode_search_btn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Найти'**
+  String get barcode_search_btn;
+
+  /// No description provided for @barcode_not_found.
+  ///
+  /// In ru, this message translates to:
+  /// **'Продукт не найден'**
+  String get barcode_not_found;
+
   /// No description provided for @settings_privacy_policy.
   ///
   /// In ru, this message translates to:

@@ -3,13 +3,13 @@ import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../shared/models/ingredient_v2.dart';
 import '../../../shared/models/nutrients_v2.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/utils/nutrient_parser.dart';
 import 'recognition_result_sheet_v2.dart';
 
 // ── State machine ─────────────────────────────────────────────────────────────
@@ -87,10 +87,11 @@ class _BarcodeScannerScreenV2State extends State<BarcodeScannerScreenV2>
       );
       final data = resp.data;
       if (data == null) {
-        final lang = mounted
-            ? Localizations.localeOf(context).languageCode
-            : 'ru';
-        throw Exception(lang == 'ru' ? 'Пустой ответ сервера' : 'Empty server response');
+        throw Exception(mounted
+            ? (Localizations.localeOf(context).languageCode == 'ru'
+                ? 'Пустой ответ сервера'
+                : 'Empty server response')
+            : 'Empty server response');
       }
 
       if (data['error'] != null) {
@@ -102,24 +103,34 @@ class _BarcodeScannerScreenV2State extends State<BarcodeScannerScreenV2>
         return;
       }
 
-      // Parse flat v1 fields → Ingredient → wrap into IngredientV2
-      final ing = ingredientFromJson(data);
+      // Parse barcode response — all values are per 100g
+      double _d(String key) => (data[key] as num?)?.toDouble() ?? 0.0;
+      double? _dn(String key) => (data[key] as num?)?.toDouble();
+
       final nutrients = NutrientsV2(
-        calories: ing.calories,
-        protein: ing.protein,
-        fat: ing.fat,
-        carbs: ing.carbs,
-        fiber: ing.fiber > 0 ? ing.fiber : null,
-        sugarAlcohols: ing.sugarAlcohols > 0 ? ing.sugarAlcohols : null,
-        netCarbs: ing.netCarbs > 0 ? ing.netCarbs : null,
-        saturatedFat: ing.saturatedFat > 0 ? ing.saturatedFat : null,
+        calories: _d('calories'),
+        protein: _d('protein'),
+        fat: _d('fat'),
+        carbs: _d('carbs'),
+        fiber: _dn('fiber'),
+        saturatedFat: _dn('saturated_fat'),
+        sodiumMg: _dn('sodium'),
+        potassiumMg: _dn('potassium'),
+        cholesterolMg: _dn('cholesterol'),
+        ironMg: _dn('iron'),
+        calciumMg: _dn('calcium'),
+        vitaminCMg: _dn('vitamin_c'),
+        vitaminDMcg: _dn('vitamin_d'),
       );
+      final productName = (data['name'] as String?)?.isNotEmpty == true
+          ? data['name'] as String
+          : (data['brand_name'] as String? ?? 'Product');
       final ingV2 = IngredientV2(
-        name: ing.name,
-        weightGrams: ing.weightGrams,
+        name: productName,
+        weightGrams: (data['serving_size'] as num?)?.toDouble() ?? 100.0,
         nutrientsPer100g: nutrients,
         nutrientsTotal: nutrients,
-        source: 'barcode',
+        source: data['source'] as String? ?? 'barcode',
       );
 
       if (!mounted) return;
@@ -133,7 +144,7 @@ class _BarcodeScannerScreenV2State extends State<BarcodeScannerScreenV2>
           minChildSize: 0.5,
           maxChildSize: 0.95,
           builder: (_, scrollController) => RecognitionResultSheetV2(
-            dishName: ing.name,
+            dishName: productName,
             ingredients: [ingV2],
           ),
         ),
@@ -147,8 +158,8 @@ class _BarcodeScannerScreenV2State extends State<BarcodeScannerScreenV2>
       }
     } on DioException catch (e) {
       if (!mounted) return;
-      final lang = Localizations.localeOf(context).languageCode;
-      final notFound = lang == 'ru' ? 'Продукт не найден' : 'Product not found';
+      final l10n = AppLocalizations.of(context)!;
+      final notFound = l10n.barcode_not_found;
       final msg = (e.response?.data is Map)
           ? ((e.response?.data as Map)['detail'] as String? ?? notFound)
           : notFound;
@@ -158,9 +169,10 @@ class _BarcodeScannerScreenV2State extends State<BarcodeScannerScreenV2>
       });
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _state = _ScanState.error;
-        _errorText = 'Ошибка: $e';
+        _errorText = '${l10n.common_error}: $e';
       });
     }
   }
@@ -499,11 +511,11 @@ class _TopBar extends StatelessWidget {
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Сканер штрихкода',
+              AppLocalizations.of(context)!.addMeal_barcode,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -539,20 +551,21 @@ class _StatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (state) {
-      _ScanState.scanning => const Text(
-          'Наведите камеру на штрихкод',
+      _ScanState.scanning => Text(
+          l10n.barcode_scan_hint,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
         ),
-      _ScanState.loading => const Text(
-          'Определяем продукт...',
+      _ScanState.loading => Text(
+          l10n.barcode_loading,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF38BDF8),
             fontSize: 15,
             fontWeight: FontWeight.w500,
@@ -581,9 +594,9 @@ class _StatusText extends StatelessWidget {
                   border: Border.all(
                       color: Colors.white.withValues(alpha: 0.3)),
                 ),
-                child: const Text(
-                  'Попробовать снова',
-                  style: TextStyle(
+                child: Text(
+                  l10n.common_retry,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -621,9 +634,9 @@ class _ManualEntryButton extends StatelessWidget {
                   Border.all(color: Colors.white.withValues(alpha: 0.25)),
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'Ввести вручную',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context)!.barcode_manual_btn,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -672,9 +685,9 @@ class _ManualEntrySheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Введите штрихкод',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.barcode_manual_title,
+            style: const TextStyle(
               color: AppColors.text,
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -741,9 +754,9 @@ class _ManualEntrySheet extends StatelessWidget {
                 final trimmed = controller.text.trim();
                 if (trimmed.isNotEmpty) onSearch(trimmed);
               },
-              child: const Text(
-                'Найти',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.barcode_search_btn,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),

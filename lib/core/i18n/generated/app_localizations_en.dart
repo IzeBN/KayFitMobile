@@ -847,6 +847,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMeal_open_settings => 'Settings';
 
   @override
+  String get addMeal_barcode => 'Barcode';
+
+  @override
+  String get addMeal_barcode_desc => 'Scan — find product instantly';
+
+  @override
+  String get addMeal_voice_tap_stop => 'Tap again to stop';
+
+  @override
+  String get addMeal_voice_tap_start => 'Tap to start recording';
+
+  @override
+  String get addMeal_recognize_ai => 'Recognize with AI';
+
+  @override
+  String get addMeal_saving => 'Saving...';
+
+  @override
+  String get addMeal_ai_analyzing => 'AI is analyzing...';
+
+  @override
+  String get barcode_scan_hint => 'Point the camera at a barcode';
+
+  @override
+  String get barcode_loading => 'Looking up product...';
+
+  @override
+  String get barcode_manual_btn => 'Enter manually';
+
+  @override
+  String get barcode_manual_title => 'Enter barcode';
+
+  @override
+  String get barcode_search_btn => 'Search';
+
+  @override
+  String get barcode_not_found => 'Product not found';
+
+  @override
   String get settings_privacy_policy => 'Privacy Policy';
 
   @override

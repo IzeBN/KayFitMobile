@@ -436,26 +436,55 @@ class _WeightChart extends StatelessWidget {
     final targetW = calc.targetWeight;
     final deficit = calc.tdee - calc.targetCalories;
 
-    if (calc.daysToGoal != null && targetW != null) {
-      final days = calc.daysToGoal!.toDouble();
-      final totalKgLoss = deficit > 0 ? (deficit * days / 7700.0) : 0.0;
-      final startW = targetW + totalKgLoss;
-      const steps = 6;
-      return List.generate(steps + 1, (i) {
-        final t = i / steps;
-        return FlSpot(days * t, startW - totalKgLoss * t);
-      });
-    }
+    if (deficit > 0) {
+      // Weight loss scenario
+      if (calc.daysToGoal != null && targetW != null) {
+        final days = calc.daysToGoal!.toDouble();
+        final totalKgLoss = deficit * days / 7700.0;
+        final startW = targetW + totalKgLoss;
+        const steps = 6;
+        return List.generate(steps + 1, (i) {
+          final t = i / steps;
+          return FlSpot(days * t, startW - totalKgLoss * t);
+        });
+      }
 
-    if (targetW != null && deficit > 0) {
-      const projDays = 90.0;
-      final totalKgLoss = deficit * projDays / 7700.0;
-      final startW = targetW + totalKgLoss;
-      const steps = 6;
-      return List.generate(steps + 1, (i) {
-        final t = i / steps;
-        return FlSpot(projDays * t, startW - totalKgLoss * t);
-      });
+      if (targetW != null) {
+        const projDays = 90.0;
+        final totalKgLoss = deficit * projDays / 7700.0;
+        final startW = targetW + totalKgLoss;
+        const steps = 6;
+        return List.generate(steps + 1, (i) {
+          final t = i / steps;
+          return FlSpot(projDays * t, startW - totalKgLoss * t);
+        });
+      }
+    } else {
+      // Weight gain / muscle surplus scenario
+      final surplus = calc.targetCalories - calc.tdee;
+      if (surplus > 0) {
+        if (calc.daysToGoal != null && targetW != null) {
+          final days = calc.daysToGoal!.toDouble();
+          final totalKgGain = surplus * days / 7700.0;
+          final startW = targetW - totalKgGain;
+          const steps = 6;
+          return List.generate(steps + 1, (i) {
+            final t = i / steps;
+            return FlSpot(days * t, startW + totalKgGain * t);
+          });
+        }
+
+        if (targetW != null) {
+          const projDays = 90.0;
+          final totalKgGain = surplus * projDays / 7700.0;
+          final startW = targetW - totalKgGain;
+          const steps = 6;
+          return List.generate(steps + 1, (i) {
+            final t = i / steps;
+            return FlSpot(projDays * t, startW + totalKgGain * t);
+          });
+        }
+      }
     }
 
     return [];
@@ -466,9 +495,17 @@ class _WeightChart extends StatelessWidget {
     final spots = _buildSpots();
     if (spots.isEmpty) return const SizedBox.shrink();
 
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final isGain = calc.targetCalories > calc.tdee;
+    final lineColor = isGain ? AppColors.accent : OBColors.pink;
+
     final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
     final maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
     final yPad = (maxY - minY).clamp(0.5, double.infinity) * 0.2;
+
+    final chartTitle = isGain
+        ? (isRu ? 'Прогноз набора массы' : 'Muscle gain forecast')
+        : l10n.wg_weight_forecast;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 18, 18, 12),
@@ -482,7 +519,7 @@ class _WeightChart extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 12),
             child: Text(
-              l10n.wg_weight_forecast,
+              chartTitle,
               style: const TextStyle(
                   fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
             ),
@@ -542,7 +579,7 @@ class _WeightChart extends StatelessWidget {
                   LineChartBarData(
                     spots: spots,
                     isCurved: true,
-                    color: OBColors.pink,
+                    color: lineColor,
                     barWidth: 3,
                     dotData: FlDotData(
                       show: true,
@@ -550,7 +587,7 @@ class _WeightChart extends StatelessWidget {
                           spot.x == spots.first.x || spot.x == spots.last.x,
                       getDotPainter: (a, b, c, d) => FlDotCirclePainter(
                         radius: 4,
-                        color: OBColors.pink,
+                        color: lineColor,
                         strokeWidth: 2,
                         strokeColor: Colors.white,
                       ),
@@ -561,8 +598,8 @@ class _WeightChart extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          OBColors.pink.withValues(alpha: 0.2),
-                          OBColors.pink.withValues(alpha: 0.0),
+                          lineColor.withValues(alpha: 0.2),
+                          lineColor.withValues(alpha: 0.0),
                         ],
                       ),
                     ),

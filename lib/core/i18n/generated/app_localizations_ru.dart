@@ -847,6 +847,45 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addMeal_open_settings => 'Настройки';
 
   @override
+  String get addMeal_barcode => 'Штрихкод';
+
+  @override
+  String get addMeal_barcode_desc => 'Сканируй — найдём продукт мгновенно';
+
+  @override
+  String get addMeal_voice_tap_stop => 'Нажмите ещё раз чтобы остановить';
+
+  @override
+  String get addMeal_voice_tap_start => 'Нажмите чтобы начать запись';
+
+  @override
+  String get addMeal_recognize_ai => 'Распознать с помощью AI';
+
+  @override
+  String get addMeal_saving => 'Сохраняем...';
+
+  @override
+  String get addMeal_ai_analyzing => 'AI анализирует данные...';
+
+  @override
+  String get barcode_scan_hint => 'Наведите камеру на штрихкод';
+
+  @override
+  String get barcode_loading => 'Определяем продукт...';
+
+  @override
+  String get barcode_manual_btn => 'Ввести вручную';
+
+  @override
+  String get barcode_manual_title => 'Введите штрихкод';
+
+  @override
+  String get barcode_search_btn => 'Найти';
+
+  @override
+  String get barcode_not_found => 'Продукт не найден';
+
+  @override
   String get settings_privacy_policy => 'Политика конфиденциальности';
 
   @override

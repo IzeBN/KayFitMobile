@@ -123,7 +123,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _Step.weight,
       _Step.training,
       if (_goals.contains('lose_weight')) _Step.weight_loss_info,
-      if (_goals.contains('lose_weight')) _Step.calc_preview,
+      if (_goals.contains('lose_weight') || _goals.contains('gain_muscle'))
+        _Step.calc_preview,
       _Step.info_1,
       _Step.info_2,
       _Step.info_3,
@@ -1858,35 +1859,75 @@ class _CalcPreviewStep extends StatelessWidget {
     required this.isRu,
   });
 
+  bool get _isGain => preview.targetCalories > preview.tdee;
+
   List<FlSpot> _buildSpots() {
     final deficit = preview.tdee - preview.targetCalories;
-    if (deficit <= 0) {
-      return [const FlSpot(0, 0), const FlSpot(12, 0)];
+    if (deficit > 0) {
+      // Weight loss
+      final weeklyLoss = (deficit * 7) / 7700;
+      final totalLoss = (currentWeight - targetWeight).abs();
+      final weeksNeeded = totalLoss > 0
+          ? (totalLoss / weeklyLoss).clamp(4.0, 20.0)
+          : 12.0;
+      final spots = <FlSpot>[];
+      for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
+        final lost = (weeklyLoss * w).clamp(0.0, totalLoss);
+        spots.add(FlSpot(w, currentWeight - lost));
+      }
+      spots.add(FlSpot(weeksNeeded, targetWeight));
+      return spots;
+    } else {
+      // Weight gain / surplus
+      final surplus = preview.targetCalories - preview.tdee;
+      if (surplus <= 0) {
+        return [FlSpot(0, currentWeight), FlSpot(12, currentWeight)];
+      }
+      final weeklyGain = (surplus * 7) / 7700;
+      final totalGain = (targetWeight - currentWeight).abs();
+      final weeksNeeded = totalGain > 0
+          ? (totalGain / weeklyGain).clamp(4.0, 20.0)
+          : 12.0;
+      final spots = <FlSpot>[];
+      for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
+        final gained = (weeklyGain * w).clamp(0.0, totalGain);
+        spots.add(FlSpot(w, currentWeight + gained));
+      }
+      spots.add(FlSpot(weeksNeeded, targetWeight));
+      return spots;
     }
-    final weeklyLoss = (deficit * 7) / 7700;
-    final totalLoss = currentWeight - targetWeight;
-    final weeksNeeded = (totalLoss / weeklyLoss).clamp(4.0, 20.0);
-    final spots = <FlSpot>[];
-    for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
-      final lost = (weeklyLoss * w).clamp(0.0, totalLoss);
-      spots.add(FlSpot(w, currentWeight - lost));
-    }
-    spots.add(FlSpot(weeksNeeded, targetWeight));
-    return spots;
   }
 
   @override
   Widget build(BuildContext context) {
+    final gain = _isGain;
     final kcal = preview.targetCalories.toStringAsFixed(0);
     final protein = preview.protein.toStringAsFixed(0);
     final fat = preview.fat.toStringAsFixed(0);
     final carbs = preview.carbs.toStringAsFixed(0);
     final spots = _buildSpots();
-    final totalLoss = (currentWeight - targetWeight).abs();
+    final totalDelta = (currentWeight - targetWeight).abs();
     final deficit = preview.tdee - preview.targetCalories;
-    final weeksNeeded = deficit > 0
-        ? ((totalLoss / ((deficit * 7) / 7700)).clamp(4.0, 20.0)).round()
+    final surplus = preview.targetCalories - preview.tdee;
+    final weeklyChange = gain
+        ? (surplus * 7) / 7700
+        : (deficit > 0 ? (deficit * 7) / 7700 : 1.0);
+    final weeksNeeded = totalDelta > 0
+        ? ((totalDelta / weeklyChange).clamp(4.0, 20.0)).round()
         : 12;
+
+    final planTitle = gain
+        ? (isRu ? 'Твой план набора массы' : 'Your muscle gain plan')
+        : (isRu ? 'Твой план похудения' : 'Your weight loss plan');
+    final planSubtitle = gain
+        ? (isRu ? 'Прогноз набора мышечной массы' : 'Muscle gain projection')
+        : (isRu ? 'Прогноз снижения веса' : 'Weight loss projection');
+    final targetLabel = gain
+        ? (isRu ? 'цель' : 'goal')
+        : (isRu ? 'цель' : 'goal');
+    final lineColor = gain ? AppColors.accent : OBColors.pink;
+    final chipColor = gain ? AppColors.accentSoft : OBColors.pinkSoft;
+    final chipTextColor = gain ? AppColors.accent : OBColors.pink;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
@@ -1894,12 +1935,12 @@ class _CalcPreviewStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            isRu ? 'Твой план похудения' : 'Your weight loss plan',
+            planTitle,
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
           ),
           const SizedBox(height: 6),
           Text(
-            isRu ? 'Прогноз снижения веса' : 'Weight loss projection',
+            planSubtitle,
             style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
           ),
           const SizedBox(height: 20),
@@ -1947,7 +1988,7 @@ class _CalcPreviewStep extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          isRu ? 'цель' : 'goal',
+                          targetLabel,
                           style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                         ),
                       ],
@@ -1956,12 +1997,12 @@ class _CalcPreviewStep extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: OBColors.pinkSoft,
+                        color: chipColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         isRu ? '~$weeksNeeded нед.' : '~$weeksNeeded wks',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: OBColors.pink),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: chipTextColor),
                       ),
                     ),
                   ],
@@ -1995,9 +2036,7 @@ class _CalcPreviewStep extends StatelessWidget {
                           spots: spots,
                           isCurved: true,
                           curveSmoothness: 0.35,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
-                          ),
+                          color: lineColor,
                           barWidth: 3,
                           dotData: FlDotData(
                             show: true,
@@ -2005,9 +2044,7 @@ class _CalcPreviewStep extends StatelessWidget {
                                 spot == spots.first || spot == spots.last,
                             getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
                               radius: 5,
-                              color: spot == spots.last
-                                  ? const Color(0xFFFE7650)
-                                  : const Color(0xFFFF597D),
+                              color: lineColor,
                               strokeWidth: 2,
                               strokeColor: Colors.white,
                             ),
@@ -2018,8 +2055,8 @@ class _CalcPreviewStep extends StatelessWidget {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                const Color(0xFFFF597D).withValues(alpha: 0.18),
-                                const Color(0xFFFE7650).withValues(alpha: 0.0),
+                                lineColor.withValues(alpha: 0.18),
+                                lineColor.withValues(alpha: 0.0),
                               ],
                             ),
                           ),
