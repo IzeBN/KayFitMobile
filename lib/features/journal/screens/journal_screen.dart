@@ -5,11 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
-import '../widgets/meal_item.dart';
+import '../widgets/meal_group_card.dart';
 import '../../add_meal/screens/add_meal_sheet.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/models/meal.dart';
+import '../../../shared/utils/meal_grouping.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 
@@ -299,26 +300,31 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                       ],
                     );
                   }
+                  final groups = list.grouped();
                   return RefreshIndicator(
                     color: AppColors.accent,
                     onRefresh: () async =>
                         ref.invalidate(journalDayMealsProvider(_dateKey)),
                     child: ListView.builder(
                       padding: const EdgeInsets.only(top: 8, bottom: 100),
-                      itemCount: list.length + 1,
+                      itemCount: groups.length + 1,
                       itemBuilder: (ctx, i) {
                         if (i == 0) {
                           return _AiNutritionistBanner(
-                              onTap: () {
-                                AnalyticsService.journalAiBannerTapped();
-                                context.go('/chat');
-                              });
+                            onTap: () {
+                              AnalyticsService.journalAiBannerTapped();
+                              context.go('/chat');
+                            },
+                          );
                         }
-                        final meal = list[i - 1];
-                        return MealItem(
-                          meal: meal,
-                          onDelete: () => _deleteMeal(ctx, meal.id),
-                          onEdit: () => context.push('/meals/${meal.id}/edit'),
+                        final (group, items) = groups[i - 1];
+                        return MealGroupCard(
+                          mealType: group.apiKey,
+                          time: '',
+                          meals: items,
+                          onDeleteMeal: (id) => _deleteMeal(ctx, id),
+                          onEditMeal: (id) =>
+                              context.push('/meals/$id/edit'),
                         );
                       },
                     ),

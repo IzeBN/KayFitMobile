@@ -113,6 +113,7 @@ NutrientsV2 _scaleNutrients(NutrientsV2 per100, double factor) {
     fat: per100.fat * factor,
     carbs: per100.carbs * factor,
     fiber: per100.fiber != null ? per100.fiber! * factor : null,
+    sugar: per100.sugar != null ? per100.sugar! * factor : null,
     sugarAlcohols:
         per100.sugarAlcohols != null ? per100.sugarAlcohols! * factor : null,
     netCarbs: per100.netCarbs != null ? per100.netCarbs! * factor : null,

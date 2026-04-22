@@ -72,7 +72,7 @@ class _RecognitionResultSheetV2State
       return const NutrientsV2(calories: 0, protein: 0, fat: 0, carbs: 0);
     }
     double cal = 0, pro = 0, fat = 0, carb = 0;
-    double? fiber, sa, nc, sf, mf, pf, sod, cho, pot;
+    double? fiber, sugar, sa, nc, sf, mf, pf, sod, cho, pot;
     int? gi;
 
     for (final item in _selected) {
@@ -82,6 +82,7 @@ class _RecognitionResultSheetV2State
       fat += n.fat;
       carb += n.carbs;
       if (n.fiber != null) fiber = (fiber ?? 0) + n.fiber!;
+      if (n.sugar != null) sugar = (sugar ?? 0) + n.sugar!;
       if (n.sugarAlcohols != null) sa = (sa ?? 0) + n.sugarAlcohols!;
       if (n.netCarbs != null) nc = (nc ?? 0) + n.netCarbs!;
       if (n.saturatedFat != null) sf = (sf ?? 0) + n.saturatedFat!;
@@ -109,6 +110,7 @@ class _RecognitionResultSheetV2State
       fat: fat,
       carbs: carb,
       fiber: fiber,
+      sugar: sugar,
       sugarAlcohols: sa,
       netCarbs: nc,
       saturatedFat: sf,
@@ -177,6 +179,7 @@ class _RecognitionResultSheetV2State
           'carbs': n.carbs,
           'weight': item.weightGrams,
           'fiber': n.fiber,
+          'sugar': n.sugar,
           'sugar_alcohols': n.sugarAlcohols,
           'net_carbs': n.netCarbs,
           'saturated_fat': n.saturatedFat,
@@ -932,7 +935,10 @@ class _NutrientBreakdownCard extends StatelessWidget {
           ],
 
           // ── Carbs detail ──
-          if (n.netCarbs != null || n.fiber != null || n.sugarAlcohols != null)
+          if (n.netCarbs != null ||
+              n.fiber != null ||
+              n.sugar != null ||
+              n.sugarAlcohols != null)
             ...[
             const SizedBox(height: 12),
             _SectionLabel(l10n.recogV2_carbs_detail),
@@ -949,6 +955,14 @@ class _NutrientBreakdownCard extends StatelessWidget {
                   value: '${n.fiber!.toStringAsFixed(1)}${l10n.macro_g}',
                   color: NutrientColors.fiber,
                   fraction: n.carbs > 0 ? n.fiber! / n.carbs : 0),
+            if (n.sugar != null)
+              _NutrientRow(
+                  label: Localizations.localeOf(context).languageCode == 'ru'
+                      ? 'Сахар'
+                      : 'Sugar',
+                  value: '${n.sugar!.toStringAsFixed(1)}${l10n.macro_g}',
+                  color: NutrientColors.sugar,
+                  fraction: n.carbs > 0 ? n.sugar! / n.carbs : 0),
             if (n.sugarAlcohols != null)
               _NutrientRow(
                   label: l10n.recogV2_sugar_alcohols,

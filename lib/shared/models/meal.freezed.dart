@@ -58,6 +58,10 @@ mixin _$Meal {
   String? get source => throw _privateConstructorUsedError;
   @JsonKey(name: 'source_url')
   String? get sourceUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'meal_type')
+  String? get mealType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'dish_name')
+  String? get dishName => throw _privateConstructorUsedError;
 
   /// Serializes this Meal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -101,6 +105,8 @@ abstract class $MealCopyWith<$Res> {
     @JsonKey(name: 'vitamin_b12') double? vitaminB12,
     String? source,
     @JsonKey(name: 'source_url') String? sourceUrl,
+    @JsonKey(name: 'meal_type') String? mealType,
+    @JsonKey(name: 'dish_name') String? dishName,
   });
 }
 
@@ -146,6 +152,8 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
     Object? vitaminB12 = freezed,
     Object? source = freezed,
     Object? sourceUrl = freezed,
+    Object? mealType = freezed,
+    Object? dishName = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -257,6 +265,14 @@ class _$MealCopyWithImpl<$Res, $Val extends Meal>
                 ? _value.sourceUrl
                 : sourceUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            mealType: freezed == mealType
+                ? _value.mealType
+                : mealType // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            dishName: freezed == dishName
+                ? _value.dishName
+                : dishName // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -299,6 +315,8 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     @JsonKey(name: 'vitamin_b12') double? vitaminB12,
     String? source,
     @JsonKey(name: 'source_url') String? sourceUrl,
+    @JsonKey(name: 'meal_type') String? mealType,
+    @JsonKey(name: 'dish_name') String? dishName,
   });
 }
 
@@ -341,6 +359,8 @@ class __$$MealImplCopyWithImpl<$Res>
     Object? vitaminB12 = freezed,
     Object? source = freezed,
     Object? sourceUrl = freezed,
+    Object? mealType = freezed,
+    Object? dishName = freezed,
   }) {
     return _then(
       _$MealImpl(
@@ -452,6 +472,14 @@ class __$$MealImplCopyWithImpl<$Res>
             ? _value.sourceUrl
             : sourceUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        mealType: freezed == mealType
+            ? _value.mealType
+            : mealType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        dishName: freezed == dishName
+            ? _value.dishName
+            : dishName // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -488,6 +516,8 @@ class _$MealImpl implements _Meal {
     @JsonKey(name: 'vitamin_b12') this.vitaminB12,
     this.source,
     @JsonKey(name: 'source_url') this.sourceUrl,
+    @JsonKey(name: 'meal_type') this.mealType,
+    @JsonKey(name: 'dish_name') this.dishName,
   });
 
   factory _$MealImpl.fromJson(Map<String, dynamic> json) =>
@@ -557,10 +587,16 @@ class _$MealImpl implements _Meal {
   @override
   @JsonKey(name: 'source_url')
   final String? sourceUrl;
+  @override
+  @JsonKey(name: 'meal_type')
+  final String? mealType;
+  @override
+  @JsonKey(name: 'dish_name')
+  final String? dishName;
 
   @override
   String toString() {
-    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, netCarbs: $netCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, potassium: $potassium, vitaminA: $vitaminA, vitaminC: $vitaminC, vitaminD: $vitaminD, vitaminB12: $vitaminB12, source: $source, sourceUrl: $sourceUrl)';
+    return 'Meal(id: $id, name: $name, calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, weight: $weight, emotion: $emotion, createdAt: $createdAt, netCarbs: $netCarbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, glycemicIndex: $glycemicIndex, saturatedFat: $saturatedFat, unsaturatedFat: $unsaturatedFat, sodium: $sodium, cholesterol: $cholesterol, iron: $iron, calcium: $calcium, potassium: $potassium, vitaminA: $vitaminA, vitaminC: $vitaminC, vitaminD: $vitaminD, vitaminB12: $vitaminB12, source: $source, sourceUrl: $sourceUrl, mealType: $mealType, dishName: $dishName)';
   }
 
   @override
@@ -608,7 +644,11 @@ class _$MealImpl implements _Meal {
                 other.vitaminB12 == vitaminB12) &&
             (identical(other.source, source) || other.source == source) &&
             (identical(other.sourceUrl, sourceUrl) ||
-                other.sourceUrl == sourceUrl));
+                other.sourceUrl == sourceUrl) &&
+            (identical(other.mealType, mealType) ||
+                other.mealType == mealType) &&
+            (identical(other.dishName, dishName) ||
+                other.dishName == dishName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -642,6 +682,8 @@ class _$MealImpl implements _Meal {
     vitaminB12,
     source,
     sourceUrl,
+    mealType,
+    dishName,
   ]);
 
   /// Create a copy of Meal
@@ -687,6 +729,8 @@ abstract class _Meal implements Meal {
     @JsonKey(name: 'vitamin_b12') final double? vitaminB12,
     final String? source,
     @JsonKey(name: 'source_url') final String? sourceUrl,
+    @JsonKey(name: 'meal_type') final String? mealType,
+    @JsonKey(name: 'dish_name') final String? dishName,
   }) = _$MealImpl;
 
   factory _Meal.fromJson(Map<String, dynamic> json) = _$MealImpl.fromJson;
@@ -755,6 +799,12 @@ abstract class _Meal implements Meal {
   @override
   @JsonKey(name: 'source_url')
   String? get sourceUrl;
+  @override
+  @JsonKey(name: 'meal_type')
+  String? get mealType;
+  @override
+  @JsonKey(name: 'dish_name')
+  String? get dishName;
 
   /// Create a copy of Meal
   /// with the given fields replaced by the non-null parameter values.

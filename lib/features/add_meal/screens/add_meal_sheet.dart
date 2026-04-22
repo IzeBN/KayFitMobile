@@ -5,14 +5,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/utils/nutrient_parser.dart';
 import 'package:dio/dio.dart';
 import 'barcode_scanner_screen_v2.dart';
+import 'recognition_result_sheet_v2.dart';
 
 enum _InputMode { choose, text, voice, photo }
 enum _LoadingType { none, voice, photo, parsing }
@@ -54,14 +58,10 @@ class AddMealSheet extends ConsumerStatefulWidget {
 class _AddMealSheetState extends ConsumerState<AddMealSheet>
     with TickerProviderStateMixin {
   _InputMode _mode = _InputMode.choose;
-  String? _emotion;
   _LoadingType _loadingType = _LoadingType.none;
 
   final _textController = TextEditingController();
   final _textFocus = FocusNode();
-  List<Map<String, dynamic>> _suggestions = [];
-  final Set<int> _selected = {};
-  final Map<int, double?> _itemWeights = {};
 
   String _lang = 'en';
 
@@ -111,7 +111,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
     super.dispose();
   }
 
-  void _switchMode(_InputMode mode) async {
+  Future<void> _switchMode(_InputMode mode) async {
     HapticFeedback.selectionClick();
     if (mode != _InputMode.choose) {
       AnalyticsService.addMealModeSelected(mode.name);
@@ -136,29 +136,59 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
       {bool manageLoading = true}) async {
     if (manageLoading) setState(() => _loadingType = _LoadingType.parsing);
     try {
-      final resp = await apiDio.post('/api/v2/parse_meal_suggestions',
-          data: {'text': text, 'language': lang});
-      final items = (resp.data['items'] as List<dynamic>)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
-      if (mounted) {
-        setState(() {
-          _suggestions = items;
-          _selected.addAll(Iterable.generate(items.length));
-          _itemWeights.clear();
-          for (int i = 0; i < items.length; i++) {
-            _itemWeights[i] =
-                (items[i]['weight_grams'] as num?)?.toDouble();
-          }
-        });
-        AnalyticsService.mealParsed(items.length, _mode.name);
+      final resp = await apiDio.post(
+        '/api/v2/parse_meal_suggestions',
+        data: {'text': text, 'language': lang},
+        options: Options(
+          receiveTimeout: const Duration(seconds: 90),
+        ),
+      );
+      final rawItems = (resp.data['items'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+
+      if (!mounted) return;
+
+      if (rawItems.isNotEmpty) {
+        final v2items = rawItems.map((raw) {
+          final w = (raw['weight_grams'] as num?)?.toDouble() ?? 100.0;
+          return ingredientV2FromSuggestion(raw, w);
+        }).toList();
+
+        AnalyticsService.mealParsed(v2items.length, _mode.name);
+
+        if (manageLoading) setState(() => _loadingType = _LoadingType.none);
+
+        final summaryName = v2items.map((i) => i.name).join(', ');
+
+        final saved = await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.92,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, __) => RecognitionResultSheetV2(
+              dishName: summaryName,
+              ingredients: v2items,
+              mealDate: widget.mealDate,
+            ),
+          ),
+        );
+
+        if (saved == true && mounted) {
+          Navigator.of(context).pop();
+        }
+        return;
       }
     } catch (e) {
       _handleError(e);
-    } finally {
-      if (manageLoading && mounted)
-        setState(() => _loadingType = _LoadingType.none);
+      if (manageLoading && mounted) setState(() => _loadingType = _LoadingType.none);
+      return;
     }
+    if (manageLoading && mounted) setState(() => _loadingType = _LoadingType.none);
   }
 
   Future<void> _startRecording() async {
@@ -213,9 +243,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
           : (raw?.toString() ?? '');
       if (text.isNotEmpty) {
         await _parseText(text, _lang, manageLoading: false);
-      }
-      // If we still have no suggestions after parsing, go back to choose screen
-      if (mounted && _suggestions.isEmpty) {
+      } else if (mounted) {
         _switchMode(_InputMode.choose);
       }
     } catch (e) {
@@ -227,10 +255,12 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
   }
 
   Future<void> _pickAndRecognizePhoto(ImageSource source) async {
+    if (mounted) setState(() => _loadingType = _LoadingType.photo);
     final picker = ImagePicker();
     final lang = _lang;
     final file = await picker.pickImage(source: source, imageQuality: 80);
     if (file == null) {
+      if (mounted) setState(() => _loadingType = _LoadingType.none);
       if (mounted) _switchMode(_InputMode.choose);
       return;
     }
@@ -240,109 +270,98 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
       AnalyticsService.addMealPhotoTaken();
     }
     if (!mounted) return;
-    setState(() => _loadingType = _LoadingType.photo);
     try {
-      final form = FormData.fromMap({
-        'image': await MultipartFile.fromFile(file.path, filename: 'photo.jpg'),
-      });
-      final resp =
-          await apiDio.post('/api/v2/recognize_photo?language=$lang', data: form);
+      final origSize = await File(file.path).length();
+      debugPrint('📸 Original photo: ${file.path} (${origSize ~/ 1024} KB)');
+
+      // Force-convert any source format (PNG/HEIC/JPEG) to a JPEG that's
+      // small enough for fast upload + AI processing on the server.
+      final compressed = await FlutterImageCompress.compressWithFile(
+        file.path,
+        minWidth: 1280,
+        minHeight: 1280,
+        quality: 75,
+        format: CompressFormat.jpeg,
+      );
+
+      late final MultipartFile multipart;
+      if (compressed != null) {
+        debugPrint('📸 Compressed to ${compressed.length ~/ 1024} KB');
+        multipart = MultipartFile.fromBytes(
+          compressed,
+          filename: 'photo.jpg',
+          contentType: DioMediaType('image', 'jpeg'),
+        );
+      } else {
+        debugPrint('📸 Compression failed, sending original');
+        multipart = await MultipartFile.fromFile(
+          file.path,
+          filename: 'photo.jpg',
+          contentType: DioMediaType('image', 'jpeg'),
+        );
+      }
+
+      final form = FormData.fromMap({'image': multipart});
+      final resp = await apiDio.post(
+        '/api/v2/recognize_photo?language=$lang',
+        data: form,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 120),
+          sendTimeout: const Duration(seconds: 60),
+        ),
+      );
       if (!mounted) return;
+      debugPrint('📸 Recognize response status=${resp.statusCode} '
+          'data=${resp.data}');
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
       if (error != null && error.isNotEmpty) {
+        setState(() => _loadingType = _LoadingType.none);
         _handleError(Exception(error));
-      } else if (rawItems != null && rawItems.isNotEmpty) {
-        final items =
-            rawItems.map((e) => e as Map<String, dynamic>).toList();
-        setState(() {
-          _suggestions = items;
-          _selected.addAll(Iterable.generate(items.length));
-          _itemWeights.clear();
-          for (int i = 0; i < items.length; i++) {
-            _itemWeights[i] =
-                (items[i]['weight_grams'] as num?)?.toDouble();
-          }
-        });
+        return;
+      }
+      if (rawItems == null || rawItems.isEmpty) {
+        if (mounted) setState(() => _loadingType = _LoadingType.none);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not recognize food in this photo')),
+          );
+        }
+        return;
+      }
+      if (rawItems.isNotEmpty) {
+        final items = rawItems.map((e) => e as Map<String, dynamic>).toList();
+        final v2items = items.map(ingredientV2FromJson).toList();
+
+        final dishName = resp.data['dish_name'] as String? ??
+            items
+                .map((e) => (e['name'] as String?) ?? '')
+                .where((n) => n.isNotEmpty)
+                .join(', ');
+
+        setState(() => _loadingType = _LoadingType.none);
+
+        final saved = await showModalBottomSheet<bool>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.92,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, __) => RecognitionResultSheetV2(
+              dishName: dishName,
+              ingredients: v2items,
+              mealDate: widget.mealDate,
+            ),
+          ),
+        );
+
+        if (saved == true && mounted) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
-      _handleError(e);
-    } finally {
-      if (mounted) setState(() => _loadingType = _LoadingType.none);
-    }
-  }
-
-  Future<void> _addSelected() async {
-    if (_selected.isEmpty || _emotion == null) return;
-    HapticFeedback.mediumImpact();
-    setState(() => _loadingType = _LoadingType.parsing);
-    try {
-      final items = _selected.map((i) {
-        final s = _suggestions[i];
-        final actualWeight = _itemWeights[i] ??
-            (s['weight_grams'] as num?)?.toDouble() ??
-            100.0;
-        // v2 format: nutrients_per_100g is a nested dict
-        final n100 = s['nutrients_per_100g'] as Map<String, dynamic>? ?? {};
-        final k = actualWeight / 100.0;
-        double _scale(String key) =>
-            ((n100[key] as num?)?.toDouble() ?? 0) * k;
-        double? _scaleN(String key) {
-          final v = (n100[key] as num?)?.toDouble();
-          return v != null ? v * k : null;
-        }
-        return <String, dynamic>{
-          'name': s['name'],
-          'weight_grams': actualWeight,
-          'calories': _scale('calories'),
-          'protein': _scale('protein'),
-          'fat': _scale('fat'),
-          'carbs': _scale('carbs'),
-          'fiber': _scaleN('fiber'),
-          'sugar': _scaleN('sugar'),
-          'sugar_alcohols': _scaleN('sugar_alcohols'),
-          'net_carbs': _scaleN('net_carbs'),
-          'saturated_fat': _scaleN('saturated_fat'),
-          'glycemic_index': n100['glycemic_index'],
-          'sodium_mg': _scaleN('sodium_mg'),
-          'potassium_mg': _scaleN('potassium_mg'),
-          'calcium_mg': _scaleN('calcium_mg'),
-          'iron_mg': _scaleN('iron_mg'),
-          'magnesium_mg': _scaleN('magnesium_mg'),
-          'phosphorus_mg': _scaleN('phosphorus_mg'),
-          'zinc_mg': _scaleN('zinc_mg'),
-          'selenium_mcg': _scaleN('selenium_mcg'),
-          'manganese_mg': _scaleN('manganese_mg'),
-          'copper_mg': _scaleN('copper_mg'),
-          'cholesterol_mg': _scaleN('cholesterol_mg'),
-          'vitamin_c_mg': _scaleN('vitamin_c_mg'),
-          'vitamin_d_mcg': _scaleN('vitamin_d_mcg'),
-          'source': s['source'],
-          'source_url': s['source_url'],
-        };
-      }).toList();
-
-      await apiDio.post('/api/meals/add_selected', data: {
-        'emotion': _emotion,
-        'items': items,
-        if (widget.mealDate != null)
-          'date':
-              '${widget.mealDate!.year.toString().padLeft(4, '0')}-'
-              '${widget.mealDate!.month.toString().padLeft(2, '0')}-'
-              '${widget.mealDate!.day.toString().padLeft(2, '0')}',
-      });
-      final totalCal = items
-          .fold<double>(
-              0, (s, it) => s + ((it['calories'] as num?)?.toDouble() ?? 0))
-          .round();
-      AnalyticsService.mealSaved(
-          itemCount: items.length,
-          mode: _mode.name,
-          emotion: _emotion,
-          totalCalories: totalCal);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      AnalyticsService.mealSaveFailed('$e');
       _handleError(e);
     } finally {
       if (mounted) setState(() => _loadingType = _LoadingType.none);
@@ -394,15 +413,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                   _SheetHeader(
                     mode: _mode,
                     l10n: l10n,
-                    onBack: _suggestions.isNotEmpty
-                        ? () => setState(() {
-                              _suggestions.clear();
-                              _selected.clear();
-                              _itemWeights.clear();
-                            })
-                        : _mode != _InputMode.choose
-                            ? () => _switchMode(_InputMode.choose)
-                            : null,
+                    onBack: _mode != _InputMode.choose
+                        ? () => _switchMode(_InputMode.choose)
+                        : null,
                   ),
 
                   // Content
@@ -413,27 +426,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                       curve: Curves.easeOutCubic,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(20, 0, 20, bottomPad + 20),
-                        child: _suggestions.isNotEmpty
-                            ? _SuggestionsView(
-                                suggestions: _suggestions,
-                                selected: _selected,
-                                itemWeights: _itemWeights,
-                                emotion: _emotion,
-                                onToggle: (i) => setState(() {
-                                  _selected.contains(i)
-                                      ? _selected.remove(i)
-                                      : _selected.add(i);
-                                }),
-                                onWeightChange: (i, w) =>
-                                    setState(() => _itemWeights[i] = w),
-                                onEmotionSelect: (e) {
-                                  setState(() => _emotion = e);
-                                  AnalyticsService.emotionSelected(e);
-                                },
-                                onAdd: _addSelected,
-                                l10n: l10n,
-                              )
-                            : _mode == _InputMode.choose
+                        child: _mode == _InputMode.choose
                                 ? _ChooseView(
                                     l10n: l10n,
                                     isRu: isRu,
@@ -453,8 +446,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                             _PhotoSourceSheet(l10n: l10n),
                                       );
                                       if (source == null) return;
-                                      _switchMode(_InputMode.photo);
-                                      _pickAndRecognizePhoto(source);
+                                      await _switchMode(_InputMode.photo);
+                                      if (!mounted) return;
+                                      await _pickAndRecognizePhoto(source);
                                     },
                                     onBarcode: _openBarcodeScanner,
                                   )
@@ -1281,588 +1275,6 @@ class _TextViewState extends State<_TextView> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Suggestions view — beautiful meal result cards
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SuggestionsView extends StatefulWidget {
-  final List<Map<String, dynamic>> suggestions;
-  final Set<int> selected;
-  final Map<int, double?> itemWeights;
-  final String? emotion;
-  final ValueChanged<int> onToggle;
-  final void Function(int, double?) onWeightChange;
-  final ValueChanged<String> onEmotionSelect;
-  final VoidCallback onAdd;
-  final AppLocalizations l10n;
-
-  const _SuggestionsView({
-    required this.suggestions,
-    required this.selected,
-    required this.itemWeights,
-    required this.emotion,
-    required this.onToggle,
-    required this.onWeightChange,
-    required this.onEmotionSelect,
-    required this.onAdd,
-    required this.l10n,
-  });
-
-  @override
-  State<_SuggestionsView> createState() => _SuggestionsViewState();
-}
-
-class _SuggestionsViewState extends State<_SuggestionsView>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _stagger;
-
-  @override
-  void initState() {
-    super.initState();
-    _stagger = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _stagger.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = widget.l10n;
-    final canAdd = widget.selected.isNotEmpty && widget.emotion != null;
-
-    // Calculate totals for selected (v2 format: nutrients_per_100g)
-    double totalCal = 0;
-    for (final i in widget.selected) {
-      final s = widget.suggestions[i];
-      final n100 = s['nutrients_per_100g'] as Map<String, dynamic>?;
-      final cal100 = (n100?['calories'] as num?)?.toDouble() ?? 0.0;
-      final weight = widget.itemWeights[i] ?? 100.0;
-      totalCal += cal100 > 0 ? cal100 * weight / 100 : 0;
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Total badge
-        if (widget.selected.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF059669), Color(0xFF16A34A)],
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.local_fire_department_rounded,
-                  color: Colors.white, size: 14),
-              const SizedBox(width: 5),
-              Text(
-                '${totalCal.toStringAsFixed(0)} ${l10n.macro_kcal}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ]),
-          ),
-
-        const SizedBox(height: 12),
-
-        // Meal cards list
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.35,
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: widget.suggestions.length,
-            itemBuilder: (context, i) {
-              final delay = i * 0.12;
-              final fade = CurvedAnimation(
-                parent: _stagger,
-                curve: Interval(delay.clamp(0, 0.7),
-                    (delay + 0.4).clamp(0, 1.0),
-                    curve: Curves.easeOutCubic),
-              );
-              final slide = Tween<Offset>(
-                begin: const Offset(0.1, 0),
-                end: Offset.zero,
-              ).animate(fade);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: FadeTransition(
-                  opacity: fade,
-                  child: SlideTransition(
-                    position: slide,
-                    child: _MealResultCard(
-                      index: i,
-                      item: widget.suggestions[i],
-                      selected: widget.selected.contains(i),
-                      weight: widget.itemWeights[i],
-                      onToggle: () => widget.onToggle(i),
-                      onWeightChange: (w) => widget.onWeightChange(i, w),
-                      l10n: l10n,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(height: 14),
-
-        // Meal type section
-        Text(
-          Localizations.localeOf(context).languageCode == 'ru'
-              ? 'Тип приёма пищи'
-              : 'Meal type',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 15,
-            color: AppColors.text,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _MealTypePicker(
-          selected: widget.emotion,
-          onSelect: widget.onEmotionSelect,
-        ),
-
-        const SizedBox(height: 16),
-
-        // Add button
-        SizedBox(
-          width: double.infinity,
-          height: 54,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: canAdd
-                  ? const LinearGradient(
-                      colors: [Color(0xFF059669), Color(0xFF16A34A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : const LinearGradient(
-                      colors: [AppColors.border, AppColors.border]),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              boxShadow: canAdd
-                  ? [
-                      BoxShadow(
-                        color: AppColors.accent.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 5),
-                      )
-                    ]
-                  : null,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              child: InkWell(
-                onTap: canAdd ? widget.onAdd : null,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.check_circle_rounded,
-                          color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.addMeal_add,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Meal result card
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _MealResultCard extends StatefulWidget {
-  final int index;
-  final Map<String, dynamic> item;
-  final bool selected;
-  final double? weight;
-  final VoidCallback onToggle;
-  final void Function(double?) onWeightChange;
-  final AppLocalizations l10n;
-
-  const _MealResultCard({
-    required this.index,
-    required this.item,
-    required this.selected,
-    required this.weight,
-    required this.onToggle,
-    required this.onWeightChange,
-    required this.l10n,
-  });
-
-  @override
-  State<_MealResultCard> createState() => _MealResultCardState();
-}
-
-class _MealResultCardState extends State<_MealResultCard> {
-  late final TextEditingController _wCtrl;
-  bool _expanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final w = widget.weight ?? 100.0;
-    _wCtrl = TextEditingController(text: w.toStringAsFixed(0));
-  }
-
-  @override
-  void dispose() {
-    _wCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final item = widget.item;
-    final l10n = widget.l10n;
-    final name = item['name'] as String? ?? '';
-    // v2 response: nutrients_per_100g dict
-    final n100 = item['nutrients_per_100g'] as Map<String, dynamic>?;
-    final cal100 = (n100?['calories'] as num?)?.toDouble() ?? 0.0;
-    final currentWeight = widget.weight ?? 100.0;
-    final displayCal = cal100 > 0
-        ? (cal100 * currentWeight / 100).toStringAsFixed(0)
-        : '?';
-
-    final sel = widget.selected;
-
-    // Nutrition per 100g for expanded row
-    final protein100 = (n100?['protein'] as num?)?.toDouble();
-    final fat100 = (n100?['fat'] as num?)?.toDouble();
-    final carbs100 = (n100?['carbs'] as num?)?.toDouble();
-    final fiber100 = (n100?['fiber'] as num?)?.toDouble();
-
-    final hasNutrition = protein100 != null || fat100 != null || carbs100 != null;
-
-    String _fmt(double? v) => v != null ? v.toStringAsFixed(1) : '?';
-
-    return GestureDetector(
-      onTap: widget.onToggle,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: sel ? AppColors.accentSoft : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: sel ? AppColors.accent : AppColors.border,
-            width: sel ? 1.5 : 1,
-          ),
-          boxShadow: sel ? [] : AppShadow.sm,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Checkbox
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: sel ? AppColors.accent : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: sel ? AppColors.accent : AppColors.textMuted,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: sel
-                        ? const Icon(Icons.check_rounded,
-                            color: Colors.white, size: 14)
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: sel ? AppColors.accentDark : AppColors.text,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.addMeal_kcal(displayCal),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: sel ? AppColors.accent : AppColors.textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Weight field
-                  SizedBox(
-                    width: 72,
-                    height: 36,
-                    child: TextField(
-                      controller: _wCtrl,
-                      keyboardType: TextInputType.number,
-                      textAlignVertical: TextAlignVertical.center,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        suffixText: l10n.macro_g,
-                        suffixStyle: const TextStyle(
-                            fontSize: 12, color: AppColors.textMuted),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 8),
-                        filled: true,
-                        fillColor: sel
-                            ? Colors.white
-                            : AppColors.bg,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(
-                            color: sel ? AppColors.accent : AppColors.border,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              color: AppColors.accent, width: 2),
-                        ),
-                      ),
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w600),
-                      onChanged: (v) =>
-                          widget.onWeightChange(double.tryParse(v)),
-                    ),
-                  ),
-                  // Expand chevron
-                  if (hasNutrition) ...[
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () => setState(() => _expanded = !_expanded),
-                      behavior: HitTestBehavior.opaque,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: AnimatedRotation(
-                          turns: _expanded ? 0.5 : 0.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: const Icon(
-                            Icons.expand_more_rounded,
-                            size: 20,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              // Expandable nutrition detail row
-              if (hasNutrition)
-                AnimatedCrossFade(
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: sel
-                            ? Colors.white.withValues(alpha: 0.6)
-                            : AppColors.bg,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            '${l10n.macro_protein[0]}: ${_fmt(protein100)}${l10n.macro_g}',
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '${l10n.macro_fat[0]}: ${_fmt(fat100)}${l10n.macro_g}',
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '${l10n.macro_carbs[0]}: ${_fmt(carbs100)}${l10n.macro_g}',
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (fiber100 != null) ...[
-                            const SizedBox(width: 10),
-                            Text(
-                              'F: ${_fmt(fiber100)}${l10n.macro_g}',
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                color: AppColors.textMuted,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                          const Spacer(),
-                          Text(
-                            '/100${l10n.macro_g}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  crossFadeState: _expanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 200),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Meal type picker — icon-based selector replacing emotion emoji row
-// ─────────────────────────────────────────────────────────────────────────────
-
-const _mealTypes = [
-  (Icons.wb_sunny_outlined, 'breakfast'),
-  (Icons.restaurant_menu_rounded, 'lunch'),
-  (Icons.dinner_dining_rounded, 'dinner'),
-  (Icons.cookie_outlined, 'snack'),
-  (Icons.more_horiz_rounded, 'other'),
-];
-
-String _mealTypeLabel(String type, bool isRu) {
-  switch (type) {
-    case 'breakfast':
-      return isRu ? 'Завтрак' : 'Breakfast';
-    case 'lunch':
-      return isRu ? 'Обед' : 'Lunch';
-    case 'dinner':
-      return isRu ? 'Ужин' : 'Dinner';
-    case 'snack':
-      return isRu ? 'Перекус' : 'Snack';
-    default:
-      return isRu ? 'Другое' : 'Other';
-  }
-}
-
-class _MealTypePicker extends StatelessWidget {
-  final String? selected;
-  final ValueChanged<String> onSelect;
-
-  const _MealTypePicker({required this.selected, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
-    return SizedBox(
-      height: 76,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _mealTypes.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (context, i) {
-          final (icon, value) = _mealTypes[i];
-          final sel = selected == value;
-          return GestureDetector(
-            onTap: () => onSelect(value),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutBack,
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: sel ? AppColors.accentSoft : AppColors.bg,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: sel ? AppColors.accent : AppColors.border,
-                      width: sel ? 2 : 1,
-                    ),
-                    boxShadow: sel ? AppShadow.sm : null,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    icon,
-                    size: 24,
-                    color: sel ? AppColors.accent : AppColors.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _mealTypeLabel(value, isRu),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                    color: sel ? AppColors.accent : AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Recognizing overlay (voice / photo)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2201,3 +1613,4 @@ class _PhotoSourceBtnState extends State<_PhotoSourceBtn>
     );
   }
 }
+

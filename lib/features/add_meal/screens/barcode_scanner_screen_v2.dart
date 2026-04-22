@@ -696,7 +696,7 @@ class _ManualEntrySheet extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'EAN-8, EAN-13, UPC-A и другие форматы',
+            'EAN-8, EAN-13, UPC-A and other formats',
             style: TextStyle(
               color: AppColors.textMuted,
               fontSize: 13,
@@ -709,7 +709,7 @@ class _ManualEntrySheet extends StatelessWidget {
             keyboardType: TextInputType.number,
             maxLength: 20,
             decoration: InputDecoration(
-              hintText: 'Например: 4607086562619',
+              hintText: 'Example: 4607086562619',
               prefixIcon: const Icon(
                 Icons.qr_code_rounded,
                 color: AppColors.textMuted,

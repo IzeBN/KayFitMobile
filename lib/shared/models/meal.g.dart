@@ -34,6 +34,8 @@ _$MealImpl _$$MealImplFromJson(Map<String, dynamic> json) => _$MealImpl(
   vitaminB12: (json['vitamin_b12'] as num?)?.toDouble(),
   source: json['source'] as String?,
   sourceUrl: json['source_url'] as String?,
+  mealType: json['meal_type'] as String?,
+  dishName: json['dish_name'] as String?,
 );
 
 Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
@@ -65,4 +67,6 @@ Map<String, dynamic> _$$MealImplToJson(_$MealImpl instance) =>
       'vitamin_b12': instance.vitaminB12,
       'source': instance.source,
       'source_url': instance.sourceUrl,
+      'meal_type': instance.mealType,
+      'dish_name': instance.dishName,
     };

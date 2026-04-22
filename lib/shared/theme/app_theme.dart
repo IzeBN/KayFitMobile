@@ -86,6 +86,12 @@ class NutrientColors {
   // Sub-macros
   static const fiber      = Color(0xFF0EA5E9); // sky blue
   static const sugar      = Color(0xFFF97316); // orange-red
+
+  // Soft backgrounds for chips
+  static const kcalSoft      = Color(0xFFFFEDD5);
+  static const fiberSoft     = Color(0xFFE0F2FE);
+  static const sugarSoft     = Color(0xFFFFEDD5);
+  static const fatBadSoft    = Color(0xFFFEE2E2);
 }
 
 class AppTheme {

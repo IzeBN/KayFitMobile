@@ -26,6 +26,7 @@ mixin _$NutrientsV2 {
   double get fat => throw _privateConstructorUsedError;
   double get carbs => throw _privateConstructorUsedError;
   double? get fiber => throw _privateConstructorUsedError;
+  double? get sugar => throw _privateConstructorUsedError;
   @JsonKey(name: 'sugar_alcohols')
   double? get sugarAlcohols => throw _privateConstructorUsedError;
   @JsonKey(name: 'net_carbs')
@@ -80,6 +81,7 @@ abstract class $NutrientsV2CopyWith<$Res> {
     double fat,
     double carbs,
     double? fiber,
+    double? sugar,
     @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
     @JsonKey(name: 'net_carbs') double? netCarbs,
     @JsonKey(name: 'saturated_fat') double? saturatedFat,
@@ -118,6 +120,7 @@ class _$NutrientsV2CopyWithImpl<$Res, $Val extends NutrientsV2>
     Object? fat = null,
     Object? carbs = null,
     Object? fiber = freezed,
+    Object? sugar = freezed,
     Object? sugarAlcohols = freezed,
     Object? netCarbs = freezed,
     Object? saturatedFat = freezed,
@@ -155,6 +158,10 @@ class _$NutrientsV2CopyWithImpl<$Res, $Val extends NutrientsV2>
             fiber: freezed == fiber
                 ? _value.fiber
                 : fiber // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            sugar: freezed == sugar
+                ? _value.sugar
+                : sugar // ignore: cast_nullable_to_non_nullable
                       as double?,
             sugarAlcohols: freezed == sugarAlcohols
                 ? _value.sugarAlcohols
@@ -237,6 +244,7 @@ abstract class _$$NutrientsV2ImplCopyWith<$Res>
     double fat,
     double carbs,
     double? fiber,
+    double? sugar,
     @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
     @JsonKey(name: 'net_carbs') double? netCarbs,
     @JsonKey(name: 'saturated_fat') double? saturatedFat,
@@ -274,6 +282,7 @@ class __$$NutrientsV2ImplCopyWithImpl<$Res>
     Object? fat = null,
     Object? carbs = null,
     Object? fiber = freezed,
+    Object? sugar = freezed,
     Object? sugarAlcohols = freezed,
     Object? netCarbs = freezed,
     Object? saturatedFat = freezed,
@@ -311,6 +320,10 @@ class __$$NutrientsV2ImplCopyWithImpl<$Res>
         fiber: freezed == fiber
             ? _value.fiber
             : fiber // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        sugar: freezed == sugar
+            ? _value.sugar
+            : sugar // ignore: cast_nullable_to_non_nullable
                   as double?,
         sugarAlcohols: freezed == sugarAlcohols
             ? _value.sugarAlcohols
@@ -386,6 +399,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
     required this.fat,
     required this.carbs,
     this.fiber,
+    this.sugar,
     @JsonKey(name: 'sugar_alcohols') this.sugarAlcohols,
     @JsonKey(name: 'net_carbs') this.netCarbs,
     @JsonKey(name: 'saturated_fat') this.saturatedFat,
@@ -416,6 +430,8 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
   final double carbs;
   @override
   final double? fiber;
+  @override
+  final double? sugar;
   @override
   @JsonKey(name: 'sugar_alcohols')
   final double? sugarAlcohols;
@@ -464,7 +480,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
 
   @override
   String toString() {
-    return 'NutrientsV2(calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, fiber: $fiber, sugarAlcohols: $sugarAlcohols, netCarbs: $netCarbs, saturatedFat: $saturatedFat, monounsaturatedFat: $monounsaturatedFat, polyunsaturatedFat: $polyunsaturatedFat, sodiumMg: $sodiumMg, cholesterolMg: $cholesterolMg, potassiumMg: $potassiumMg, calciumMg: $calciumMg, ironMg: $ironMg, vitaminAMcg: $vitaminAMcg, vitaminCMg: $vitaminCMg, vitaminDMcg: $vitaminDMcg, glycemicIndex: $glycemicIndex, glycemicIndexCategory: $glycemicIndexCategory)';
+    return 'NutrientsV2(calories: $calories, protein: $protein, fat: $fat, carbs: $carbs, fiber: $fiber, sugar: $sugar, sugarAlcohols: $sugarAlcohols, netCarbs: $netCarbs, saturatedFat: $saturatedFat, monounsaturatedFat: $monounsaturatedFat, polyunsaturatedFat: $polyunsaturatedFat, sodiumMg: $sodiumMg, cholesterolMg: $cholesterolMg, potassiumMg: $potassiumMg, calciumMg: $calciumMg, ironMg: $ironMg, vitaminAMcg: $vitaminAMcg, vitaminCMg: $vitaminCMg, vitaminDMcg: $vitaminDMcg, glycemicIndex: $glycemicIndex, glycemicIndexCategory: $glycemicIndexCategory)';
   }
 
   @override
@@ -478,6 +494,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
             (identical(other.fat, fat) || other.fat == fat) &&
             (identical(other.carbs, carbs) || other.carbs == carbs) &&
             (identical(other.fiber, fiber) || other.fiber == fiber) &&
+            (identical(other.sugar, sugar) || other.sugar == sugar) &&
             (identical(other.sugarAlcohols, sugarAlcohols) ||
                 other.sugarAlcohols == sugarAlcohols) &&
             (identical(other.netCarbs, netCarbs) ||
@@ -518,6 +535,7 @@ class _$NutrientsV2Impl implements _NutrientsV2 {
     fat,
     carbs,
     fiber,
+    sugar,
     sugarAlcohols,
     netCarbs,
     saturatedFat,
@@ -556,6 +574,7 @@ abstract class _NutrientsV2 implements NutrientsV2 {
     required final double fat,
     required final double carbs,
     final double? fiber,
+    final double? sugar,
     @JsonKey(name: 'sugar_alcohols') final double? sugarAlcohols,
     @JsonKey(name: 'net_carbs') final double? netCarbs,
     @JsonKey(name: 'saturated_fat') final double? saturatedFat,
@@ -587,6 +606,8 @@ abstract class _NutrientsV2 implements NutrientsV2 {
   double get carbs;
   @override
   double? get fiber;
+  @override
+  double? get sugar;
   @override
   @JsonKey(name: 'sugar_alcohols')
   double? get sugarAlcohols;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/models/meal.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/extended_nutrients_grid.dart';
 
 const _mealTypeConfig = {
   'breakfast': ('🌅', 'Breakfast'),
@@ -271,6 +271,22 @@ class _Chip extends StatelessWidget {
   }
 }
 
+// ── helpers ────────────────────────────────────────────────────────────────
+
+bool _hasExtendedData(Meal meal) {
+  final net = meal.netCarbs ?? meal.carbs;
+  return (meal.fiber != null && meal.fiber! > 0) ||
+      (meal.sugar != null && meal.sugar! > 0) ||
+      (meal.sugarAlcohols != null && meal.sugarAlcohols! > 0) ||
+      net > 0 ||
+      (meal.saturatedFat != null && meal.saturatedFat! > 0) ||
+      (meal.unsaturatedFat != null && meal.unsaturatedFat! > 0) ||
+      (meal.sodium != null && meal.sodium! > 0) ||
+      (meal.cholesterol != null && meal.cholesterol! > 0) ||
+      (meal.potassium != null && meal.potassium! > 0) ||
+      meal.glycemicIndex != null;
+}
+
 // ── _MealDetailSheet ───────────────────────────────────────────────────────
 
 class _MealDetailSheet extends StatelessWidget {
@@ -284,27 +300,18 @@ class _MealDetailSheet extends StatelessWidget {
     final name = meal.dishName ?? meal.name;
     final net = meal.netCarbs ?? meal.carbs;
 
-    // Build extended nutrient rows only for non-null values
-    final extended = <_NutrientRow>[
-      if (meal.fiber != null && meal.fiber! > 0)
-        _NutrientRow('Fiber', '${meal.fiber!.toStringAsFixed(1)}g',
-            NutrientColors.fiber, NutrientColors.fiberSoft),
-      if (net > 0)
-        _NutrientRow('Net carbs', '${net.toStringAsFixed(1)}g',
-            NutrientColors.netCarbs, NutrientColors.netCarbsSoft),
-      if (meal.sugarAlcohols != null && meal.sugarAlcohols! > 0)
-        _NutrientRow(
-            'Sugar alcohols',
-            '${meal.sugarAlcohols!.toStringAsFixed(1)}g',
-            NutrientColors.sugar,
-            NutrientColors.sugarSoft),
-      if (meal.saturatedFat != null && meal.saturatedFat! > 0)
-        _NutrientRow(
-            'Sat. fat',
-            '${meal.saturatedFat!.toStringAsFixed(1)}g',
-            NutrientColors.fatBad,
-            NutrientColors.fatBadSoft),
-    ];
+    final extendedGrid = ExtendedNutrientsGrid(
+      fiber: meal.fiber,
+      sugar: meal.sugar,
+      sugarAlcohols: meal.sugarAlcohols,
+      netCarbs: net > 0 ? net : null,
+      saturatedFat: meal.saturatedFat,
+      unsaturatedFat: meal.unsaturatedFat,
+      sodiumMg: meal.sodium != null ? meal.sodium! * 1000 : null,
+      cholesterolMg: meal.cholesterol != null ? meal.cholesterol! * 1000 : null,
+      potassiumMg: meal.potassium != null ? meal.potassium! * 1000 : null,
+      glycemicIndex: meal.glycemicIndex,
+    );
 
     return Container(
       decoration: const BoxDecoration(
@@ -372,8 +379,8 @@ class _MealDetailSheet extends StatelessWidget {
           // Primary macro grid: calories, protein, fat, carbs
           _MacroGrid(meal: meal),
 
-          // Extended nutrients
-          if (extended.isNotEmpty) ...[
+          // Extended nutrients via shared widget — only when data is present
+          if (_hasExtendedData(meal)) ...[
             const SizedBox(height: 14),
             Text(
               'EXTENDED',
@@ -385,13 +392,7 @@ class _MealDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: extended
-                  .map((r) => _ExtendedChip(row: r))
-                  .toList(),
-            ),
+            extendedGrid,
           ],
 
           const SizedBox(height: 20),
@@ -582,52 +583,6 @@ class _GiBadge extends StatelessWidget {
   }
 }
 
-// ── _ExtendedChip ──────────────────────────────────────────────────────────
-
-class _NutrientRow {
-  final String label, value;
-  final Color color, bg;
-  const _NutrientRow(this.label, this.value, this.color, this.bg);
-}
-
-class _ExtendedChip extends StatelessWidget {
-  final _NutrientRow row;
-  const _ExtendedChip({required this.row});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: row.bg,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '${row.label} ',
-              style: TextStyle(
-                fontSize: 11,
-                color: row.color.withValues(alpha: 0.75),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextSpan(
-              text: row.value,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: row.color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ── _ActionButton ──────────────────────────────────────────────────────────
 
 class _ActionButton extends StatelessWidget {
@@ -687,14 +642,28 @@ class _GroupDetailSheet extends StatelessWidget {
     final emoji = config.$1;
     final title = config.$2;
 
+    final l10n = AppLocalizations.of(context)!;
+
     final totalCal = meals.fold<double>(0, (s, m) => s + m.calories);
     final totalP   = meals.fold<double>(0, (s, m) => s + m.protein);
     final totalF   = meals.fold<double>(0, (s, m) => s + m.fat);
     final totalC   = meals.fold<double>(0, (s, m) => s + m.carbs);
     final totalNet = meals.fold<double>(0, (s, m) => s + (m.netCarbs ?? m.carbs));
-    final totalFib = meals.fold<double>(0, (s, m) => s + (m.fiber ?? 0));
-    final totalSat = meals.fold<double>(0, (s, m) => s + (m.saturatedFat ?? 0));
-    final totalSugarAlc = meals.fold<double>(0, (s, m) => s + (m.sugarAlcohols ?? 0));
+
+    // Aggregated extended nutrients — null-collapse to null if total is zero
+    double _sumOrNull(double Function(Meal) fn) =>
+        meals.fold<double>(0, (s, m) => s + fn(m));
+    final aggFiber      = _sumOrNull((m) => m.fiber ?? 0);
+    final aggSugar      = _sumOrNull((m) => m.sugar ?? 0);
+    final aggSugarAlc   = _sumOrNull((m) => m.sugarAlcohols ?? 0);
+    final aggSatFat     = _sumOrNull((m) => m.saturatedFat ?? 0);
+    final aggUnsatFat   = _sumOrNull((m) => m.unsaturatedFat ?? 0);
+    final aggSodiumMg   = _sumOrNull((m) => (m.sodium ?? 0) * 1000);
+    final aggCholMg     = _sumOrNull((m) => (m.cholesterol ?? 0) * 1000);
+    final aggPotMg      = _sumOrNull((m) => (m.potassium ?? 0) * 1000);
+    final hasExtended = aggFiber > 0 || aggSugar > 0 || aggSugarAlc > 0 ||
+        totalNet > 0 || aggSatFat > 0 || aggUnsatFat > 0 ||
+        aggSodiumMg > 0 || aggCholMg > 0 || aggPotMg > 0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -726,13 +695,10 @@ class _GroupDetailSheet extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.text, letterSpacing: -0.3)),
                 const Spacer(),
-                Builder(builder: (context) {
-                  final isRu = Localizations.localeOf(context).languageCode == 'ru';
-                  return Text(
-                    isRu ? '${meals.length} блюд' : '${meals.length} items',
-                    style: TextStyle(fontSize: 12, color: NutrientColors.tertiary),
-                  );
-                }),
+                Text(
+                  l10n.mealGroup_itemsCount(meals.length),
+                  style: TextStyle(fontSize: 12, color: NutrientColors.tertiary),
+                ),
               ],
             ),
           ),
@@ -741,28 +707,30 @@ class _GroupDetailSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                Expanded(child: _MacroCell(label: 'Калории', value: totalCal.toStringAsFixed(0), unit: 'ккал', color: NutrientColors.kcal, bg: NutrientColors.kcalSoft)),
+                Expanded(child: _MacroCell(label: 'Calories', value: totalCal.toStringAsFixed(0), unit: 'kcal', color: NutrientColors.kcal, bg: NutrientColors.kcalSoft)),
                 const SizedBox(width: 8),
-                Expanded(child: _MacroCell(label: 'Белки', value: totalP.toStringAsFixed(1), unit: 'г', color: NutrientColors.protein, bg: NutrientColors.proteinSoft)),
+                Expanded(child: _MacroCell(label: 'Protein', value: totalP.toStringAsFixed(1), unit: 'g', color: NutrientColors.protein, bg: NutrientColors.proteinSoft)),
                 const SizedBox(width: 8),
-                Expanded(child: _MacroCell(label: 'Жиры', value: totalF.toStringAsFixed(1), unit: 'г', color: NutrientColors.fatGood, bg: NutrientColors.fatGoodSoft)),
+                Expanded(child: _MacroCell(label: 'Fat', value: totalF.toStringAsFixed(1), unit: 'g', color: NutrientColors.fatGood, bg: NutrientColors.fatGoodSoft)),
                 const SizedBox(width: 8),
-                Expanded(child: _MacroCell(label: 'Углеводы', value: totalC.toStringAsFixed(1), unit: 'г', color: NutrientColors.netCarbs, bg: NutrientColors.netCarbsSoft)),
+                Expanded(child: _MacroCell(label: 'Carbs', value: totalC.toStringAsFixed(1), unit: 'g', color: NutrientColors.netCarbs, bg: NutrientColors.netCarbsSoft)),
               ],
             ),
           ),
-          if (totalNet > 0 || totalFib > 0 || totalSat > 0 || totalSugarAlc > 0) ...[
+          if (hasExtended) ...[
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Wrap(
-                spacing: 8, runSpacing: 6,
-                children: [
-                  if (totalNet > 0) _ExtendedChip(row: _NutrientRow('Чистые углеводы', '${totalNet.toStringAsFixed(1)}г', NutrientColors.netCarbs, NutrientColors.netCarbsSoft)),
-                  if (totalFib > 0) _ExtendedChip(row: _NutrientRow('Клетчатка', '${totalFib.toStringAsFixed(1)}г', NutrientColors.fiber, NutrientColors.fiberSoft)),
-                  if (totalSat > 0) _ExtendedChip(row: _NutrientRow('Нас. жиры', '${totalSat.toStringAsFixed(1)}г', NutrientColors.fatBad, NutrientColors.fatBadSoft)),
-                  if (totalSugarAlc > 0) _ExtendedChip(row: _NutrientRow('Сах. спирты', '${totalSugarAlc.toStringAsFixed(1)}г', NutrientColors.sugar, NutrientColors.sugarSoft)),
-                ],
+              child: ExtendedNutrientsGrid(
+                fiber: aggFiber > 0 ? aggFiber : null,
+                sugar: aggSugar > 0 ? aggSugar : null,
+                sugarAlcohols: aggSugarAlc > 0 ? aggSugarAlc : null,
+                netCarbs: totalNet > 0 ? totalNet : null,
+                saturatedFat: aggSatFat > 0 ? aggSatFat : null,
+                unsaturatedFat: aggUnsatFat > 0 ? aggUnsatFat : null,
+                sodiumMg: aggSodiumMg > 0 ? aggSodiumMg : null,
+                cholesterolMg: aggCholMg > 0 ? aggCholMg : null,
+                potassiumMg: aggPotMg > 0 ? aggPotMg : null,
               ),
             ),
           ],
@@ -787,11 +755,11 @@ class _GroupDetailSheet extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(m.dishName ?? m.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            Text('Net ${net.toStringAsFixed(0)}г · Б ${m.protein.toStringAsFixed(0)}г · Ж ${m.fat.toStringAsFixed(0)}г', style: TextStyle(fontSize: 11, color: NutrientColors.secondary)),
+                            Text('Net ${net.toStringAsFixed(0)}g · P ${m.protein.toStringAsFixed(0)}g · F ${m.fat.toStringAsFixed(0)}g', style: TextStyle(fontSize: 11, color: NutrientColors.secondary)),
                           ],
                         ),
                       ),
-                      Text('${m.calories.toStringAsFixed(0)} ккал', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: NutrientColors.kcal)),
+                      Text('${m.calories.toStringAsFixed(0)} kcal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: NutrientColors.kcal)),
                     ],
                   ),
                 );

@@ -11,6 +11,7 @@ class NutrientsV2 with _$NutrientsV2 {
     required double fat,
     required double carbs,
     double? fiber,
+    double? sugar,
     @JsonKey(name: 'sugar_alcohols') double? sugarAlcohols,
     @JsonKey(name: 'net_carbs') double? netCarbs,
     @JsonKey(name: 'saturated_fat') double? saturatedFat,

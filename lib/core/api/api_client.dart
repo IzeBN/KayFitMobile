@@ -119,10 +119,13 @@ class _AuthInterceptor extends Interceptor {
 
     // ── This request is the first to get 401 — do the refresh ────────────────
     _refreshCompleter = Completer<String?>();
+    String? newAccess;
     try {
       final refreshToken = await TokenStorage.getRefresh();
       if (refreshToken == null) {
-        _refreshCompleter!.complete(null);
+        if (!_refreshCompleter!.isCompleted) {
+          _refreshCompleter!.complete(null);
+        }
         await _handleLogout();
         handler.next(err);
         return;
@@ -139,23 +142,42 @@ class _AuthInterceptor extends Interceptor {
       );
 
       final data = resp.data as Map<String, dynamic>;
-      final newAccess = data['access_token'] as String;
+      newAccess = data['access_token'] as String;
       final newRefresh = data['refresh_token'] as String;
       await TokenStorage.save(newAccess, newRefresh);
 
-      _refreshCompleter!.complete(newAccess);
+      if (!_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.complete(newAccess);
+      }
+    } catch (_) {
+      // Refresh itself failed — token is dead, log out
+      if (!_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.complete(null);
+      }
+      _refreshCompleter = null;
+      await _handleLogout();
+      handler.next(err);
+      return;
+    }
 
-      // Retry the original request that triggered the 401
+    // Refresh succeeded. Clear in-flight marker BEFORE retrying so concurrent
+    // 401s don't queue forever, and so retry failures don't trigger logout.
+    _refreshCompleter = null;
+
+    // Retry the original request that triggered the 401
+    try {
       final opts = err.requestOptions;
       opts.headers['Authorization'] = 'Bearer $newAccess';
       final retryResp = await _dio.fetch(opts);
       handler.resolve(retryResp);
-    } catch (_) {
-      _refreshCompleter!.complete(null);
-      await _handleLogout();
-      handler.next(err);
-    } finally {
-      _refreshCompleter = null;
+    } catch (e) {
+      // Retry failed for non-auth reasons (timeout, network, server error).
+      // Surface the error to the caller without logging out.
+      if (e is DioException) {
+        handler.next(e);
+      } else {
+        handler.next(err);
+      }
     }
   }
 

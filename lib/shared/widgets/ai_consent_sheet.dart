@@ -122,13 +122,7 @@ class _AiConsentSheetState extends State<_AiConsentSheet>
 
               // Body text
               Text(
-                isRu
-                    ? 'Для распознавания блюд приложение отправляет описание '
-                        'вашей еды (голос, фото, текст) в Anthropic (Claude). '
-                        'Данные используются только для анализа и не хранятся для обучения модели.'
-                    : 'To recognize your meals, the app sends food descriptions '
-                        '(voice, photo, or text) to Anthropic (Claude) for analysis.'
-                        'Your data is used only for recognition and is not stored for model training.',
+                'For food recognition the app sends your food description (voice, photo, text) to Anthropic (Claude). Data is used for analysis only and is not stored for model training.',
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.textMuted,
@@ -304,9 +298,7 @@ class _CheckboxRow extends StatelessWidget {
           // Label
           Expanded(
             child: Text(
-              isRu
-                  ? 'Я согласен(а) отправлять данные о еде в Anthropic (Claude) для распознавания'
-                  : 'I agree to send food data to Anthropic (Claude) for recognition',
+              'I agree to send food data to Anthropic (Claude) for recognition',
               style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.text,

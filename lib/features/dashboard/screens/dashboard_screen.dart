@@ -11,8 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/stats_card.dart';
-import '../../journal/widgets/meal_item.dart';
+import '../../journal/widgets/meal_group_card.dart';
 import '../../add_meal/screens/add_meal_sheet.dart';
+import '../../../shared/utils/meal_grouping.dart';
 import '../../way_to_goal/providers/way_to_goal_provider.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -65,7 +66,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    _listCtrl.forward();
+    // _listCtrl is triggered via ref.listen in build() once data arrives,
+    // so that groups are actually visible when the animation runs.
 
     AnalyticsService.dashboardOpened();
 
@@ -206,6 +208,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final meals = ref.watch(todayMealsProvider);
     final calc = ref.watch(calculationResultProvider);
 
+    // Trigger stagger animation when meal data first arrives so groups are
+    // already in the tree when the animation plays.
+    ref.listen<AsyncValue<List<Meal>>>(todayMealsProvider, (previous, next) {
+      if (next.hasValue && _listCtrl.status != AnimationStatus.completed) {
+        _listCtrl.forward(from: 0);
+      }
+    });
+
     final hasMeals = meals.valueOrNull?.isNotEmpty ?? false;
 
     return Scaffold(
@@ -307,7 +317,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               ),
             ),
 
-            // ── Meals list ────────────────────────────────────────────────
+            // ── Meals list (grouped by meal type) ────────────────────────
             meals.when(
               data: (list) {
                 if (list.isEmpty) {
@@ -319,20 +329,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     ),
                   );
                 }
+                final groups = list.grouped();
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => _AnimatedListItem(
-                      fade: _fadeFor(index + 3),
-                      slide: _slideFor(index + 3),
-                      child: MealItem(
-                        meal: list[index],
-                        onDelete: () =>
-                            _deleteMeal(context, ref, list[index].id),
-                        onEdit: () =>
-                            context.push('/meals/${list[index].id}/edit'),
-                      ),
-                    ),
-                    childCount: list.length,
+                    (context, index) {
+                      final (group, items) = groups[index];
+                      return _AnimatedListItem(
+                        fade: _fadeFor(index + 3),
+                        slide: _slideFor(index + 3),
+                        child: MealGroupCard(
+                          mealType: group.apiKey,
+                          time: '',
+                          meals: items,
+                          onDeleteMeal: (id) =>
+                              _deleteMeal(context, ref, id),
+                          onEditMeal: (id) =>
+                              context.push('/meals/$id/edit'),
+                        ),
+                      );
+                    },
+                    childCount: groups.length,
                   ),
                 );
               },

@@ -775,6 +775,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get goals_err_enter_int => 'Введите целое число';
 
   @override
+  String get dashboard_details => 'Подробнее';
+
+  @override
   String get dashboard_no_goals_title => 'Цели не настроены';
 
   @override
@@ -884,6 +887,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get barcode_not_found => 'Продукт не найден';
+
+  @override
+  String get addMeal_barcode_scanning => 'Сканирование штрихкода';
+
+  @override
+  String get addMeal_barcode_torch_off => 'Выключить фонарик';
+
+  @override
+  String get addMeal_barcode_torch_on => 'Включить фонарик';
+
+  @override
+  String get addMeal_barcode_detected => 'Штрихкод найден';
+
+  @override
+  String get addMeal_barcode_confirm => 'Добавить в журнал';
 
   @override
   String get settings_privacy_policy => 'Политика конфиденциальности';
@@ -1276,4 +1294,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get nutrient_mcg => 'мкг';
+
+  @override
+  String mealGroup_itemsCount(int count) {
+    return '$count блюд';
+  }
 }

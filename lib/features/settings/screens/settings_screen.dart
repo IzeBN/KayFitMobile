@@ -89,7 +89,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             _showLangSheet(context, l10n, isRu);
           },
           trailing: Text(
-            isRu ? '🇷🇺 RU' : '🇬🇧 EN',
+            '🇬🇧 EN',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textMuted,
@@ -283,27 +283,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             ),
             const SizedBox(height: 16),
             _LangOption(
-              flag: '🇷🇺',
-              label: 'Русский',
-              selected: isRu,
-              onTap: () {
-                ref
-                    .read(localeProvider.notifier)
-                    .setLocale(const Locale('ru'));
-                AnalyticsService.languageChanged('ru');
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 8),
-            _LangOption(
               flag: '🇬🇧',
               label: 'English',
-              selected: !isRu,
+              selected: true,
               onTap: () {
-                ref
-                    .read(localeProvider.notifier)
-                    .setLocale(const Locale('en'));
-                AnalyticsService.languageChanged('en');
                 Navigator.pop(context);
               },
             ),

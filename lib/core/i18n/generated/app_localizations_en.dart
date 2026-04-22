@@ -774,6 +774,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goals_err_enter_int => 'Enter a whole number';
 
   @override
+  String get dashboard_details => 'Details';
+
+  @override
   String get dashboard_no_goals_title => 'Goals not set';
 
   @override
@@ -884,6 +887,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get barcode_not_found => 'Product not found';
+
+  @override
+  String get addMeal_barcode_scanning => 'Barcode scanning';
+
+  @override
+  String get addMeal_barcode_torch_off => 'Turn off flashlight';
+
+  @override
+  String get addMeal_barcode_torch_on => 'Turn on flashlight';
+
+  @override
+  String get addMeal_barcode_detected => 'Barcode detected';
+
+  @override
+  String get addMeal_barcode_confirm => 'Add to journal';
 
   @override
   String get settings_privacy_policy => 'Privacy Policy';
@@ -1276,4 +1294,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutrient_mcg => 'mcg';
+
+  @override
+  String mealGroup_itemsCount(int count) {
+    return '$count items';
+  }
 }

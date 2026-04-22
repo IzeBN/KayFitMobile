@@ -38,6 +38,7 @@ dependencies:
 
   # Media
   image_picker: ^1.1.0
+  flutter_image_compress: ^2.3.0
   record: ^6.0.0
   permission_handler: ^11.3.0
 

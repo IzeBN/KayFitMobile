@@ -1550,6 +1550,12 @@ abstract class AppLocalizations {
   /// **'Введите целое число'**
   String get goals_err_enter_int;
 
+  /// No description provided for @dashboard_details.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подробнее'**
+  String get dashboard_details;
+
   /// No description provided for @dashboard_no_goals_title.
   ///
   /// In ru, this message translates to:
@@ -1759,6 +1765,36 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Продукт не найден'**
   String get barcode_not_found;
+
+  /// No description provided for @addMeal_barcode_scanning.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сканирование штрихкода'**
+  String get addMeal_barcode_scanning;
+
+  /// No description provided for @addMeal_barcode_torch_off.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выключить фонарик'**
+  String get addMeal_barcode_torch_off;
+
+  /// No description provided for @addMeal_barcode_torch_on.
+  ///
+  /// In ru, this message translates to:
+  /// **'Включить фонарик'**
+  String get addMeal_barcode_torch_on;
+
+  /// No description provided for @addMeal_barcode_detected.
+  ///
+  /// In ru, this message translates to:
+  /// **'Штрихкод найден'**
+  String get addMeal_barcode_detected;
+
+  /// No description provided for @addMeal_barcode_confirm.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить в журнал'**
+  String get addMeal_barcode_confirm;
 
   /// No description provided for @settings_privacy_policy.
   ///
@@ -2527,6 +2563,12 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'мкг'**
   String get nutrient_mcg;
+
+  /// No description provided for @mealGroup_itemsCount.
+  ///
+  /// In ru, this message translates to:
+  /// **'{count} блюд'**
+  String mealGroup_itemsCount(int count);
 }
 
 class _AppLocalizationsDelegate
