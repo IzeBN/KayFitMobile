@@ -33,6 +33,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_edit => 'Edit';
 
   @override
+  String get meal_details_full => 'Full Details';
+
+  @override
   String get common_loading => 'Loading...';
 
   @override
@@ -871,6 +874,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMeal_ai_analyzing => 'AI is analyzing...';
 
   @override
+  String get addMeal_parsing_title => 'Searching database';
+
+  @override
+  String get addMeal_parsing_step1 => 'Searching in database...';
+
+  @override
+  String get addMeal_parsing_step2 => 'Analyzing ingredients...';
+
+  @override
+  String get addMeal_parsing_step3 => 'Calculating nutrition...';
+
+  @override
+  String get addMeal_parsing_step4 => 'Finding vitamins & minerals...';
+
+  @override
   String get barcode_scan_hint => 'Point the camera at a barcode';
 
   @override
@@ -1130,6 +1148,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recogV2_search_hint => 'E.g.: chicken breast';
+
+  @override
+  String get recogV2_correct_btn => 'Correct';
+
+  @override
+  String get recogV2_correct_hint =>
+      'What to change? E.g.: turkey patties, not chicken';
+
+  @override
+  String get recogV2_correct_title => 'Correction';
+
+  @override
+  String get recogV2_correct_send => 'Apply';
+
+  @override
+  String get recogV2_correct_loading => 'Updating...';
 
   @override
   String get nds_section_basic => 'Basic';

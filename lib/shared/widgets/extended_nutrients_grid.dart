@@ -18,6 +18,12 @@ class ExtendedNutrientsGrid extends StatelessWidget {
   final double? sodiumMg;
   final double? cholesterolMg;
   final double? potassiumMg;
+  final double? calciumMg;
+  final double? ironMg;
+  final double? vitaminAMcg;
+  final double? vitaminCMg;
+  final double? vitaminDMcg;
+  final double? vitaminB12Mcg;
   final int? glycemicIndex;
   final String? glycemicIndexCategory;
 
@@ -32,6 +38,12 @@ class ExtendedNutrientsGrid extends StatelessWidget {
     this.sodiumMg,
     this.cholesterolMg,
     this.potassiumMg,
+    this.calciumMg,
+    this.ironMg,
+    this.vitaminAMcg,
+    this.vitaminCMg,
+    this.vitaminDMcg,
+    this.vitaminB12Mcg,
     this.glycemicIndex,
     this.glycemicIndexCategory,
   });
@@ -110,6 +122,54 @@ class ExtendedNutrientsGrid extends StatelessWidget {
           unit: 'mg',
           color: AppColors.textMuted,
           bg: NutrientColors.bg,
+        ),
+      if (calciumMg != null && calciumMg! > 0)
+        _NutrientChip(
+          label: 'Calcium',
+          value: calciumMg!.toStringAsFixed(0),
+          unit: 'mg',
+          color: AppColors.textMuted,
+          bg: NutrientColors.bg,
+        ),
+      if (ironMg != null && ironMg! > 0)
+        _NutrientChip(
+          label: 'Iron',
+          value: ironMg!.toStringAsFixed(1),
+          unit: 'mg',
+          color: AppColors.textMuted,
+          bg: NutrientColors.bg,
+        ),
+      if (vitaminAMcg != null && vitaminAMcg! > 0)
+        _NutrientChip(
+          label: 'Vit A',
+          value: vitaminAMcg!.toStringAsFixed(0),
+          unit: 'mcg',
+          color: NutrientColors.fiber,
+          bg: NutrientColors.fiberSoft,
+        ),
+      if (vitaminCMg != null && vitaminCMg! > 0)
+        _NutrientChip(
+          label: 'Vit C',
+          value: vitaminCMg!.toStringAsFixed(1),
+          unit: 'mg',
+          color: NutrientColors.fiber,
+          bg: NutrientColors.fiberSoft,
+        ),
+      if (vitaminDMcg != null && vitaminDMcg! > 0)
+        _NutrientChip(
+          label: 'Vit D',
+          value: vitaminDMcg!.toStringAsFixed(1),
+          unit: 'mcg',
+          color: NutrientColors.fiber,
+          bg: NutrientColors.fiberSoft,
+        ),
+      if (vitaminB12Mcg != null && vitaminB12Mcg! > 0)
+        _NutrientChip(
+          label: 'Vit B12',
+          value: vitaminB12Mcg!.toStringAsFixed(1),
+          unit: 'mcg',
+          color: NutrientColors.fiber,
+          bg: NutrientColors.fiberSoft,
         ),
       if (glycemicIndex != null) _GiBadgeChip(gi: glycemicIndex!),
     ];

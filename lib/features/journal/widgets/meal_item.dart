@@ -51,7 +51,7 @@ NutrientsV2 nutrientsFromMeal(Meal meal) {
     netCarbs: meal.netCarbs,
     saturatedFat: meal.saturatedFat,
     // unsaturatedFat в Meal суммарный; разбивки нет — пропускаем
-    sodiumMg: meal.sodium != null ? meal.sodium! * 1000 : null,
+    sodiumMg: meal.sodium,
     cholesterolMg: meal.cholesterol,
     potassiumMg: meal.potassium,
     calciumMg: meal.calcium,
@@ -143,7 +143,7 @@ class _MealItemState extends State<MealItem>
                     ? meal.saturatedFat! / meal.weight! * 100
                     : null,
                 sodiumMg: meal.sodium != null
-                    ? meal.sodium! * 1000 / meal.weight! * 100
+                    ? meal.sodium! / meal.weight! * 100
                     : null,
                 cholesterolMg: meal.cholesterol != null
                     ? meal.cholesterol! / meal.weight! * 100
@@ -644,44 +644,97 @@ class _MealActionsSheetState extends State<_MealActionsSheet>
               // ── Action buttons ─────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Row(
+                child: Column(
                   children: [
-                    // Edit button
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.edit_rounded,
-                        label: l10n.common_edit,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF059669), Color(0xFF34D399)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shadowColor: AppColors.accent,
-                        onTap: () {
-                          AnalyticsService.journalMealEditTapped(meal.id);
-                          Navigator.pop(context);
-                          widget.onEdit?.call();
-                        },
+                    // Details button
+                    _ActionButton(
+                      icon: Icons.info_outline_rounded,
+                      label: l10n.meal_details_full,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0369A1), Color(0xFF38BDF8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      shadowColor: Color(0xFF0369A1),
+                      onTap: () {
+                        Navigator.pop(context);
+                        final nutrients = nutrientsFromMeal(meal);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => NutrientDetailSheet(
+                            name: meal.name,
+                            weightGrams: meal.weight ?? 100,
+                            per100g: meal.weight != null && meal.weight! > 0
+                                ? NutrientsV2(
+                                    calories: meal.calories / meal.weight! * 100,
+                                    protein: meal.protein / meal.weight! * 100,
+                                    fat: meal.fat / meal.weight! * 100,
+                                    carbs: meal.carbs / meal.weight! * 100,
+                                    fiber: meal.fiber != null ? meal.fiber! / meal.weight! * 100 : null,
+                                    sugarAlcohols: meal.sugarAlcohols != null ? meal.sugarAlcohols! / meal.weight! * 100 : null,
+                                    netCarbs: meal.netCarbs != null ? meal.netCarbs! / meal.weight! * 100 : null,
+                                    saturatedFat: meal.saturatedFat != null ? meal.saturatedFat! / meal.weight! * 100 : null,
+                                    sodiumMg: meal.sodium != null ? meal.sodium! / meal.weight! * 100 : null,
+                                    cholesterolMg: meal.cholesterol != null ? meal.cholesterol! / meal.weight! * 100 : null,
+                                    potassiumMg: meal.potassium != null ? meal.potassium! / meal.weight! * 100 : null,
+                                    calciumMg: meal.calcium != null ? meal.calcium! / meal.weight! * 100 : null,
+                                    ironMg: meal.iron != null ? meal.iron! / meal.weight! * 100 : null,
+                                    vitaminAMcg: meal.vitaminA != null ? meal.vitaminA! / meal.weight! * 100 : null,
+                                    vitaminCMg: meal.vitaminC != null ? meal.vitaminC! / meal.weight! * 100 : null,
+                                    vitaminDMcg: meal.vitaminD != null ? meal.vitaminD! / meal.weight! * 100 : null,
+                                    glycemicIndex: meal.glycemicIndex,
+                                  )
+                                : nutrients,
+                            total: nutrients,
+                            source: meal.source ?? 'claude',
+                            sourceUrl: meal.sourceUrl,
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(width: 12),
-                    // Delete button
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.delete_rounded,
-                        label: l10n.common_delete,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFDC2626), Color(0xFFF87171)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        // Edit button
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.edit_rounded,
+                            label: l10n.common_edit,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF059669), Color(0xFF34D399)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shadowColor: AppColors.accent,
+                            onTap: () {
+                              AnalyticsService.journalMealEditTapped(meal.id);
+                              Navigator.pop(context);
+                              widget.onEdit?.call();
+                            },
+                          ),
                         ),
-                        shadowColor: AppColors.accentOver,
-                        onTap: () {
-                          AnalyticsService.journalMealDeleteConfirmed(meal.id);
-                          Navigator.pop(context);
-                          widget.onDelete?.call();
-                        },
-                      ),
+                        const SizedBox(width: 12),
+                        // Delete button
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.delete_rounded,
+                            label: l10n.common_delete,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFDC2626), Color(0xFFF87171)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shadowColor: AppColors.accentOver,
+                            onTap: () {
+                              AnalyticsService.journalMealDeleteConfirmed(meal.id);
+                              Navigator.pop(context);
+                              widget.onDelete?.call();
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -730,7 +783,7 @@ class _NutrientDetailsSection extends StatelessWidget {
     // Жиры детально
     if (meal.saturatedFat != null) items.add(_NutrientRow(l10n.nutrient_saturated_fat, '${meal.saturatedFat!.toStringAsFixed(1)} ${l10n.macro_g}'));
     if (meal.unsaturatedFat != null) items.add(_NutrientRow(l10n.nutrient_unsaturated_fat, '${meal.unsaturatedFat!.toStringAsFixed(1)} ${l10n.macro_g}'));
-    if (meal.cholesterol != null) items.add(_NutrientRow(l10n.nutrient_cholesterol, '${meal.cholesterol!.toStringAsFixed(1)} ${l10n.macro_g}'));
+    if (meal.cholesterol != null) items.add(_NutrientRow(l10n.nutrient_cholesterol, '${meal.cholesterol!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));
 
     // Минералы
     if (meal.sodium != null) items.add(_NutrientRow(l10n.nutrient_sodium, '${meal.sodium!.toStringAsFixed(1)} ${l10n.nutrient_mg}'));

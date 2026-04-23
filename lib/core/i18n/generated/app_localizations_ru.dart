@@ -33,6 +33,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get common_edit => 'Редактировать';
 
   @override
+  String get meal_details_full => 'Подробный состав';
+
+  @override
   String get common_loading => 'Загрузка...';
 
   @override
@@ -871,6 +874,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addMeal_ai_analyzing => 'AI анализирует данные...';
 
   @override
+  String get addMeal_parsing_title => 'Поиск в базе данных';
+
+  @override
+  String get addMeal_parsing_step1 => 'Ищем в базе данных...';
+
+  @override
+  String get addMeal_parsing_step2 => 'Анализируем ингредиенты...';
+
+  @override
+  String get addMeal_parsing_step3 => 'Рассчитываем КБЖУ...';
+
+  @override
+  String get addMeal_parsing_step4 => 'Подбираем витамины и минералы...';
+
+  @override
   String get barcode_scan_hint => 'Наведите камеру на штрихкод';
 
   @override
@@ -1130,6 +1148,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get recogV2_search_hint => 'Например: куриная грудка';
+
+  @override
+  String get recogV2_correct_btn => 'Скорректировать';
+
+  @override
+  String get recogV2_correct_hint =>
+      'Что изменить? Например: котлеты из индейки, а не курицы';
+
+  @override
+  String get recogV2_correct_title => 'Корректировка';
+
+  @override
+  String get recogV2_correct_send => 'Применить';
+
+  @override
+  String get recogV2_correct_loading => 'Обновляем состав...';
 
   @override
   String get nds_section_basic => 'Основные';

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -174,6 +175,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
               dishName: summaryName,
               ingredients: v2items,
               mealDate: widget.mealDate,
+              originalText: text,
             ),
           ),
         );
@@ -353,6 +355,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
               dishName: dishName,
               ingredients: v2items,
               mealDate: widget.mealDate,
+              originalText: null,
             ),
           ),
         );
@@ -484,7 +487,7 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                   _loadingType == _LoadingType.photo)
                 _RecognizingOverlay(type: _loadingType, l10n: l10n),
               if (_loadingType == _LoadingType.parsing)
-                _SavingOverlay(l10n: l10n),
+                const _ParsingOverlay(),
             ],
           ),
         ),
@@ -610,9 +613,9 @@ class _ChooseViewState extends State<_ChooseView>
     final l10n = widget.l10n;
     final ru = widget.isRu;
 
-    const unifiedGradient = [Color(0xFF6366F1), Color(0xFF8B5CF6)];
-    const unifiedShadow = Color(0xFF6366F1);
-    const unifiedBg = Color(0xFFF5F3FF);
+    const unifiedGradient = [Color(0xFF059669), Color(0xFF34D399)];
+    const unifiedShadow = Color(0xFF059669);
+    const unifiedBg = Color(0xFFECFDF5);
 
     final methods = [
       _MethodData(
@@ -620,7 +623,7 @@ class _ChooseViewState extends State<_ChooseView>
         gradient: unifiedGradient,
         shadowColor: unifiedShadow,
         bgColor: unifiedBg,
-        title: l10n.addMeal_photo,
+        title: '📸 ${l10n.addMeal_photo}',
         desc: ru
             ? 'Сфотографируй — AI распознает состав за 5 сек'
             : 'Take a photo — AI identifies macros in 5 sec',
@@ -631,7 +634,7 @@ class _ChooseViewState extends State<_ChooseView>
         gradient: unifiedGradient,
         shadowColor: unifiedShadow,
         bgColor: unifiedBg,
-        title: l10n.addMeal_voice,
+        title: '🎙️ ${l10n.addMeal_voice}',
         desc: ru
             ? '«Съел борщ 300 мл» — просто скажи'
             : 'Say "I ate soup 300ml" — that\'s it',
@@ -642,7 +645,7 @@ class _ChooseViewState extends State<_ChooseView>
         gradient: unifiedGradient,
         shadowColor: unifiedShadow,
         bgColor: unifiedBg,
-        title: l10n.addMeal_text,
+        title: '✏️ ${l10n.addMeal_text}',
         desc: ru
             ? 'Напиши что съел — AI посчитает КБЖУ'
             : 'Describe your meal — AI counts macros',
@@ -653,7 +656,7 @@ class _ChooseViewState extends State<_ChooseView>
         gradient: unifiedGradient,
         shadowColor: unifiedShadow,
         bgColor: unifiedBg,
-        title: l10n.addMeal_barcode,
+        title: '📱 ${l10n.addMeal_barcode}',
         desc: l10n.addMeal_barcode_desc,
         onTap: widget.onBarcode,
       ),
@@ -1420,45 +1423,188 @@ class _RecognizingOverlayState extends State<_RecognizingOverlay>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Saving overlay
+// Parsing overlay — Perplexity-style animated search steps
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SavingOverlay extends StatelessWidget {
-  final AppLocalizations l10n;
-  const _SavingOverlay({required this.l10n});
+class _ParsingOverlay extends StatefulWidget {
+  const _ParsingOverlay();
+
+  @override
+  State<_ParsingOverlay> createState() => _ParsingOverlayState();
+}
+
+class _ParsingOverlayState extends State<_ParsingOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _dotCtrl;
+  Timer? _stepTimer;
+  int _visibleSteps = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _dotCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
+
+    _stepTimer = Timer.periodic(const Duration(milliseconds: 1600), (t) {
+      if (!mounted) return;
+      setState(() {
+        if (_visibleSteps < 4) _visibleSteps++;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _dotCtrl.dispose();
+    _stepTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final steps = [
+      l10n.addMeal_parsing_step1,
+      l10n.addMeal_parsing_step2,
+      l10n.addMeal_parsing_step3,
+      l10n.addMeal_parsing_step4,
+    ];
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.35),
+        color: AppColors.surface.withValues(alpha: 0.97),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            boxShadow: AppShadow.md,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(
-                color: AppColors.accent,
-                strokeWidth: 3,
-              ),
-              const SizedBox(height: 14),
-              Text(
-                AppLocalizations.of(context)!.addMeal_saving,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text,
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──────────────────────────────────────────────
+            Row(
+              children: [
+                AnimatedBuilder(
+                  animation: _dotCtrl,
+                  builder: (_, __) {
+                    final scale = 1.0 + 0.07 * math.sin(_dotCtrl.value * 2 * math.pi);
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF059669), Color(0xFF10B981)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: 0.35),
+                              blurRadius: 16,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.manage_search_rounded, color: Colors.white, size: 26),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.addMeal_parsing_title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.addMeal_ai_analyzing,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            // ── Steps ──────────────────────────────────────────────
+            ...List.generate(steps.length, (i) {
+              final isVisible = i < _visibleSteps;
+              final isCurrent = i == _visibleSteps - 1;
+              final isDone = i < _visibleSteps - 1;
+
+              return AnimatedOpacity(
+                opacity: isVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 450),
+                child: AnimatedSlide(
+                  offset: isVisible ? Offset.zero : const Offset(0, 0.25),
+                  duration: const Duration(milliseconds: 450),
+                  curve: Curves.easeOutCubic,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        // Icon: spinner for current, checkmark for done
+                        SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: isCurrent
+                              ? AnimatedBuilder(
+                                  animation: _dotCtrl,
+                                  builder: (_, __) =>
+                                      const CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: AppColors.accent,
+                                  ),
+                                )
+                              : Icon(
+                                  isDone
+                                      ? Icons.check_circle_rounded
+                                      : Icons.radio_button_unchecked_rounded,
+                                  size: 22,
+                                  color: isDone
+                                      ? AppColors.accent
+                                      : AppColors.border,
+                                ),
+                        ),
+                        const SizedBox(width: 14),
+                        Text(
+                          steps[i],
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isCurrent
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color: isCurrent
+                                ? AppColors.text
+                                : isDone
+                                    ? AppColors.textMuted
+                                    : AppColors.border,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
         ),
       ),
     );

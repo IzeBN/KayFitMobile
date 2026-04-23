@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'Редактировать'**
   String get common_edit;
 
+  /// No description provided for @meal_details_full.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подробный состав'**
+  String get meal_details_full;
+
   /// No description provided for @common_loading.
   ///
   /// In ru, this message translates to:
@@ -1730,6 +1736,36 @@ abstract class AppLocalizations {
   /// **'AI анализирует данные...'**
   String get addMeal_ai_analyzing;
 
+  /// No description provided for @addMeal_parsing_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поиск в базе данных'**
+  String get addMeal_parsing_title;
+
+  /// No description provided for @addMeal_parsing_step1.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ищем в базе данных...'**
+  String get addMeal_parsing_step1;
+
+  /// No description provided for @addMeal_parsing_step2.
+  ///
+  /// In ru, this message translates to:
+  /// **'Анализируем ингредиенты...'**
+  String get addMeal_parsing_step2;
+
+  /// No description provided for @addMeal_parsing_step3.
+  ///
+  /// In ru, this message translates to:
+  /// **'Рассчитываем КБЖУ...'**
+  String get addMeal_parsing_step3;
+
+  /// No description provided for @addMeal_parsing_step4.
+  ///
+  /// In ru, this message translates to:
+  /// **'Подбираем витамины и минералы...'**
+  String get addMeal_parsing_step4;
+
   /// No description provided for @barcode_scan_hint.
   ///
   /// In ru, this message translates to:
@@ -2239,6 +2275,36 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Например: куриная грудка'**
   String get recogV2_search_hint;
+
+  /// No description provided for @recogV2_correct_btn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Скорректировать'**
+  String get recogV2_correct_btn;
+
+  /// No description provided for @recogV2_correct_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Что изменить? Например: котлеты из индейки, а не курицы'**
+  String get recogV2_correct_hint;
+
+  /// No description provided for @recogV2_correct_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Корректировка'**
+  String get recogV2_correct_title;
+
+  /// No description provided for @recogV2_correct_send.
+  ///
+  /// In ru, this message translates to:
+  /// **'Применить'**
+  String get recogV2_correct_send;
+
+  /// No description provided for @recogV2_correct_loading.
+  ///
+  /// In ru, this message translates to:
+  /// **'Обновляем состав...'**
+  String get recogV2_correct_loading;
 
   /// No description provided for @nds_section_basic.
   ///

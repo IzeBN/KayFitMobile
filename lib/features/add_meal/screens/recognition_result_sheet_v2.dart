@@ -25,12 +25,14 @@ class RecognitionResultSheetV2 extends ConsumerStatefulWidget {
   final String dishName;
   final List<IngredientV2> ingredients;
   final DateTime? mealDate;
+  final String? originalText;
 
   const RecognitionResultSheetV2({
     super.key,
     required this.dishName,
     required this.ingredients,
     this.mealDate,
+    this.originalText,
   });
 
   @override
@@ -47,11 +49,23 @@ class _RecognitionResultSheetV2State
   // Which ingredient index is expanded, null = none.
   int? _expandedIndex;
 
+  bool _correcting = false;
+  bool _correctionLoading = false;
+  final _correctionCtrl = TextEditingController();
+  final _correctionFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
     _items = List.from(widget.ingredients);
     _mealType = _inferMealType();
+  }
+
+  @override
+  void dispose() {
+    _correctionCtrl.dispose();
+    _correctionFocus.dispose();
+    super.dispose();
   }
 
   String _inferMealType() {
@@ -159,6 +173,55 @@ class _RecognitionResultSheetV2State
     }
   }
 
+  // ── Correction ───────────────────────────────────────────────────────────
+
+  Future<void> _applyCorrection() async {
+    final text = _correctionCtrl.text.trim();
+    if (text.isEmpty) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _correctionLoading = true);
+    try {
+      final lang = Localizations.localeOf(context).languageCode;
+      final resp = await apiDio.post(
+        '/api/v2/correct_recognition',
+        data: {
+          'current_items': _items.map((i) => i.name).toList(),
+          'correction': text,
+          'language': lang,
+          if (widget.originalText != null) 'original_text': widget.originalText,
+        },
+      );
+      final rawItems = (resp.data['items'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+      if (rawItems.isNotEmpty && mounted) {
+        final newItems = rawItems.map((raw) {
+          final w = (raw['weight_grams'] as num?)?.toDouble() ?? 100.0;
+          return ingredientV2FromSuggestion(raw, w);
+        }).toList();
+        setState(() {
+          _items = newItems;
+          _correcting = false;
+          _correctionLoading = false;
+          _correctionCtrl.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.error_unknown),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.accentOver,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _correctionLoading = false);
+    }
+  }
+
   // ── Save ─────────────────────────────────────────────────────────────────
 
   Future<void> _save() async {
@@ -183,8 +246,18 @@ class _RecognitionResultSheetV2State
           'sugar_alcohols': n.sugarAlcohols,
           'net_carbs': n.netCarbs,
           'saturated_fat': n.saturatedFat,
-          'unsaturated_fat': mono + poly,
+          'unsaturated_fat': mono + poly > 0 ? mono + poly : null,
           'glycemic_index': item.nutrientsPer100g.glycemicIndex,
+          // Minerals
+          'sodium_mg': n.sodiumMg,
+          'calcium_mg': n.calciumMg,
+          'iron_mg': n.ironMg,
+          'potassium_mg': n.potassiumMg,
+          'cholesterol_mg': n.cholesterolMg,
+          // Vitamins
+          'vitamin_a_mcg': n.vitaminAMcg,
+          'vitamin_c_mg': n.vitaminCMg,
+          'vitamin_d_mcg': n.vitaminDMcg,
           'source': item.source,
           'source_url': item.sourceUrl,
         };
@@ -243,7 +316,9 @@ class _RecognitionResultSheetV2State
       ),
       child: SafeArea(
         top: false,
-        child: CustomScrollView(
+        child: Stack(
+          children: [
+            CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Column(
@@ -351,6 +426,44 @@ class _RecognitionResultSheetV2State
                     ),
                   ),
 
+                  // ── Correction button ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => _correcting = !_correcting);
+                        if (!_correcting) return;
+                        Future.delayed(const Duration(milliseconds: 350), () {
+                          if (mounted) _correctionFocus.requestFocus();
+                        });
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF86EFAC), width: 1.5),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.edit_note_rounded, size: 18, color: Color(0xFF059669)),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.recogV2_correct_btn,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF059669),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // ── Save CTA ──
                   Padding(
                     padding: EdgeInsets.fromLTRB(
@@ -394,6 +507,27 @@ class _RecognitionResultSheetV2State
               ),
             ),
           ],
+        ),
+        // ── Correction panel overlay ──
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          bottom: _correcting ? 0 : -200,
+          left: 0,
+          right: 0,
+          child: _CorrectionPanel(
+            ctrl: _correctionCtrl,
+            focus: _correctionFocus,
+            loading: _correctionLoading,
+            onSend: _applyCorrection,
+            onClose: () => setState(() {
+              _correcting = false;
+              _correctionCtrl.clear();
+            }),
+            l10n: l10n,
+          ),
+        ),
+      ],
         ),
       ),
     );
@@ -1424,6 +1558,128 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
             ),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Correction panel — slides up from bottom
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CorrectionPanel extends StatelessWidget {
+  final TextEditingController ctrl;
+  final FocusNode focus;
+  final bool loading;
+  final VoidCallback onSend;
+  final VoidCallback onClose;
+  final AppLocalizations l10n;
+
+  const _CorrectionPanel({
+    required this.ctrl,
+    required this.focus,
+    required this.loading,
+    required this.onSend,
+    required this.onClose,
+    required this.l10n,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              const Icon(Icons.edit_note_rounded, size: 18, color: Color(0xFF059669)),
+              const SizedBox(width: 8),
+              Text(
+                l10n.recogV2_correct_title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: onClose,
+                child: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Input row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: ctrl,
+                  focusNode: focus,
+                  maxLines: 3,
+                  minLines: 1,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  decoration: InputDecoration(
+                    hintText: l10n.recogV2_correct_hint,
+                    hintStyle: TextStyle(fontSize: 13, color: NutrientColors.tertiary),
+                    filled: true,
+                    fillColor: NutrientColors.bg,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: loading ? null : onSend,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: loading
+                        ? const Color(0xFF059669).withValues(alpha: 0.5)
+                        : const Color(0xFF059669),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: loading
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.send_rounded,
+                          color: Colors.white, size: 20),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

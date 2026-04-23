@@ -42,18 +42,23 @@ mixin _$Meal {
   double? get saturatedFat => throw _privateConstructorUsedError;
   @JsonKey(name: 'unsaturated_fat')
   double? get unsaturatedFat => throw _privateConstructorUsedError;
+  @JsonKey(name: 'sodium_mg')
   double? get sodium => throw _privateConstructorUsedError;
+  @JsonKey(name: 'cholesterol_mg')
   double? get cholesterol => throw _privateConstructorUsedError;
+  @JsonKey(name: 'iron_mg')
   double? get iron => throw _privateConstructorUsedError;
+  @JsonKey(name: 'calcium_mg')
   double? get calcium => throw _privateConstructorUsedError;
+  @JsonKey(name: 'potassium_mg')
   double? get potassium => throw _privateConstructorUsedError;
-  @JsonKey(name: 'vitamin_a')
+  @JsonKey(name: 'vitamin_a_mcg')
   double? get vitaminA => throw _privateConstructorUsedError;
-  @JsonKey(name: 'vitamin_c')
+  @JsonKey(name: 'vitamin_c_mg')
   double? get vitaminC => throw _privateConstructorUsedError;
-  @JsonKey(name: 'vitamin_d')
+  @JsonKey(name: 'vitamin_d_mcg')
   double? get vitaminD => throw _privateConstructorUsedError;
-  @JsonKey(name: 'vitamin_b12')
+  @JsonKey(name: 'vitamin_b12_mcg')
   double? get vitaminB12 => throw _privateConstructorUsedError;
   String? get source => throw _privateConstructorUsedError;
   @JsonKey(name: 'source_url')
@@ -94,15 +99,15 @@ abstract class $MealCopyWith<$Res> {
     @JsonKey(name: 'glycemic_index') int? glycemicIndex,
     @JsonKey(name: 'saturated_fat') double? saturatedFat,
     @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
-    double? sodium,
-    double? cholesterol,
-    double? iron,
-    double? calcium,
-    double? potassium,
-    @JsonKey(name: 'vitamin_a') double? vitaminA,
-    @JsonKey(name: 'vitamin_c') double? vitaminC,
-    @JsonKey(name: 'vitamin_d') double? vitaminD,
-    @JsonKey(name: 'vitamin_b12') double? vitaminB12,
+    @JsonKey(name: 'sodium_mg') double? sodium,
+    @JsonKey(name: 'cholesterol_mg') double? cholesterol,
+    @JsonKey(name: 'iron_mg') double? iron,
+    @JsonKey(name: 'calcium_mg') double? calcium,
+    @JsonKey(name: 'potassium_mg') double? potassium,
+    @JsonKey(name: 'vitamin_a_mcg') double? vitaminA,
+    @JsonKey(name: 'vitamin_c_mg') double? vitaminC,
+    @JsonKey(name: 'vitamin_d_mcg') double? vitaminD,
+    @JsonKey(name: 'vitamin_b12_mcg') double? vitaminB12,
     String? source,
     @JsonKey(name: 'source_url') String? sourceUrl,
     @JsonKey(name: 'meal_type') String? mealType,
@@ -304,15 +309,15 @@ abstract class _$$MealImplCopyWith<$Res> implements $MealCopyWith<$Res> {
     @JsonKey(name: 'glycemic_index') int? glycemicIndex,
     @JsonKey(name: 'saturated_fat') double? saturatedFat,
     @JsonKey(name: 'unsaturated_fat') double? unsaturatedFat,
-    double? sodium,
-    double? cholesterol,
-    double? iron,
-    double? calcium,
-    double? potassium,
-    @JsonKey(name: 'vitamin_a') double? vitaminA,
-    @JsonKey(name: 'vitamin_c') double? vitaminC,
-    @JsonKey(name: 'vitamin_d') double? vitaminD,
-    @JsonKey(name: 'vitamin_b12') double? vitaminB12,
+    @JsonKey(name: 'sodium_mg') double? sodium,
+    @JsonKey(name: 'cholesterol_mg') double? cholesterol,
+    @JsonKey(name: 'iron_mg') double? iron,
+    @JsonKey(name: 'calcium_mg') double? calcium,
+    @JsonKey(name: 'potassium_mg') double? potassium,
+    @JsonKey(name: 'vitamin_a_mcg') double? vitaminA,
+    @JsonKey(name: 'vitamin_c_mg') double? vitaminC,
+    @JsonKey(name: 'vitamin_d_mcg') double? vitaminD,
+    @JsonKey(name: 'vitamin_b12_mcg') double? vitaminB12,
     String? source,
     @JsonKey(name: 'source_url') String? sourceUrl,
     @JsonKey(name: 'meal_type') String? mealType,
@@ -505,15 +510,15 @@ class _$MealImpl implements _Meal {
     @JsonKey(name: 'glycemic_index') this.glycemicIndex,
     @JsonKey(name: 'saturated_fat') this.saturatedFat,
     @JsonKey(name: 'unsaturated_fat') this.unsaturatedFat,
-    this.sodium,
-    this.cholesterol,
-    this.iron,
-    this.calcium,
-    this.potassium,
-    @JsonKey(name: 'vitamin_a') this.vitaminA,
-    @JsonKey(name: 'vitamin_c') this.vitaminC,
-    @JsonKey(name: 'vitamin_d') this.vitaminD,
-    @JsonKey(name: 'vitamin_b12') this.vitaminB12,
+    @JsonKey(name: 'sodium_mg') this.sodium,
+    @JsonKey(name: 'cholesterol_mg') this.cholesterol,
+    @JsonKey(name: 'iron_mg') this.iron,
+    @JsonKey(name: 'calcium_mg') this.calcium,
+    @JsonKey(name: 'potassium_mg') this.potassium,
+    @JsonKey(name: 'vitamin_a_mcg') this.vitaminA,
+    @JsonKey(name: 'vitamin_c_mg') this.vitaminC,
+    @JsonKey(name: 'vitamin_d_mcg') this.vitaminD,
+    @JsonKey(name: 'vitamin_b12_mcg') this.vitaminB12,
     this.source,
     @JsonKey(name: 'source_url') this.sourceUrl,
     @JsonKey(name: 'meal_type') this.mealType,
@@ -561,26 +566,31 @@ class _$MealImpl implements _Meal {
   @JsonKey(name: 'unsaturated_fat')
   final double? unsaturatedFat;
   @override
+  @JsonKey(name: 'sodium_mg')
   final double? sodium;
   @override
+  @JsonKey(name: 'cholesterol_mg')
   final double? cholesterol;
   @override
+  @JsonKey(name: 'iron_mg')
   final double? iron;
   @override
+  @JsonKey(name: 'calcium_mg')
   final double? calcium;
   @override
+  @JsonKey(name: 'potassium_mg')
   final double? potassium;
   @override
-  @JsonKey(name: 'vitamin_a')
+  @JsonKey(name: 'vitamin_a_mcg')
   final double? vitaminA;
   @override
-  @JsonKey(name: 'vitamin_c')
+  @JsonKey(name: 'vitamin_c_mg')
   final double? vitaminC;
   @override
-  @JsonKey(name: 'vitamin_d')
+  @JsonKey(name: 'vitamin_d_mcg')
   final double? vitaminD;
   @override
-  @JsonKey(name: 'vitamin_b12')
+  @JsonKey(name: 'vitamin_b12_mcg')
   final double? vitaminB12;
   @override
   final String? source;
@@ -718,15 +728,15 @@ abstract class _Meal implements Meal {
     @JsonKey(name: 'glycemic_index') final int? glycemicIndex,
     @JsonKey(name: 'saturated_fat') final double? saturatedFat,
     @JsonKey(name: 'unsaturated_fat') final double? unsaturatedFat,
-    final double? sodium,
-    final double? cholesterol,
-    final double? iron,
-    final double? calcium,
-    final double? potassium,
-    @JsonKey(name: 'vitamin_a') final double? vitaminA,
-    @JsonKey(name: 'vitamin_c') final double? vitaminC,
-    @JsonKey(name: 'vitamin_d') final double? vitaminD,
-    @JsonKey(name: 'vitamin_b12') final double? vitaminB12,
+    @JsonKey(name: 'sodium_mg') final double? sodium,
+    @JsonKey(name: 'cholesterol_mg') final double? cholesterol,
+    @JsonKey(name: 'iron_mg') final double? iron,
+    @JsonKey(name: 'calcium_mg') final double? calcium,
+    @JsonKey(name: 'potassium_mg') final double? potassium,
+    @JsonKey(name: 'vitamin_a_mcg') final double? vitaminA,
+    @JsonKey(name: 'vitamin_c_mg') final double? vitaminC,
+    @JsonKey(name: 'vitamin_d_mcg') final double? vitaminD,
+    @JsonKey(name: 'vitamin_b12_mcg') final double? vitaminB12,
     final String? source,
     @JsonKey(name: 'source_url') final String? sourceUrl,
     @JsonKey(name: 'meal_type') final String? mealType,
@@ -773,26 +783,31 @@ abstract class _Meal implements Meal {
   @JsonKey(name: 'unsaturated_fat')
   double? get unsaturatedFat;
   @override
+  @JsonKey(name: 'sodium_mg')
   double? get sodium;
   @override
+  @JsonKey(name: 'cholesterol_mg')
   double? get cholesterol;
   @override
+  @JsonKey(name: 'iron_mg')
   double? get iron;
   @override
+  @JsonKey(name: 'calcium_mg')
   double? get calcium;
   @override
+  @JsonKey(name: 'potassium_mg')
   double? get potassium;
   @override
-  @JsonKey(name: 'vitamin_a')
+  @JsonKey(name: 'vitamin_a_mcg')
   double? get vitaminA;
   @override
-  @JsonKey(name: 'vitamin_c')
+  @JsonKey(name: 'vitamin_c_mg')
   double? get vitaminC;
   @override
-  @JsonKey(name: 'vitamin_d')
+  @JsonKey(name: 'vitamin_d_mcg')
   double? get vitaminD;
   @override
-  @JsonKey(name: 'vitamin_b12')
+  @JsonKey(name: 'vitamin_b12_mcg')
   double? get vitaminB12;
   @override
   String? get source;

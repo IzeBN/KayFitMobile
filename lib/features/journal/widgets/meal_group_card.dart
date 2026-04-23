@@ -284,6 +284,12 @@ bool _hasExtendedData(Meal meal) {
       (meal.sodium != null && meal.sodium! > 0) ||
       (meal.cholesterol != null && meal.cholesterol! > 0) ||
       (meal.potassium != null && meal.potassium! > 0) ||
+      (meal.calcium != null && meal.calcium! > 0) ||
+      (meal.iron != null && meal.iron! > 0) ||
+      (meal.vitaminA != null && meal.vitaminA! > 0) ||
+      (meal.vitaminC != null && meal.vitaminC! > 0) ||
+      (meal.vitaminD != null && meal.vitaminD! > 0) ||
+      (meal.vitaminB12 != null && meal.vitaminB12! > 0) ||
       meal.glycemicIndex != null;
 }
 
@@ -307,9 +313,15 @@ class _MealDetailSheet extends StatelessWidget {
       netCarbs: net > 0 ? net : null,
       saturatedFat: meal.saturatedFat,
       unsaturatedFat: meal.unsaturatedFat,
-      sodiumMg: meal.sodium != null ? meal.sodium! * 1000 : null,
-      cholesterolMg: meal.cholesterol != null ? meal.cholesterol! * 1000 : null,
-      potassiumMg: meal.potassium != null ? meal.potassium! * 1000 : null,
+      sodiumMg: meal.sodium,
+      cholesterolMg: meal.cholesterol,
+      potassiumMg: meal.potassium,
+      calciumMg: meal.calcium,
+      ironMg: meal.iron,
+      vitaminAMcg: meal.vitaminA,
+      vitaminCMg: meal.vitaminC,
+      vitaminDMcg: meal.vitaminD,
+      vitaminB12Mcg: meal.vitaminB12,
       glycemicIndex: meal.glycemicIndex,
     );
 
@@ -658,9 +670,9 @@ class _GroupDetailSheet extends StatelessWidget {
     final aggSugarAlc   = _sumOrNull((m) => m.sugarAlcohols ?? 0);
     final aggSatFat     = _sumOrNull((m) => m.saturatedFat ?? 0);
     final aggUnsatFat   = _sumOrNull((m) => m.unsaturatedFat ?? 0);
-    final aggSodiumMg   = _sumOrNull((m) => (m.sodium ?? 0) * 1000);
-    final aggCholMg     = _sumOrNull((m) => (m.cholesterol ?? 0) * 1000);
-    final aggPotMg      = _sumOrNull((m) => (m.potassium ?? 0) * 1000);
+    final aggSodiumMg   = _sumOrNull((m) => m.sodium ?? 0);
+    final aggCholMg     = _sumOrNull((m) => m.cholesterol ?? 0);
+    final aggPotMg      = _sumOrNull((m) => m.potassium ?? 0);
     final hasExtended = aggFiber > 0 || aggSugar > 0 || aggSugarAlc > 0 ||
         totalNet > 0 || aggSatFat > 0 || aggUnsatFat > 0 ||
         aggSodiumMg > 0 || aggCholMg > 0 || aggPotMg > 0;
