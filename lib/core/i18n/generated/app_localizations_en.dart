@@ -321,35 +321,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ob_step_weight_goal => 'Goal';
 
   @override
-  String get ob_step_training_title => 'Training days?';
+  String get ob_step_training_title => 'How many days a week do you train?';
 
   @override
   String get ob_step_training_sub =>
       'This helps calculate your daily activity more precisely';
 
   @override
-  String get ob_training_none => 'I don\'t train';
+  String get ob_training_0 => 'I don\'t train';
 
   @override
-  String get ob_training_monday => 'Monday';
+  String get ob_training_1_2 => '1–2 days';
 
   @override
-  String get ob_training_tuesday => 'Tuesday';
+  String get ob_training_3_4 => '3–4 days';
 
   @override
-  String get ob_training_wednesday => 'Wednesday';
-
-  @override
-  String get ob_training_thursday => 'Thursday';
-
-  @override
-  String get ob_training_friday => 'Friday';
-
-  @override
-  String get ob_training_saturday => 'Saturday';
-
-  @override
-  String get ob_training_sunday => 'Sunday';
+  String get ob_training_daily => 'Every day';
 
   @override
   String get ob_method_title => 'How to add food?';

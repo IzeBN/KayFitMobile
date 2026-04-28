@@ -70,7 +70,9 @@
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
       "Bash(find /c/Data/projects/KayFitMobile/lib -type f -name meal_item* -o -name *stats*)",
-      "Bash(dart analyze:*)"
+      "Bash(dart analyze:*)",
+      "Bash(pip show:*)",
+      "Bash(grep -v \"^Analyzing\\\\|^$\\\\|unused_element_parameter\\\\|unnecessary_underscores\")"
     ]
   }
 }

@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,8 +34,6 @@ enum _Step {
   // ignore: constant_identifier_names
   weight_loss_info,
   // ignore: constant_identifier_names
-  calc_preview,
-  // ignore: constant_identifier_names
   info_1,
   // ignore: constant_identifier_names
   info_2,
@@ -55,13 +52,13 @@ const _ageOptions = [
 ];
 
 // ─── Calculation helpers ───────────────────────────────────────────────────────
-double _getActivityCoef(String trainingDays) {
-  if (trainingDays.isEmpty || trainingDays == 'none') return 1.2;
-  final cnt = trainingDays.split(',').where((d) => d.trim().isNotEmpty && d.trim() != 'none').length;
-  if (cnt >= 6) return 1.725;
-  if (cnt >= 3) return 1.55;
-  if (cnt >= 1) return 1.375;
-  return 1.2;
+double _getActivityCoef(String trainingFreq) {
+  switch (trainingFreq) {
+    case 'daily': return 1.725;
+    case '3-4': return 1.55;
+    case '1-2': return 1.375;
+    default: return 1.2;
+  }
 }
 
 CalculationResult _calcPreview({
@@ -123,8 +120,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _Step.weight,
       _Step.training,
       if (_goals.contains('lose_weight')) _Step.weight_loss_info,
-      if (_goals.contains('lose_weight') || _goals.contains('gain_muscle'))
-        _Step.calc_preview,
       _Step.info_1,
       _Step.info_2,
       _Step.info_3,
@@ -142,7 +137,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String _gender = '';
   double? _weight;
   double? _targetWeight;
-  final Set<String> _trainingDays = {};
+  String _trainingFreq = '';
 
   // New step data
   Set<String> _healthConditions = {'none'};
@@ -197,14 +192,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _savePending() {
-    final td = _trainingDays.isEmpty ? '' : _trainingDays.join(',');
     OnboardingPendingStorage.save(OnboardingPendingData(
       age: _age,
       height: _height,
       gender: _gender.isEmpty ? null : _gender,
       weight: _weight,
       targetWeight: _targetWeight,
-      trainingDays: td,
+      trainingDays: _trainingFreq,
       healthConditions: _healthConditions.toList(),
       dietType: _dietType,
       foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
@@ -258,48 +252,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _handleTrainingNext(AppLocalizations l10n) {
-    if (_trainingDays.isEmpty) {
+    if (_trainingFreq.isEmpty) {
       setState(() => _error = l10n.ob_err_training);
       return;
     }
-    final daysCount = _trainingDays.contains('none') ? 0 :
-        _trainingDays.where((d) => d.isNotEmpty).length;
+    final daysCount = _trainingFreq == '0' ? 0 : _trainingFreq == '1-2' ? 2 : _trainingFreq == '3-4' ? 4 : 7;
     AnalyticsService.onboardingTrainingDaysSelected(daysCount);
     _savePending();
     _goNext();
   }
 
-  void _handleTrainingToggle(String value) {
-    setState(() {
-      if (value == 'none') {
-        if (_trainingDays.contains('none')) {
-          _trainingDays.clear();
-        } else {
-          _trainingDays
-            ..clear()
-            ..add('none');
-        }
-      } else {
-        _trainingDays.remove('none');
-        if (_trainingDays.contains(value)) {
-          _trainingDays.remove(value);
-        } else {
-          _trainingDays.add(value);
-        }
-      }
-    });
+  void _handleTrainingSelect(String value) {
+    setState(() => _trainingFreq = value);
   }
 
   Future<void> _navigateToLogin() async {
     // Explicit await-save with all collected data before leaving onboarding.
-    final td = _trainingDays.isEmpty ? '' : _trainingDays.join(',');
     await OnboardingPendingStorage.save(OnboardingPendingData(
       age: _age,
       height: _height,
       gender: _gender.isEmpty ? null : _gender,
       weight: _weight,
       targetWeight: _targetWeight,
-      trainingDays: td,
+      trainingDays: _trainingFreq,
       healthConditions: _healthConditions.toList(),
       dietType: _dietType,
       foodRestrictions: _foodRestrictions.isNotEmpty ? _foodRestrictions : null,
@@ -320,7 +295,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         weight: _weight ?? 65,
         height: _height ?? 165,
         gender: _gender.isEmpty ? 'female' : _gender,
-        trainingDays: _trainingDays.join(','),
+        trainingDays: _trainingFreq,
         targetWeight: _targetWeight,
       );
 
@@ -495,13 +470,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: _GradientButton(
               label: l10n.common_next,
-              onTap: _trainingDays.isEmpty ? null : () => _handleTrainingNext(l10n),
+              onTap: _trainingFreq.isEmpty ? null : () => _handleTrainingNext(l10n),
             ),
           ),
         );
 
       case _Step.weight_loss_info:
-      case _Step.calc_preview:
       case _Step.info_1:
       case _Step.info_2:
       case _Step.info_3:
@@ -611,21 +585,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case _Step.training:
         return _TrainingStep(
           l10n: l10n,
-          selected: _trainingDays,
-          onToggle: _handleTrainingToggle,
+          selected: _trainingFreq,
+          onSelect: _handleTrainingSelect,
           error: _error,
         );
 
       case _Step.weight_loss_info:
         return _WeightLossInfoStep(isRu: isRu);
-
-      case _Step.calc_preview:
-        return _CalcPreviewStep(
-          preview: _preview,
-          currentWeight: _weight ?? 70,
-          targetWeight: _targetWeight ?? ((_weight ?? 70) - 5),
-          isRu: isRu,
-        );
 
       case _Step.info_1:
         return _InfoStep(
@@ -1656,31 +1622,27 @@ class _WeightCard extends StatelessWidget {
   }
 }
 
-// ─── Step: Training days ───────────────────────────────────────────────────────
+// ─── Step: Training frequency ──────────────────────────────────────────────────
 class _TrainingStep extends StatelessWidget {
   final AppLocalizations l10n;
-  final Set<String> selected;
-  final ValueChanged<String> onToggle;
+  final String selected;
+  final ValueChanged<String> onSelect;
   final String? error;
 
   const _TrainingStep({
     required this.l10n,
     required this.selected,
-    required this.onToggle,
+    required this.onSelect,
     this.error,
   });
 
   @override
   Widget build(BuildContext context) {
     final options = [
-      ('none', l10n.ob_training_none),
-      ('monday', l10n.ob_training_monday),
-      ('tuesday', l10n.ob_training_tuesday),
-      ('wednesday', l10n.ob_training_wednesday),
-      ('thursday', l10n.ob_training_thursday),
-      ('friday', l10n.ob_training_friday),
-      ('saturday', l10n.ob_training_saturday),
-      ('sunday', l10n.ob_training_sunday),
+      ('0', l10n.ob_training_0),
+      ('1-2', l10n.ob_training_1_2),
+      ('3-4', l10n.ob_training_3_4),
+      ('daily', l10n.ob_training_daily),
     ];
 
     return _StepScaffold(
@@ -1689,12 +1651,11 @@ class _TrainingStep extends StatelessWidget {
       child: Column(
         children: [
           ...options.map((opt) {
-            final isSelected = selected.contains(opt.$1);
-            final isDisabled = opt.$1 != 'none' && selected.contains('none');
+            final isSelected = selected == opt.$1;
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: GestureDetector(
-                onTap: isDisabled ? null : () => onToggle(opt.$1),
+                onTap: () => onSelect(opt.$1),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   width: double.infinity,
@@ -1714,11 +1675,7 @@ class _TrainingStep extends StatelessWidget {
                           opt.$2,
                           style: TextStyle(
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                            color: isDisabled
-                                ? AppColors.textMuted
-                                : isSelected
-                                    ? OBColors.pink
-                                    : AppColors.text,
+                            color: isSelected ? OBColors.pink : AppColors.text,
                           ),
                         ),
                       ),
@@ -1839,315 +1796,6 @@ class _BulletRow extends StatelessWidget {
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.text),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Calc preview step ─────────────────────────────────────────────────────────
-class _CalcPreviewStep extends StatelessWidget {
-  final CalculationResult preview;
-  final double currentWeight;
-  final double targetWeight;
-  final bool isRu;
-
-  const _CalcPreviewStep({
-    required this.preview,
-    required this.currentWeight,
-    required this.targetWeight,
-    required this.isRu,
-  });
-
-  bool get _isGain => preview.targetCalories > preview.tdee;
-
-  List<FlSpot> _buildSpots() {
-    final deficit = preview.tdee - preview.targetCalories;
-    if (deficit > 0) {
-      // Weight loss
-      final weeklyLoss = (deficit * 7) / 7700;
-      final totalLoss = (currentWeight - targetWeight).abs();
-      final weeksNeeded = totalLoss > 0
-          ? (totalLoss / weeklyLoss).clamp(4.0, 20.0)
-          : 12.0;
-      final spots = <FlSpot>[];
-      for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
-        final lost = (weeklyLoss * w).clamp(0.0, totalLoss);
-        spots.add(FlSpot(w, currentWeight - lost));
-      }
-      spots.add(FlSpot(weeksNeeded, targetWeight));
-      return spots;
-    } else {
-      // Weight gain / surplus
-      final surplus = preview.targetCalories - preview.tdee;
-      if (surplus <= 0) {
-        return [FlSpot(0, currentWeight), FlSpot(12, currentWeight)];
-      }
-      final weeklyGain = (surplus * 7) / 7700;
-      final totalGain = (targetWeight - currentWeight).abs();
-      final weeksNeeded = totalGain > 0
-          ? (totalGain / weeklyGain).clamp(4.0, 20.0)
-          : 12.0;
-      final spots = <FlSpot>[];
-      for (var w = 0.0; w <= weeksNeeded; w += weeksNeeded / 10) {
-        final gained = (weeklyGain * w).clamp(0.0, totalGain);
-        spots.add(FlSpot(w, currentWeight + gained));
-      }
-      spots.add(FlSpot(weeksNeeded, targetWeight));
-      return spots;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final gain = _isGain;
-    final kcal = preview.targetCalories.toStringAsFixed(0);
-    final protein = preview.protein.toStringAsFixed(0);
-    final fat = preview.fat.toStringAsFixed(0);
-    final carbs = preview.carbs.toStringAsFixed(0);
-    final spots = _buildSpots();
-    final totalDelta = (currentWeight - targetWeight).abs();
-    final deficit = preview.tdee - preview.targetCalories;
-    final surplus = preview.targetCalories - preview.tdee;
-    final weeklyChange = gain
-        ? (surplus * 7) / 7700
-        : (deficit > 0 ? (deficit * 7) / 7700 : 1.0);
-    final weeksNeeded = totalDelta > 0
-        ? ((totalDelta / weeklyChange).clamp(4.0, 20.0)).round()
-        : 12;
-
-    final planTitle = gain
-        ? (isRu ? 'Твой план набора массы' : 'Your muscle gain plan')
-        : (isRu ? 'Твой план похудения' : 'Your weight loss plan');
-    final planSubtitle = gain
-        ? (isRu ? 'Прогноз набора мышечной массы' : 'Muscle gain projection')
-        : (isRu ? 'Прогноз снижения веса' : 'Weight loss projection');
-    final targetLabel = gain
-        ? (isRu ? 'цель' : 'goal')
-        : (isRu ? 'цель' : 'goal');
-    final lineColor = gain ? AppColors.accent : OBColors.pink;
-    final chipColor = gain ? AppColors.accentSoft : OBColors.pinkSoft;
-    final chipTextColor = gain ? AppColors.accent : OBColors.pink;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            planTitle,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            planSubtitle,
-            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 20),
-
-          // Weight projection chart
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 20, 20, 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: OBColors.border),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 4)),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${currentWeight.toStringAsFixed(1)} кг',
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text),
-                        ),
-                        Text(
-                          isRu ? 'сейчас' : 'now',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.arrow_forward_rounded, color: AppColors.textMuted, size: 18),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (b) => OBColors.gradient.createShader(b),
-                          child: Text(
-                            '${targetWeight.toStringAsFixed(1)} кг',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
-                          ),
-                        ),
-                        Text(
-                          targetLabel,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: chipColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        isRu ? '~$weeksNeeded нед.' : '~$weeksNeeded wks',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: chipTextColor),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 140,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      borderData: FlBorderData(show: false),
-                      titlesData: FlTitlesData(
-                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 24,
-                            interval: spots.last.x / 4,
-                            getTitlesWidget: (v, _) => Text(
-                              '${v.round()}${isRu ? "н" : "w"}',
-                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
-                            ),
-                          ),
-                        ),
-                      ),
-                      lineTouchData: const LineTouchData(enabled: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          curveSmoothness: 0.35,
-                          color: lineColor,
-                          barWidth: 3,
-                          dotData: FlDotData(
-                            show: true,
-                            checkToShowDot: (spot, _) =>
-                                spot == spots.first || spot == spots.last,
-                            getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-                              radius: 5,
-                              color: lineColor,
-                              strokeWidth: 2,
-                              strokeColor: Colors.white,
-                            ),
-                          ),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                lineColor.withValues(alpha: 0.18),
-                                lineColor.withValues(alpha: 0.0),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Kcal target
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: OBColors.gradient,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 28),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isRu ? 'Норма калорий' : 'Daily target',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    Text(
-                      '$kcal ${isRu ? "ккал / день" : "kcal / day"}',
-                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Macro cards
-          Row(
-            children: [
-              Expanded(child: _MacroCard(label: isRu ? 'Белки' : 'Protein', value: '$protein${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFF6C8EF5))),
-              const SizedBox(width: 10),
-              Expanded(child: _MacroCard(label: isRu ? 'Жиры' : 'Fat', value: '$fat${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFFFE7650))),
-              const SizedBox(width: 10),
-              Expanded(child: _MacroCard(label: isRu ? 'Углеводы' : 'Carbs', value: '$carbs${AppLocalizations.of(context)!.macro_g}', color: const Color(0xFF4CC0A0))),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: Text(
-              isRu ? 'По формуле Миффлина-Сент-Жора' : 'Mifflin-St Jeor formula',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MacroCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _MacroCard({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
         ],
       ),
     );

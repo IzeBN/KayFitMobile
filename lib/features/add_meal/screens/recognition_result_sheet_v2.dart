@@ -54,10 +54,13 @@ class _RecognitionResultSheetV2State
   final _correctionCtrl = TextEditingController();
   final _correctionFocus = FocusNode();
 
+  String _dishName = '';
+
   @override
   void initState() {
     super.initState();
     _items = List.from(widget.ingredients);
+    _dishName = widget.dishName;
     _mealType = _inferMealType();
   }
 
@@ -162,14 +165,14 @@ class _RecognitionResultSheetV2State
   }
 
   Future<void> _addIngredient() async {
-    final result = await showModalBottomSheet<IngredientV2>(
+    final result = await showModalBottomSheet<List<IngredientV2>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const _V2IngredientSearchSheet(),
     );
-    if (result != null && mounted) {
-      setState(() => _items.add(result));
+    if (result != null && result.isNotEmpty && mounted) {
+      setState(() => _items.addAll(result));
     }
   }
 
@@ -186,6 +189,9 @@ class _RecognitionResultSheetV2State
         '/api/v2/correct_recognition',
         data: {
           'current_items': _items.map((i) => i.name).toList(),
+          'current_items_data': _items
+              .map((i) => {'name': i.name, 'weight_grams': i.weightGrams})
+              .toList(),
           'correction': text,
           'language': lang,
           if (widget.originalText != null) 'original_text': widget.originalText,
@@ -202,6 +208,7 @@ class _RecognitionResultSheetV2State
         }).toList();
         setState(() {
           _items = newItems;
+          _dishName = newItems.map((i) => i.name).join(', ');
           _correcting = false;
           _correctionLoading = false;
           _correctionCtrl.clear();
@@ -339,7 +346,7 @@ class _RecognitionResultSheetV2State
 
                   // ── Header: dish name + total cal ──
                   _HeaderSection(
-                    dishName: widget.dishName,
+                    dishName: _dishName,
                     totals: totals,
                     items: _selected,
                     l10n: l10n,
@@ -1388,6 +1395,22 @@ class _IconBtn extends StatelessWidget {
 // Bottom sheet: text → /api/v2/parse_meal_suggestions → IngredientV2
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── Model for a parsed variant group ────────────────────────────────────────
+
+class _VariantGroup {
+  final String food;
+  final List<Map<String, dynamic>> variants;
+  int selectedIndex;
+
+  _VariantGroup({
+    required this.food,
+    required this.variants,
+    this.selectedIndex = 0,
+  });
+}
+
+// ─── Add ingredient sheet with variant picker ─────────────────────────────────
+
 class _V2IngredientSearchSheet extends StatefulWidget {
   final String? initialQuery;
   const _V2IngredientSearchSheet({this.initialQuery});
@@ -1401,7 +1424,7 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
   final _ctrl = TextEditingController();
   final _focus = FocusNode();
   bool _loading = false;
-  List<Map<String, dynamic>> _results = [];
+  List<_VariantGroup> _groups = [];
 
   @override
   void initState() {
@@ -1420,16 +1443,25 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
   Future<void> _search() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
-    setState(() => _loading = true);
+    _focus.unfocus();
+    setState(() { _loading = true; _groups = []; });
     try {
       final lang = Localizations.localeOf(context).languageCode;
-      final resp = await apiDio.post('/api/v2/parse_meal_suggestions',
-          data: {'text': text, 'language': lang});
-      final items = (resp.data['items'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
-          [];
-      if (mounted) setState(() => _results = items);
+      final resp = await apiDio.post(
+        '/api/v2/parse_meal_variants',
+        data: {'text': text, 'language': lang},
+      );
+      final rawGroups = (resp.data['groups'] as List<dynamic>?) ?? [];
+      final groups = rawGroups.map((g) {
+        final variants = ((g['variants'] as List<dynamic>?) ?? [])
+            .map((v) => v as Map<String, dynamic>)
+            .toList();
+        return _VariantGroup(
+          food: g['food'] as String? ?? '',
+          variants: variants,
+        );
+      }).where((g) => g.variants.isNotEmpty).toList();
+      if (mounted) setState(() => _groups = groups);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -1440,23 +1472,37 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
     }
   }
 
+  void _addSelected() {
+    if (_groups.isEmpty) return;
+    HapticFeedback.mediumImpact();
+    final items = _groups.map((g) {
+      final raw = g.variants[g.selectedIndex];
+      final w = (raw['weight_grams'] as num?)?.toDouble() ?? 100.0;
+      return ingredientV2FromSuggestion(raw, w);
+    }).toList();
+    Navigator.pop(context, items);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final keyboardPad = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: keyboardPad),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Handle
           Center(
             child: Container(
-              width: 36,
-              height: 4,
+              width: 36, height: 4,
               margin: const EdgeInsets.only(top: 12, bottom: 12),
               decoration: BoxDecoration(
                 color: NutrientColors.border,
@@ -1466,13 +1512,17 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(l10n.recogV2_search_ingredient,
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: NutrientColors.secondary)),
+            child: Text(
+              l10n.recogV2_search_ingredient,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: NutrientColors.secondary,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
+          // Search bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -1500,8 +1550,7 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
                 GestureDetector(
                   onTap: _search,
                   child: Container(
-                    width: 44,
-                    height: 44,
+                    width: 44, height: 44,
                     decoration: BoxDecoration(
                       color: NutrientColors.netCarbs,
                       borderRadius: BorderRadius.circular(12),
@@ -1510,7 +1559,8 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
                         ? const Padding(
                             padding: EdgeInsets.all(12),
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
+                                strokeWidth: 2, color: Colors.white),
+                          )
                         : const Icon(Icons.search_rounded,
                             color: Colors.white, size: 22),
                   ),
@@ -1518,46 +1568,137 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.4),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _results.length,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemBuilder: (_, i) {
-                final r = _results[i];
-                final name = r['name'] as String? ?? '';
-                final per100 =
-                    r['nutrients_per_100g'] as Map<String, dynamic>? ?? {};
-                final cal = (per100['calories'] as num?)?.toDouble() ?? 0;
-                final weight = (r['weight_grams'] as num?)?.toDouble() ?? 100;
-                return ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(name,
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
-                  subtitle: Text(
-                    '${cal.toStringAsFixed(0)} ${l10n.macro_kcal} / 100${l10n.macro_g}',
-                    style: TextStyle(
-                        fontSize: 12, color: NutrientColors.secondary),
-                  ),
-                  trailing: Icon(Icons.add_circle_outline_rounded,
-                      color: NutrientColors.netCarbs),
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    Navigator.pop(
-                      context,
-                      ingredientV2FromSuggestion(r, weight),
-                    );
-                  },
-                );
-              },
+          const SizedBox(height: 8),
+          // Variant groups
+          if (_groups.isNotEmpty)
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: _groups.length,
+                itemBuilder: (_, gi) {
+                  final group = _groups[gi];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          group.food,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ...group.variants.asMap().entries.map((entry) {
+                          final vi = entry.key;
+                          final v = entry.value;
+                          final isSelected = group.selectedIndex == vi;
+                          final name = v['name'] as String? ?? '';
+                          final per100 = v['nutrients_per_100g']
+                              as Map<String, dynamic>? ?? {};
+                          final cal =
+                              (per100['calories'] as num?)?.toDouble() ?? 0;
+                          final w =
+                              (v['weight_grams'] as num?)?.toDouble() ?? 100;
+                          return GestureDetector(
+                            onTap: () => setState(
+                                () => group.selectedIndex = vi),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? NutrientColors.netCarbsSoft
+                                    : NutrientColors.bg,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? NutrientColors.netCarbs
+                                      : NutrientColors.border,
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                            color: isSelected
+                                                ? NutrientColors.netCarbs
+                                                : AppColors.text,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${cal.toStringAsFixed(0)} ${l10n.macro_kcal}/100${l10n.macro_g}  ·  '
+                                          '${w.toStringAsFixed(0)}${l10n.macro_g}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: NutrientColors.secondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    Icon(Icons.check_circle_rounded,
+                                        color: NutrientColors.netCarbs,
+                                        size: 18),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          // Add button
+          if (_groups.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, bottomPad + 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _addSelected,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: NutrientColors.netCarbs,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    isRu ? 'Добавить выбранные' : 'Add selected',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
+          if (_groups.isEmpty && !_loading)
+            SizedBox(height: bottomPad + 16),
         ],
       ),
     );

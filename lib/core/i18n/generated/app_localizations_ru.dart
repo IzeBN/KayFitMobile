@@ -321,35 +321,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ob_step_weight_goal => 'Цель';
 
   @override
-  String get ob_step_training_title => 'Дни тренировок?';
+  String get ob_step_training_title => 'Сколько дней в неделю вы тренируетесь?';
 
   @override
   String get ob_step_training_sub =>
       'Это поможет точнее рассчитать суточную активность';
 
   @override
-  String get ob_training_none => 'Не тренируюсь';
+  String get ob_training_0 => 'Не тренируюсь';
 
   @override
-  String get ob_training_monday => 'Понедельник';
+  String get ob_training_1_2 => '1–2 дня';
 
   @override
-  String get ob_training_tuesday => 'Вторник';
+  String get ob_training_3_4 => '3–4 дня';
 
   @override
-  String get ob_training_wednesday => 'Среда';
-
-  @override
-  String get ob_training_thursday => 'Четверг';
-
-  @override
-  String get ob_training_friday => 'Пятница';
-
-  @override
-  String get ob_training_saturday => 'Суббота';
-
-  @override
-  String get ob_training_sunday => 'Воскресенье';
+  String get ob_training_daily => 'Каждый день';
 
   @override
   String get ob_method_title => 'Как добавить еду?';

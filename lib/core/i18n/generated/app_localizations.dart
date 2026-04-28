@@ -689,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @ob_step_training_title.
   ///
   /// In ru, this message translates to:
-  /// **'Дни тренировок?'**
+  /// **'Сколько дней в неделю вы тренируетесь?'**
   String get ob_step_training_title;
 
   /// No description provided for @ob_step_training_sub.
@@ -698,53 +698,29 @@ abstract class AppLocalizations {
   /// **'Это поможет точнее рассчитать суточную активность'**
   String get ob_step_training_sub;
 
-  /// No description provided for @ob_training_none.
+  /// No description provided for @ob_training_0.
   ///
   /// In ru, this message translates to:
   /// **'Не тренируюсь'**
-  String get ob_training_none;
+  String get ob_training_0;
 
-  /// No description provided for @ob_training_monday.
+  /// No description provided for @ob_training_1_2.
   ///
   /// In ru, this message translates to:
-  /// **'Понедельник'**
-  String get ob_training_monday;
+  /// **'1–2 дня'**
+  String get ob_training_1_2;
 
-  /// No description provided for @ob_training_tuesday.
+  /// No description provided for @ob_training_3_4.
   ///
   /// In ru, this message translates to:
-  /// **'Вторник'**
-  String get ob_training_tuesday;
+  /// **'3–4 дня'**
+  String get ob_training_3_4;
 
-  /// No description provided for @ob_training_wednesday.
+  /// No description provided for @ob_training_daily.
   ///
   /// In ru, this message translates to:
-  /// **'Среда'**
-  String get ob_training_wednesday;
-
-  /// No description provided for @ob_training_thursday.
-  ///
-  /// In ru, this message translates to:
-  /// **'Четверг'**
-  String get ob_training_thursday;
-
-  /// No description provided for @ob_training_friday.
-  ///
-  /// In ru, this message translates to:
-  /// **'Пятница'**
-  String get ob_training_friday;
-
-  /// No description provided for @ob_training_saturday.
-  ///
-  /// In ru, this message translates to:
-  /// **'Суббота'**
-  String get ob_training_saturday;
-
-  /// No description provided for @ob_training_sunday.
-  ///
-  /// In ru, this message translates to:
-  /// **'Воскресенье'**
-  String get ob_training_sunday;
+  /// **'Каждый день'**
+  String get ob_training_daily;
 
   /// No description provided for @ob_method_title.
   ///
