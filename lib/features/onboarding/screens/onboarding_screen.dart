@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
@@ -17,6 +20,8 @@ import '../../../router.dart';
 import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../way_to_goal/widgets/plan_result_view.dart';
+import '../widgets/ob_gradient_button.dart';
+import '../widgets/onboarding_scaffold.dart';
 
 // ─── Step definitions ──────────────────────────────────────────────────────────
 enum _Step {
@@ -158,6 +163,98 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.initState();
     AnalyticsService.onboardingStarted();
     AnalyticsService.onboardingStepViewed(_Step.landing.name);
+    _restoreProgress();
+  }
+
+  /// Restore step index and answers from SharedPreferences after a kill-restore.
+  /// UC5: if `onboarding_current_step` key exists, resume from that step.
+  Future<void> _restoreProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedStepName = prefs.getString('onboarding_current_step');
+      final savedAnswersJson = prefs.getString('onboarding_answers');
+
+      if (savedStepName == null) return;
+
+      // Try to find the saved step in the enum.
+      final savedStep = _Step.values.where((s) => s.name == savedStepName).firstOrNull;
+      if (savedStep == null) return;
+
+      // Restore answers from JSON if available.
+      if (savedAnswersJson != null) {
+        try {
+          final answers = jsonDecode(savedAnswersJson) as Map<String, dynamic>;
+          _restoreAnswers(answers);
+        } catch (_) {
+          // Corrupted answers — start with defaults, still resume step.
+        }
+      }
+
+      // Find the step index in the current step list.
+      final steps = _buildStepList();
+      final restoredIndex = steps.indexOf(savedStep);
+      if (restoredIndex > 0 && mounted) {
+        setState(() {
+          _stepIndex = restoredIndex;
+        });
+      }
+    } catch (_) {
+      // If restoration fails for any reason, just start from the beginning.
+    }
+  }
+
+  /// Populate data fields from a previously serialised answers map.
+  void _restoreAnswers(Map<String, dynamic> answers) {
+    _age = answers['age'] as int?;
+    _height = (answers['height'] as num?)?.toDouble();
+    _gender = answers['gender'] as String? ?? '';
+    _weight = (answers['weight'] as num?)?.toDouble();
+    _targetWeight = (answers['targetWeight'] as num?)?.toDouble();
+    _trainingFreq = answers['trainingFreq'] as String? ?? '';
+    _dietType = answers['dietType'] as String? ?? 'none';
+    _foodRestrictions = answers['foodRestrictions'] as String? ?? '';
+
+    final healthList = answers['healthConditions'];
+    if (healthList is List) {
+      _healthConditions = healthList.cast<String>().toSet();
+    }
+    final goalsList = answers['goals'];
+    if (goalsList is List) {
+      _goals = goalsList.cast<String>().toSet();
+    }
+
+    // Restore text controller values.
+    if (_height != null) _heightCtrl.text = _height!.toStringAsFixed(0);
+    if (_weight != null) _weightCtrl.text = _weight!.toStringAsFixed(0);
+    if (_targetWeight != null) {
+      _targetWeightCtrl.text = _targetWeight!.toStringAsFixed(0);
+    }
+  }
+
+  /// Persist current step name and all answers to SharedPreferences.
+  /// Called after each successful _goNext so kill-restore can resume here.
+  Future<void> _saveProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('onboarding_current_step', _currentStep.name);
+      await prefs.setString(
+        'onboarding_answers',
+        jsonEncode({
+          'age': _age,
+          'height': _height,
+          'gender': _gender,
+          'weight': _weight,
+          'targetWeight': _targetWeight,
+          'trainingFreq': _trainingFreq,
+          'dietType': _dietType,
+          'foodRestrictions': _foodRestrictions,
+          'healthConditions': _healthConditions.toList(),
+          'goals': _goals.toList(),
+        }),
+      );
+    } catch (_) {
+      // Non-critical — if save fails, user just restarts from beginning.
+    }
   }
 
   @override
@@ -180,6 +277,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         AnalyticsService.onboardingStepViewed(_buildStepList()[_stepIndex].name);
       }
     });
+    // UC5: persist progress so kill-restore can resume from here.
+    _saveProgress();
   }
 
   void _goBack() {
@@ -307,22 +406,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final isLanding = _currentStep == _Step.landing;
 
-    return Scaffold(
-      backgroundColor: OBColors.bg,
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              if (!isLanding) _buildHeader(l10n),
-              Expanded(
-                child: _buildStepContent(l10n),
-              ),
-              if (!isLanding) _buildFooter(l10n),
-            ],
-          ),
-          if (_showSkipDialog) _buildSkipDialog(l10n),
-        ],
-      ),
+    // Landing step manages its own layout (full-screen gradient header + CTA).
+    if (isLanding) {
+      return Scaffold(
+        backgroundColor: OBColors.bg,
+        body: Stack(
+          children: [
+            _buildStepContent(l10n),
+            if (_showSkipDialog) _buildSkipDialog(l10n),
+          ],
+        ),
+      );
+    }
+
+    // All other steps use OnboardingScaffold so the CTA lives in
+    // bottomNavigationBar — Flutter automatically shifts it above the keyboard.
+    final footer = _buildFooter(l10n);
+    return Stack(
+      children: [
+        OnboardingScaffold(
+          header: _buildHeader(l10n),
+          body: _buildStepContent(l10n),
+          primaryCta: footer.primaryCta,
+          secondaryCta: footer.secondaryCta,
+        ),
+        if (_showSkipDialog) _buildSkipDialog(l10n),
+      ],
     );
   }
 
