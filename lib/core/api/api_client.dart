@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../auth/secure_token_storage.dart';
 import '../auth/token_pair.dart';
+import 'locale_interceptor.dart';
 
 export '../auth/secure_token_storage.dart';
 
@@ -57,6 +58,8 @@ Future<void> initApiClient({
     receiveTimeout: const Duration(seconds: 30),
     headers: {'Content-Type': 'application/json'},
   ));
+
+  apiDio.interceptors.add(LocaleInterceptor());
 
   apiDio.interceptors.add(
     _AuthInterceptor(
