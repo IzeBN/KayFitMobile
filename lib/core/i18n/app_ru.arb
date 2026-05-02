@@ -381,6 +381,10 @@
   "addMeal_barcode_detected": "Штрихкод найден",
   "addMeal_barcode_confirm": "Добавить в журнал",
 
+  "settings_delete_account_title": "Удалить аккаунт?",
+  "settings_delete_account_body": "Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.",
+  "settings_delete_account_btn": "Удалить аккаунт",
+
   "settings_privacy_policy": "Политика конфиденциальности",
   "settings_terms": "Пользовательское соглашение",
   "settings_sub_promo": "Оформите подписку чтобы разблокировать ИИ-распознавание, голос и фото.",

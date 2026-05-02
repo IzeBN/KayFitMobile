@@ -381,6 +381,10 @@
   "addMeal_barcode_detected": "Barcode detected",
   "addMeal_barcode_confirm": "Add to journal",
 
+  "settings_delete_account_title": "Delete account?",
+  "settings_delete_account_body": "All your data will be permanently deleted. This action cannot be undone.",
+  "settings_delete_account_btn": "Delete account",
+
   "settings_privacy_policy": "Privacy Policy",
   "settings_terms": "Terms of Service",
   "settings_sub_promo": "Subscribe to unlock AI recognition, voice and photo.",
