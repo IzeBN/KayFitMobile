@@ -488,99 +488,113 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   // ── Footer ──────────────────────────────────────────────────────────────────
-  Widget _buildFooter(AppLocalizations l10n) {
+  /// Returns [_FooterCtaData] — the primary CTA widget and an optional
+  /// secondary CTA — for the current step.
+  ///
+  /// These are placed into [OnboardingScaffold.primaryCta] /
+  /// [OnboardingScaffold.secondaryCta], which live in [bottomNavigationBar].
+  /// Flutter therefore shifts them above the keyboard automatically.
+  _FooterCtaData _buildFooter(AppLocalizations l10n) {
     final isRu = ref.watch(localeProvider).languageCode == 'ru';
+    final nextLabel = isRu ? 'Далее' : 'Next';
 
     switch (_currentStep) {
+      // Landing and auth are excluded: landing owns its CTA; auth auto-navigates.
       case _Step.landing:
-      case _Step.age:
-      case _Step.gender:
-      case _Step.diet:
       case _Step.auth:
-        return const SizedBox.shrink();
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(label: nextLabel, onTap: _goNext),
+        );
 
       case _Step.health:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: isRu ? 'Далее' : 'Next',
-              onTap: _healthConditions.isNotEmpty ? _goNext : null,
-            ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _healthConditions.isNotEmpty ? _goNext : null,
+          ),
+        );
+
+      case _Step.diet:
+        // Tap-on-card already calls _goNext; the explicit button is added so
+        // the user always sees a visible CTA (§3.4 of the spec).
+        // Diet default value is 'none' so the button is enabled from the start.
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _dietType.isNotEmpty ? _goNext : null,
           ),
         );
 
       case _Step.food_restrictions:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _GradientButton(label: isRu ? 'Далее' : 'Next', onTap: _goNext),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                    setState(() => _foodRestrictions = '');
-                    _goNext();
-                  },
-                  child: Text(
-                    isRu ? 'Пропустить' : 'Skip',
-                    style: const TextStyle(color: AppColors.textMuted),
-                  ),
-                ),
-              ],
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(label: nextLabel, onTap: _goNext),
+          secondaryCta: TextButton(
+            onPressed: () {
+              setState(() => _foodRestrictions = '');
+              _goNext();
+            },
+            child: Text(
+              isRu ? 'Пропустить' : 'Skip',
+              style: const TextStyle(color: AppColors.textMuted),
             ),
           ),
         );
 
       case _Step.goals:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: isRu ? 'Далее' : 'Next',
-              onTap: _goals.isNotEmpty ? _goNext : null,
-            ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _goals.isNotEmpty ? _goNext : null,
+          ),
+        );
+
+      case _Step.age:
+        // Tap-on-card already calls _goNext; the explicit button is added for
+        // visibility (§3.4).
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _age != null ? _goNext : null,
           ),
         );
 
       case _Step.height:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: l10n.common_next,
-              onTap: _heightCtrl.text.isEmpty ? null : () => _handleHeightNext(l10n),
-            ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: l10n.common_next,
+            onTap: _heightCtrl.text.isEmpty
+                ? null
+                : () => _handleHeightNext(l10n),
+          ),
+        );
+
+      case _Step.gender:
+        // Tap-on-card already calls _goNext; the explicit button is added for
+        // visibility (§3.4).
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _gender.isNotEmpty ? _goNext : null,
           ),
         );
 
       case _Step.weight:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: l10n.ob_footer_calc,
-              onTap: _weightCtrl.text.isEmpty ? null : () => _handleWeightNext(l10n),
-            ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: l10n.ob_footer_calc,
+            onTap: _weightCtrl.text.isEmpty
+                ? null
+                : () => _handleWeightNext(l10n),
           ),
         );
 
       case _Step.training:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: l10n.common_next,
-              onTap: _trainingFreq.isEmpty ? null : () => _handleTrainingNext(l10n),
-            ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: l10n.common_next,
+            onTap: _trainingFreq.isEmpty
+                ? null
+                : () => _handleTrainingNext(l10n),
           ),
         );
 
@@ -588,32 +602,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case _Step.info_1:
       case _Step.info_2:
       case _Step.info_3:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(
-              label: isRu ? 'Далее' : 'Next',
-              onTap: _goNext,
-            ),
-          ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(label: nextLabel, onTap: _goNext),
         );
 
       case _Step.method:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(label: l10n.common_next, onTap: _goNext),
-          ),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(label: l10n.common_next, onTap: _goNext),
         );
 
       case _Step.result:
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _GradientButton(label: l10n.ob_footer_login, onTap: _goNext),
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: l10n.ob_footer_login,
+            onTap: _goNext,
           ),
         );
     }
@@ -2654,6 +2656,14 @@ class _StepScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── Footer CTA data ───────────────────────────────────────────────────────────
+/// Carries the CTA widgets from [_buildFooter] into [OnboardingScaffold].
+class _FooterCtaData {
+  const _FooterCtaData({required this.primaryCta, this.secondaryCta});
+  final Widget primaryCta;
+  final Widget? secondaryCta;
 }
 
 // ─── Gradient button ───────────────────────────────────────────────────────────
