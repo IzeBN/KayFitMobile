@@ -1,10 +1,13 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../router.dart';
+import '../../../core/navigation/navigation_providers.dart';
 
 class AiConsentScreen extends ConsumerStatefulWidget {
   const AiConsentScreen({super.key});
@@ -16,10 +19,20 @@ class AiConsentScreen extends ConsumerStatefulWidget {
 class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
   bool _checked = false;
 
+  /// True while [_onAccept] is running — disables button and shows loader.
+  bool _isProcessing = false;
+
+  /// True when the server call exceeded [_kConsentTimeout] — shows retry UI.
+  bool _hasError = false;
+
   @override
   void initState() {
     super.initState();
-    AnalyticsService.aiConsentScreenOpened();
+    try {
+      AnalyticsService.aiConsentScreenOpened();
+    } catch (_) {
+      // Analytics is best-effort; never block the screen from mounting.
+    }
   }
 
   @override
@@ -31,259 +44,349 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
         ? 'Для работы функций распознавания еды'
         : 'Required for food recognition features';
     final row1 = isRu ? 'Текстовые описания блюд' : 'Text descriptions of meals';
-    final row1b = isRu ? 'Голосовые записи (аудиофайлы)' : 'Voice recordings (audio files)';
+    final row1b =
+        isRu ? 'Голосовые записи (аудиофайлы)' : 'Voice recordings (audio files)';
     final row1c = isRu ? 'Фотографии еды' : 'Food photos';
     final row1d = isRu ? 'Сообщения в AI-чате' : 'AI chat messages';
     final row2 = isRu
         ? 'Данные отправляются в Anthropic, Inc. (США) и обрабатываются на их серверах'
         : 'Data is sent to Anthropic, Inc. (USA) and processed on their servers';
-    final row3 = isRu ? 'Не используются для обучения модели' : 'Never used for model training';
-    final checkboxLabel = isRu ? 'Я согласен(а) с передачей данных' : 'I agree to the data transfer';
+    final row3 =
+        isRu ? 'Не используются для обучения модели' : 'Never used for model training';
+    final checkboxLabel =
+        isRu ? 'Я согласен(а) с передачей данных' : 'I agree to the data transfer';
     final acceptLabel = isRu ? 'Принять и продолжить' : 'Accept & Continue';
     final declineLabel = isRu
         ? 'Отказаться (ИИ-функции будут недоступны)'
         : 'Decline (AI features will be unavailable)';
 
+    final errorText = isRu
+        ? 'Не удалось подключиться. Попробуйте ещё раз.'
+        : 'Could not connect. Please try again.';
+    final retryLabel = isRu ? 'Повторить' : 'Retry';
+
     return Scaffold(
       backgroundColor: AppColors.bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ── Hero icon ────────────────────────────────────────────────
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C3AED), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.psychology_rounded,
-                  color: Colors.white,
-                  size: 48,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ── Title & subtitle ─────────────────────────────────────────
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.text,
-                  letterSpacing: -0.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: AppColors.textMuted,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 32),
-
-              // ── Info card ────────────────────────────────────────────────
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: AppShadow.sm,
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isRu ? 'Данные, которые передаются:' : 'Data that is shared:',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _BenefitRow(
-                      icon: Icons.text_snippet_outlined,
-                      color: const Color(0xFF7C3AED),
-                      text: row1,
-                    ),
-                    const SizedBox(height: 12),
-                    _BenefitRow(
-                      icon: Icons.mic_rounded,
-                      color: const Color(0xFF7C3AED),
-                      text: row1b,
-                    ),
-                    const SizedBox(height: 12),
-                    _BenefitRow(
-                      icon: Icons.camera_alt_outlined,
-                      color: const Color(0xFF7C3AED),
-                      text: row1c,
-                    ),
-                    const SizedBox(height: 12),
-                    _BenefitRow(
-                      icon: Icons.chat_outlined,
-                      color: const Color(0xFF7C3AED),
-                      text: row1d,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(height: 1),
-                    ),
-                    _BenefitRow(
-                      icon: Icons.send_rounded,
-                      color: const Color(0xFF3B82F6),
-                      text: row2,
-                    ),
-                    const SizedBox(height: 12),
-                    _BenefitRow(
-                      icon: Icons.shield_rounded,
-                      color: const Color(0xFF16A34A),
-                      text: row3,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // ── Checkbox row ─────────────────────────────────────────────
-              GestureDetector(
-                onTap: () {
-                  final next = !_checked;
-                  AnalyticsService.aiConsentCheckboxToggled(next);
-                  setState(() => _checked = next);
-                },
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: _checked
-                            ? const Color(0xFF7C3AED)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: _checked
-                              ? const Color(0xFF7C3AED)
-                              : AppColors.textMuted,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: _checked
-                          ? const Icon(Icons.check_rounded,
-                              color: Colors.white, size: 16)
-                          : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        checkboxLabel,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.text,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ── Accept button ────────────────────────────────────────────
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: _checked ? 1.0 : 0.4,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: DecoratedBox(
+      // ── LinearProgressIndicator while processing ──────────────────────────
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ── Hero icon ────────────────────────────────────────────────
+                  Container(
+                    width: 96,
+                    height: 96,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFF7C3AED), Color(0xFF3B82F6)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      boxShadow: _checked
-                          ? [
-                              BoxShadow(
-                                color: const Color(0xFF7C3AED)
-                                    .withValues(alpha: 0.35),
-                                blurRadius: 14,
-                                offset: const Offset(0, 5),
-                              ),
-                            ]
-                          : null,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      child: InkWell(
-                        onTap: _checked ? _onAccept : null,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        child: Center(
+                    child: const Icon(
+                      Icons.psychology_rounded,
+                      color: Colors.white,
+                      size: 48,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ── Title & subtitle ─────────────────────────────────────────
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.text,
+                      letterSpacing: -0.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textMuted,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ── Info card ────────────────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: AppShadow.sm,
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isRu ? 'Данные, которые передаются:' : 'Data that is shared:',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _BenefitRow(
+                          icon: Icons.text_snippet_outlined,
+                          color: const Color(0xFF7C3AED),
+                          text: row1,
+                        ),
+                        const SizedBox(height: 12),
+                        _BenefitRow(
+                          icon: Icons.mic_rounded,
+                          color: const Color(0xFF7C3AED),
+                          text: row1b,
+                        ),
+                        const SizedBox(height: 12),
+                        _BenefitRow(
+                          icon: Icons.camera_alt_outlined,
+                          color: const Color(0xFF7C3AED),
+                          text: row1c,
+                        ),
+                        const SizedBox(height: 12),
+                        _BenefitRow(
+                          icon: Icons.chat_outlined,
+                          color: const Color(0xFF7C3AED),
+                          text: row1d,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Divider(height: 1),
+                        ),
+                        _BenefitRow(
+                          icon: Icons.send_rounded,
+                          color: const Color(0xFF3B82F6),
+                          text: row2,
+                        ),
+                        const SizedBox(height: 12),
+                        _BenefitRow(
+                          icon: Icons.shield_rounded,
+                          color: const Color(0xFF16A34A),
+                          text: row3,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Checkbox row ─────────────────────────────────────────────
+                  GestureDetector(
+                    key: const Key('consent_checkbox'),
+                    onTap: _isProcessing
+                        ? null
+                        : () {
+                            final next = !_checked;
+                            try {
+                              AnalyticsService.aiConsentCheckboxToggled(next);
+                            } catch (_) {
+                              // Analytics is best-effort.
+                            }
+                            setState(() {
+                              _checked = next;
+                              _hasError = false;
+                            });
+                          },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: _checked
+                                ? const Color(0xFF7C3AED)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: _checked
+                                  ? const Color(0xFF7C3AED)
+                                  : AppColors.textMuted,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: _checked
+                              ? const Icon(Icons.check_rounded,
+                                  color: Colors.white, size: 16)
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Text(
-                            acceptLabel,
+                            checkboxLabel,
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: AppColors.text,
+                              fontWeight: FontWeight.w500,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ── Error banner ─────────────────────────────────────────────
+                  if (_hasError)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded,
+                              color: AppColors.accentOver, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              errorText,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.accentOver,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            key: const Key('retry_button'),
+                            onPressed: _onAccept,
+                            style: TextButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              retryLabel,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF7C3AED),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // ── Accept button ────────────────────────────────────────────
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: (_checked && !_isProcessing) ? 1.0 : 0.4,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF7C3AED), Color(0xFF3B82F6)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          boxShadow: (_checked && !_isProcessing)
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF7C3AED)
+                                        .withValues(alpha: 0.35),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          child: InkWell(
+                            key: const Key('accept_inkwell'),
+                            // Immediately disabled on first tap (≤ 100 ms response)
+                            onTap: (_checked && !_isProcessing) ? _onAccept : null,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            child: Center(
+                              child: _isProcessing
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Text(
+                                      acceptLabel,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-              // ── Decline button ───────────────────────────────────────────
-              TextButton(
-                onPressed: _onDecline,
-                child: Text(
-                  declineLabel,
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 13,
+                  // ── Decline button ───────────────────────────────────────────
+                  TextButton(
+                    onPressed: _isProcessing ? null : _onDecline,
+                    child: Text(
+                      declineLabel,
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
 
-              const SizedBox(height: 8),
-            ],
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
           ),
-        ),
+
+          // ── Top LinearProgressIndicator while processing ──────────────────
+          if (_isProcessing)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7C3AED)),
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -299,13 +402,47 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
   }
 
   Future<void> _onAccept() async {
-    AnalyticsService.aiConsentAccepted();
-    await ref.read(aiConsentProvider.notifier).setConsent(true);
+    if (_isProcessing) return;
+
+    // ── Immediate visual feedback — well within 100 ms ────────────────────
+    setState(() {
+      _isProcessing = true;
+      _hasError = false;
+    });
+
+    try {
+      AnalyticsService.aiConsentAccepted();
+    } catch (_) {
+      // Analytics is best-effort.
+    }
+
+    try {
+      await ref.read(aiConsentProvider.notifier).setConsent(true);
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _hasError = true;
+      });
+      return;
+    } on DioException {
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _hasError = true;
+      });
+      return;
+    }
+    // setConsent succeeded — navigate forward.
     if (mounted) _navigateAfterConsent();
   }
 
   Future<void> _onDecline() async {
-    AnalyticsService.aiConsentDeclined();
+    try {
+      AnalyticsService.aiConsentDeclined();
+    } catch (_) {
+      // Analytics is best-effort.
+    }
     final isRu = Localizations.localeOf(context).languageCode == 'ru';
     final confirmed = await showDialog<bool>(
       context: context,
@@ -339,7 +476,11 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
       ),
     );
     if (confirmed == true && mounted) {
-      AnalyticsService.aiConsentDeclineConfirmed();
+      try {
+        AnalyticsService.aiConsentDeclineConfirmed();
+      } catch (_) {
+        // Analytics is best-effort.
+      }
       await ref.read(aiConsentProvider.notifier).setConsent(false);
       if (mounted) _navigateAfterConsent();
     }
