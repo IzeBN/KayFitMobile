@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../auth/secure_token_storage.dart';
 import '../auth/token_pair.dart';
@@ -11,12 +12,12 @@ const _baseUrl = 'https://app.carbcounter.online';
 
 const baseUrl = _baseUrl;
 
-late final Dio apiDio;
+late Dio apiDio;
 
 // ── Singleton SecureTokenStorage shared by the entire app ─────────────────────
 // Created once in initApiClient() and used by both _AuthInterceptor and
 // AuthNotifier to avoid circular-dependency issues.
-late final SecureTokenStorage secureTokenStorage;
+late SecureTokenStorage secureTokenStorage;
 
 /// Kept for backwards-compatibility with code that still calls TokenStorage
 /// directly.  New code should use [secureTokenStorage] instead.
@@ -44,7 +45,10 @@ LogoutCallback? _onLogout;
 
 void setLogoutCallback(LogoutCallback cb) => _onLogout = cb;
 
-Future<void> initApiClient({SecureTokenStorage? storage}) async {
+Future<void> initApiClient({
+  SecureTokenStorage? storage,
+  @visibleForTesting RefreshDioFactory? refreshDioFactory,
+}) async {
   secureTokenStorage = storage ?? SecureTokenStorageImpl();
 
   apiDio = Dio(BaseOptions(
@@ -54,14 +58,28 @@ Future<void> initApiClient({SecureTokenStorage? storage}) async {
     headers: {'Content-Type': 'application/json'},
   ));
 
-  apiDio.interceptors.add(_AuthInterceptor(apiDio, secureTokenStorage));
+  apiDio.interceptors.add(
+    _AuthInterceptor(
+      apiDio,
+      secureTokenStorage,
+      refreshDioFactory: refreshDioFactory,
+    ),
+  );
 }
 
+/// Optional factory for creating the refresh Dio, injected in tests.
+typedef RefreshDioFactory = Dio Function();
+
 class _AuthInterceptor extends Interceptor {
-  _AuthInterceptor(this._dio, this._storage);
+  _AuthInterceptor(
+    this._dio,
+    this._storage, {
+    @visibleForTesting RefreshDioFactory? refreshDioFactory,
+  }) : _refreshDioFactory = refreshDioFactory;
 
   final Dio _dio;
   final SecureTokenStorage _storage;
+  final RefreshDioFactory? _refreshDioFactory;
 
   /// Non-null while a token refresh is in progress.
   /// Completes with the new access token, or null if refresh failed.
@@ -137,11 +155,13 @@ class _AuthInterceptor extends Interceptor {
         return;
       }
 
-      final refreshDio = Dio(BaseOptions(
-        baseUrl: _baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-      ));
+      final refreshDio = _refreshDioFactory != null
+          ? _refreshDioFactory()
+          : Dio(BaseOptions(
+              baseUrl: _baseUrl,
+              connectTimeout: const Duration(seconds: 15),
+              receiveTimeout: const Duration(seconds: 15),
+            ));
       final resp = await refreshDio.post(
         '/api/v1/auth/refresh',
         data: {'refresh_token': refreshToken},

@@ -37,7 +37,16 @@ const _kLegacyRefresh = 'refresh_token';
 // ─── Implementation ────────────────────────────────────────────────────────────
 
 class SecureTokenStorageImpl implements SecureTokenStorage {
+  /// Default production constructor — uses platform Keychain / EncryptedPrefs.
   SecureTokenStorageImpl() : _storage = _buildStorage();
+
+  /// Visible for testing: inject a custom [FlutterSecureStorage] instance.
+  @visibleForTesting
+  SecureTokenStorageImpl.withStorage(FlutterSecureStorage storage)
+      : _storage = storage;
+
+  // ignore: unused_element
+  FlutterSecureStorage get storage => _storage;
 
   final FlutterSecureStorage _storage;
 
