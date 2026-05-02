@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../auth/secure_token_storage.dart';
+import '../auth/token_pair.dart';
+
+export '../auth/secure_token_storage.dart';
 
 const _baseUrl = 'https://app.carbcounter.online';
 
@@ -9,31 +13,30 @@ const baseUrl = _baseUrl;
 
 late final Dio apiDio;
 
+// ── Singleton SecureTokenStorage shared by the entire app ─────────────────────
+// Created once in initApiClient() and used by both _AuthInterceptor and
+// AuthNotifier to avoid circular-dependency issues.
+late final SecureTokenStorage secureTokenStorage;
+
+/// Kept for backwards-compatibility with code that still calls TokenStorage
+/// directly.  New code should use [secureTokenStorage] instead.
+/// This class is now a thin shim that delegates to [secureTokenStorage].
+@Deprecated('Use secureTokenStorage (SecureTokenStorageImpl) instead')
 class TokenStorage {
-  static const _keyAccess = 'access_token';
-  static const _keyRefresh = 'refresh_token';
-
   static Future<void> save(String access, String refresh) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyAccess, access);
-    await prefs.setString(_keyRefresh, refresh);
+    final pair = TokenPair(
+      accessToken: access,
+      refreshToken: refresh,
+      expiresAt: DateTime.now(), // unknown — trigger immediate refresh
+    );
+    await secureTokenStorage.saveTokens(pair);
   }
 
-  static Future<String?> getAccess() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyAccess);
-  }
+  static Future<String?> getAccess() => secureTokenStorage.loadAccessToken();
 
-  static Future<String?> getRefresh() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyRefresh);
-  }
+  static Future<String?> getRefresh() => secureTokenStorage.loadRefreshToken();
 
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyAccess);
-    await prefs.remove(_keyRefresh);
-  }
+  static Future<void> clear() => secureTokenStorage.clearTokens();
 }
 
 typedef LogoutCallback = Future<void> Function();
@@ -41,7 +44,9 @@ LogoutCallback? _onLogout;
 
 void setLogoutCallback(LogoutCallback cb) => _onLogout = cb;
 
-Future<void> initApiClient() async {
+Future<void> initApiClient({SecureTokenStorage? storage}) async {
+  secureTokenStorage = storage ?? SecureTokenStorageImpl();
+
   apiDio = Dio(BaseOptions(
     baseUrl: _baseUrl,
     connectTimeout: const Duration(seconds: 15),
@@ -49,13 +54,14 @@ Future<void> initApiClient() async {
     headers: {'Content-Type': 'application/json'},
   ));
 
-  apiDio.interceptors.add(_AuthInterceptor(apiDio));
+  apiDio.interceptors.add(_AuthInterceptor(apiDio, secureTokenStorage));
 }
 
 class _AuthInterceptor extends Interceptor {
-  _AuthInterceptor(this._dio);
+  _AuthInterceptor(this._dio, this._storage);
 
   final Dio _dio;
+  final SecureTokenStorage _storage;
 
   /// Non-null while a token refresh is in progress.
   /// Completes with the new access token, or null if refresh failed.
@@ -74,7 +80,7 @@ class _AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (!_isAuthPath(options.path)) {
-      final token = await TokenStorage.getAccess();
+      final token = await _storage.loadAccessToken();
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
@@ -121,7 +127,7 @@ class _AuthInterceptor extends Interceptor {
     _refreshCompleter = Completer<String?>();
     String? newAccess;
     try {
-      final refreshToken = await TokenStorage.getRefresh();
+      final refreshToken = await _storage.loadRefreshToken();
       if (refreshToken == null) {
         if (!_refreshCompleter!.isCompleted) {
           _refreshCompleter!.complete(null);
@@ -143,12 +149,33 @@ class _AuthInterceptor extends Interceptor {
 
       final data = resp.data as Map<String, dynamic>;
       newAccess = data['access_token'] as String;
-      final newRefresh = data['refresh_token'] as String;
-      await TokenStorage.save(newAccess, newRefresh);
+      final newPair = TokenPair.fromApiResponse(data);
+      await _storage.saveTokens(newPair);
 
       if (!_refreshCompleter!.isCompleted) {
         _refreshCompleter!.complete(newAccess);
       }
+    } on DioException catch (e) {
+      // EC8: network timeout on refresh → do NOT logout; let caller retry later.
+      if (e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        if (!_refreshCompleter!.isCompleted) {
+          _refreshCompleter!.complete(null);
+        }
+        _refreshCompleter = null;
+        // Surface error without clearing tokens — session may still be valid.
+        handler.next(err);
+        return;
+      }
+      // Auth/server error → logout.
+      if (!_refreshCompleter!.isCompleted) {
+        _refreshCompleter!.complete(null);
+      }
+      _refreshCompleter = null;
+      await _handleLogout();
+      handler.next(err);
+      return;
     } catch (_) {
       // Refresh itself failed — token is dead, log out
       if (!_refreshCompleter!.isCompleted) {
@@ -161,7 +188,7 @@ class _AuthInterceptor extends Interceptor {
     }
 
     // Refresh succeeded. Clear in-flight marker BEFORE retrying so concurrent
-    // 401s don't queue forever, and so retry failures don't trigger logout.
+    // 401s don't queue forever.
     _refreshCompleter = null;
 
     // Retry the original request that triggered the 401
@@ -172,7 +199,6 @@ class _AuthInterceptor extends Interceptor {
       handler.resolve(retryResp);
     } catch (e) {
       // Retry failed for non-auth reasons (timeout, network, server error).
-      // Surface the error to the caller without logging out.
       if (e is DioException) {
         handler.next(e);
       } else {
@@ -182,7 +208,7 @@ class _AuthInterceptor extends Interceptor {
   }
 
   Future<void> _handleLogout() async {
-    await TokenStorage.clear();
+    await _storage.clearTokens();
     await _onLogout?.call();
   }
 }
