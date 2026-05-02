@@ -321,16 +321,28 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
           'data=${resp.data}');
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
+      final isFood = resp.data['is_food'] as bool?;
+      final notFoodReason = resp.data['not_food_reason'] as String?;
       if (error != null && error.isNotEmpty) {
         setState(() => _loadingType = _LoadingType.none);
         _handleError(Exception(error));
         return;
       }
-      if (rawItems == null || rawItems.isEmpty) {
+      final isNotFood = isFood == false || notFoodReason == 'not_food';
+      if (isNotFood || rawItems == null || rawItems.isEmpty) {
         if (mounted) setState(() => _loadingType = _LoadingType.none);
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not recognize food in this photo')),
+            SnackBar(
+              content: Text(l10n.addMeal_not_food_message),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: l10n.addMeal_not_food_retry,
+                onPressed: () => _pickAndRecognizePhoto(source),
+              ),
+            ),
           );
         }
         return;
