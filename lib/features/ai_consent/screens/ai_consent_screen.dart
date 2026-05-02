@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/locale/locale_provider.dart';
 import '../../../core/navigation/navigation_providers.dart';
 
 class AiConsentScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final isRu = ref.watch(localeProvider).languageCode == 'ru';
 
     final title = isRu ? 'Обработка данных ИИ' : 'AI Data Processing';
     final subtitle = isRu
@@ -443,7 +444,7 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
     } catch (_) {
       // Analytics is best-effort.
     }
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final isRu = ref.read(localeProvider).languageCode == 'ru';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
