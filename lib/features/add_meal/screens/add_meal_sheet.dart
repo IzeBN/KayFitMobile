@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/api/api_client.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/utils/nutrient_parser.dart';
+import '../../../shared/widgets/keyboard_dismisser.dart';
 import 'package:dio/dio.dart';
 import 'barcode_scanner_screen_v2.dart';
 import 'recognition_result_sheet_v2.dart';
@@ -167,6 +168,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
+          isDismissible: true,
+          enableDrag: true,
+          showDragHandle: false,
           builder: (_) => DraggableScrollableSheet(
             initialChildSize: 0.92,
             minChildSize: 0.5,
@@ -317,16 +321,28 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
           'data=${resp.data}');
       final error = resp.data['error'] as String?;
       final rawItems = resp.data['items'] as List<dynamic>?;
+      final isFood = resp.data['is_food'] as bool?;
+      final notFoodReason = resp.data['not_food_reason'] as String?;
       if (error != null && error.isNotEmpty) {
         setState(() => _loadingType = _LoadingType.none);
         _handleError(Exception(error));
         return;
       }
-      if (rawItems == null || rawItems.isEmpty) {
+      final isNotFood = isFood == false || notFoodReason == 'not_food';
+      if (isNotFood || rawItems == null || rawItems.isEmpty) {
         if (mounted) setState(() => _loadingType = _LoadingType.none);
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not recognize food in this photo')),
+            SnackBar(
+              content: Text(l10n.addMeal_not_food_message),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: l10n.addMeal_not_food_retry,
+                onPressed: () => _pickAndRecognizePhoto(source),
+              ),
+            ),
           );
         }
         return;
@@ -347,6 +363,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
+          isDismissible: true,
+          enableDrag: true,
+          showDragHandle: false,
           builder: (_) => DraggableScrollableSheet(
             initialChildSize: 0.92,
             minChildSize: 0.5,
@@ -394,32 +413,33 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
     final bottomPad = MediaQuery.of(context).viewInsets.bottom +
         MediaQuery.of(context).padding.bottom;
 
-    return FadeTransition(
-      opacity: _sheetFade,
-      child: SlideTransition(
-        position: _sheetSlide,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Drag handle
-                  _DragHandle(),
+    return KeyboardDismisser(
+      child: FadeTransition(
+        opacity: _sheetFade,
+        child: SlideTransition(
+          position: _sheetSlide,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Stack(
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag handle
+                    _DragHandle(),
 
-                  // Header
-                  _SheetHeader(
-                    mode: _mode,
-                    l10n: l10n,
-                    onBack: _mode != _InputMode.choose
-                        ? () => _switchMode(_InputMode.choose)
-                        : null,
-                  ),
+                    // Header
+                    _SheetHeader(
+                      mode: _mode,
+                      l10n: l10n,
+                      onBack: _mode != _InputMode.choose
+                          ? () => _switchMode(_InputMode.choose)
+                          : null,
+                    ),
 
                   // Content
                   FadeTransition(
@@ -445,6 +465,9 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                                           await showModalBottomSheet<ImageSource>(
                                         context: context,
                                         backgroundColor: Colors.transparent,
+                                        isDismissible: true,
+                                        enableDrag: true,
+                                        showDragHandle: false,
                                         builder: (_) =>
                                             _PhotoSourceSheet(l10n: l10n),
                                       );
@@ -488,7 +511,22 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
                 _RecognizingOverlay(type: _loadingType, l10n: l10n),
               if (_loadingType == _LoadingType.parsing)
                 const _ParsingOverlay(),
-            ],
+
+              // Close button (X) in top-right corner
+              if (_loadingType == _LoadingType.none)
+                Positioned(
+                  top: 8,
+                  right: 4,
+                  child: IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    iconSize: 20,
+                    color: AppColors.textMuted,
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

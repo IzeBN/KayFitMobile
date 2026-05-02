@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
+import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'document_screen.dart';
+
+// Provider that surfaces the singleton Dio instance to the settings screen
+// for fire-and-forget profile language sync. Avoids direct global access.
+final _apiDioProvider = Provider<Dio>((_) => apiDio);
 
 // ─── Screen ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +70,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(authNotifierProvider).value;
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final currentLocale = ref.watch(localeProvider);
+    final isRu = currentLocale.languageCode == 'ru';
 
     final sections = <Widget>[
       if (user != null) _UserCard(user: user),
@@ -89,7 +98,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             _showLangSheet(context, l10n, isRu);
           },
           trailing: Text(
-            '🇬🇧 EN',
+            isRu ? '🇷🇺 RU' : '🇬🇧 EN',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textMuted,
@@ -208,19 +217,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   void _confirmDeleteAccount(BuildContext context) {
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          isRu ? 'Удалить аккаунт?' : 'Delete account?',
+          l10n.settings_delete_account_title,
           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
         content: Text(
-          isRu
-              ? 'Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.'
-              : 'All your data will be permanently deleted. This action cannot be undone.',
+          l10n.settings_delete_account_body,
           style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
         ),
         actions: [
@@ -230,7 +237,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               Navigator.pop(ctx);
             },
             child: Text(
-              isRu ? 'Отмена' : 'Cancel',
+              l10n.common_cancel,
               style: const TextStyle(color: AppColors.textMuted),
             ),
           ),
@@ -241,7 +248,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               await ref.read(authNotifierProvider.notifier).deleteAccount();
             },
             child: Text(
-              isRu ? 'Удалить' : 'Delete',
+              l10n.common_delete,
               style: const TextStyle(
                 color: AppColors.accentOver,
                 fontWeight: FontWeight.w700,
@@ -254,46 +261,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   void _showLangSheet(
-      BuildContext context, AppLocalizations l10n, bool isRu) {
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isRu,
+  ) {
     showModalBottomSheet(
       context: context,
+      isDismissible: true,
+      enableDrag: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 36),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Text(
-              l10n.settings_language,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _LangOption(
-              flag: '🇬🇧',
-              label: 'English',
-              selected: true,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
+      builder: (_) => _LangSheet(
+        currentIsRu: isRu,
+        l10n: l10n,
+        onSelect: (newLocale) {
+          ref.read(localeProvider.notifier).setLocale(newLocale);
+          Navigator.pop(context);
+          // Fire-and-forget: sync language preference to backend profile.
+          _syncLanguageToBackend(newLocale.languageCode);
+        },
       ),
     );
+  }
+
+  void _syncLanguageToBackend(String langCode) {
+    // Intentionally unawaited — language change in UI must not block on network.
+    final dio = ref.read(_apiDioProvider);
+    unawaited(_postLanguage(dio, langCode));
+  }
+
+  static Future<void> _postLanguage(Dio dio, String langCode) async {
+    try {
+      await dio.post('/api/profile', data: {'language': langCode});
+    } on Exception {
+      // Silently ignore — locale is already applied locally via SharedPrefs.
+    }
   }
 }
 
@@ -612,7 +615,7 @@ class _DeleteAccountCardState extends State<_DeleteAccountCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) {
@@ -623,9 +626,7 @@ class _DeleteAccountCardState extends State<_DeleteAccountCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 130),
         decoration: BoxDecoration(
-          color: _pressed
-              ? AppColors.accentOverSoft
-              : AppColors.surface,
+          color: _pressed ? AppColors.accentOverSoft : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
           boxShadow: AppShadow.sm,
         ),
@@ -639,12 +640,15 @@ class _DeleteAccountCardState extends State<_DeleteAccountCard> {
                 color: AppColors.accentOverSoft,
                 borderRadius: BorderRadius.circular(9),
               ),
-              child: const Icon(Icons.person_remove_rounded,
-                  color: AppColors.accentOver, size: 18),
+              child: const Icon(
+                Icons.person_remove_rounded,
+                color: AppColors.accentOver,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Text(
-              isRu ? 'Удалить аккаунт' : 'Delete account',
+              l10n.settings_delete_account_btn,
               style: const TextStyle(
                 color: AppColors.accentOver,
                 fontWeight: FontWeight.w500,
@@ -653,6 +657,64 @@ class _DeleteAccountCardState extends State<_DeleteAccountCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Language picker bottom sheet (stateless — reads locale from ProviderScope)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LangSheet extends StatelessWidget {
+  const _LangSheet({
+    required this.currentIsRu,
+    required this.l10n,
+    required this.onSelect,
+  });
+
+  final bool currentIsRu;
+  final AppLocalizations l10n;
+  final void Function(Locale) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 36),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: AppColors.border,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Text(
+            l10n.settings_language,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _LangOption(
+            flag: '🇷🇺',
+            label: l10n.settings_langRu,
+            selected: currentIsRu,
+            onTap: () => onSelect(const Locale('ru')),
+          ),
+          const SizedBox(height: 10),
+          _LangOption(
+            flag: '🇬🇧',
+            label: l10n.settings_langEn,
+            selected: !currentIsRu,
+            onTap: () => onSelect(const Locale('en')),
+          ),
+        ],
       ),
     );
   }

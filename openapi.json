@@ -1,1 +1,5932 @@
-{"openapi":"3.1.0","info":{"title":"Calories API","version":"0.1.0"},"paths":{"/login":{"get":{"summary":"Login Page","operationId":"login_page_login_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/auth":{"get":{"summary":"Auth Callback","operationId":"auth_callback_auth_get","parameters":[{"name":"token","in":"query","required":false,"schema":{"type":"string","default":"","title":"Token"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/logout":{"get":{"summary":"Logout","operationId":"logout_logout_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/auth/register":{"post":{"tags":["auth-email"],"summary":"Register with email + password","operationId":"register_email_api_v1_auth_register_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/EmailRegisterRequest"}}},"required":true},"responses":{"201":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TokenResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/login":{"post":{"tags":["auth-email"],"summary":"Login with email + password","operationId":"login_email_api_v1_auth_login_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/EmailLoginRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TokenResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/refresh":{"post":{"tags":["auth-email"],"summary":"Refresh access token","operationId":"refresh_tokens_api_v1_auth_refresh_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RefreshRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TokenResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/logout":{"post":{"tags":["auth-email"],"summary":"Logout (revoke refresh token)","operationId":"logout_email_api_v1_auth_logout_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RefreshRequest"}}},"required":true},"responses":{"204":{"description":"Successful Response"},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/logout-all":{"post":{"tags":["auth-email"],"summary":"Logout from all devices","operationId":"logout_all_api_v1_auth_logout_all_post","responses":{"204":{"description":"Successful Response"}}}},"/api/v1/auth/me":{"get":{"tags":["auth-email"],"summary":"Get current user info","operationId":"get_me_api_v1_auth_me_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/MeResponse"}}}}}}},"/api/v1/auth/change-password":{"post":{"tags":["auth-email"],"summary":"Change password (invalidates all sessions)","operationId":"change_password_api_v1_auth_change_password_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ChangePasswordRequest"}}},"required":true},"responses":{"204":{"description":"Successful Response"},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/meals":{"get":{"summary":"Get Meals","operationId":"get_meals_api_meals_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/MealResponse"},"type":"array","title":"Response Get Meals Api Meals Get"}}}}}},"post":{"summary":"Add Meal","operationId":"add_meal_api_meals_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/MealCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/MealResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/meals/history":{"get":{"summary":"Get Meals History","operationId":"get_meals_history_api_meals_history_get","parameters":[{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":200,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/MealResponse"},"title":"Response Get Meals History Api Meals History Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/meals/{meal_id}":{"patch":{"summary":"Update Meal","operationId":"update_meal_api_meals__meal_id__patch","parameters":[{"name":"meal_id","in":"path","required":true,"schema":{"type":"integer","title":"Meal Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/MealUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"summary":"Delete Meal","operationId":"delete_meal_api_meals__meal_id__delete","parameters":[{"name":"meal_id","in":"path","required":true,"schema":{"type":"integer","title":"Meal Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/meals/add_selected":{"post":{"summary":"Add Selected Meals","operationId":"add_selected_meals_api_meals_add_selected_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/AddSelectedMealsRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/stats":{"get":{"summary":"Get Stats","operationId":"get_stats_api_stats_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/StatsResponse"}}}}}}},"/api/goals":{"get":{"summary":"Get Goals","operationId":"get_goals_api_goals_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Goal"}}}}}},"post":{"summary":"Set Goals","operationId":"set_goals_api_goals_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Goal"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/profile":{"get":{"summary":"Get Profile","operationId":"get_profile_api_profile_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserProfileResponse"}}}}}},"post":{"summary":"Save Profile","operationId":"save_profile_api_profile_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserProfileRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserProfileResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/onboarding/answer":{"post":{"summary":"Save Onboarding Answer","operationId":"save_onboarding_answer_api_onboarding_answer_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/OnboardingAnswerRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/onboarding/answers":{"get":{"summary":"Get Onboarding Answers","operationId":"get_onboarding_answers_api_onboarding_answers_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/onboarding/complete":{"post":{"summary":"Complete Onboarding","operationId":"complete_onboarding_api_onboarding_complete_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/onboarding/recognize_photo":{"post":{"summary":"Onboarding Recognize Photo","operationId":"onboarding_recognize_photo_api_onboarding_recognize_photo_post","parameters":[{"name":"language","in":"query","required":false,"schema":{"type":"string","pattern":"^(ru|en)$","default":"ru","title":"Language"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"$ref":"#/components/schemas/Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecognizePhotoResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/onboarding/parse_meal":{"post":{"summary":"Onboarding Parse Meal","operationId":"onboarding_parse_meal_api_onboarding_parse_meal_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ParseMealRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/onboarding/transcribe":{"post":{"summary":"Onboarding Transcribe","operationId":"onboarding_transcribe_api_onboarding_transcribe_post","parameters":[{"name":"language","in":"query","required":false,"schema":{"type":"string","pattern":"^(ru|en)$","default":"ru","title":"Language"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"$ref":"#/components/schemas/Body_onboarding_transcribe_api_onboarding_transcribe_post"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TranscribeResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/calculation/result":{"get":{"summary":"Get Calculation Result","operationId":"get_calculation_result_api_calculation_result_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CalculationResponse"}}}}}}},"/api/calculate":{"post":{"summary":"Calculate","operationId":"calculate_api_calculate_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CalculationRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CalculationResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/parse_meal":{"post":{"summary":"Parse Meal","operationId":"parse_meal_api_parse_meal_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ParseMealRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/parse_meal_suggestions":{"post":{"summary":"Parse Meal Suggestions","operationId":"parse_meal_suggestions_api_parse_meal_suggestions_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ParseMealRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ParseMealSuggestionsResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/transcribe":{"post":{"summary":"Transcribe","operationId":"transcribe_api_transcribe_post","parameters":[{"name":"language","in":"query","required":false,"schema":{"type":"string","pattern":"^(ru|en)$","default":"ru","title":"Language"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"$ref":"#/components/schemas/Body_transcribe_api_transcribe_post"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TranscribeResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/recognize_photo":{"post":{"summary":"Recognize Photo","operationId":"recognize_photo_api_recognize_photo_post","parameters":[{"name":"language","in":"query","required":false,"schema":{"type":"string","pattern":"^(ru|en)$","default":"ru","title":"Language"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"$ref":"#/components/schemas/Body_recognize_photo_api_recognize_photo_post"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/RecognizePhotoResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/payments/tariffs":{"get":{"summary":"List Tariffs","operationId":"list_tariffs_api_payments_tariffs_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PaywallResponse"}}}}}}},"/api/public/tariffs":{"get":{"summary":"Public Tariffs","operationId":"public_tariffs_api_public_tariffs_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/TariffResponse"},"type":"array","title":"Response Public Tariffs Api Public Tariffs Get"}}}}}}},"/api/payments/create":{"post":{"summary":"Create Payment","operationId":"create_payment_api_payments_create_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PaymentCreateRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PaymentCreateResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/payments/auto-renew/cancel":{"post":{"summary":"Cancel Auto Renew","operationId":"cancel_auto_renew_api_payments_auto_renew_cancel_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CancelAutoRenewRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CancelAutoRenewResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/payments/subscription":{"get":{"summary":"Get Subscription","operationId":"get_subscription_api_payments_subscription_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"anyOf":[{"$ref":"#/components/schemas/SubscriptionResponse"},{"type":"null"}],"title":"Response Get Subscription Api Payments Subscription Get"}}}}}}},"/api/webhook/yookassa":{"post":{"summary":"Yookassa Webhook","operationId":"yookassa_webhook_api_webhook_yookassa_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/payments/autopay/process":{"post":{"summary":"Process Autopay","operationId":"process_autopay_api_payments_autopay_process_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/admin/me":{"get":{"summary":"Admin Me","operationId":"admin_me_api_admin_me_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/admin/users":{"get":{"summary":"Admin Users","operationId":"admin_users_api_admin_users_get","parameters":[{"name":"q","in":"query","required":false,"schema":{"type":"string","default":"","title":"Q"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","maximum":200,"minimum":1,"default":50,"title":"Limit"}},{"name":"offset","in":"query","required":false,"schema":{"type":"integer","minimum":0,"default":0,"title":"Offset"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/admin/users/{target_user_id}":{"get":{"summary":"Admin User Details","operationId":"admin_user_details_api_admin_users__target_user_id__get","parameters":[{"name":"target_user_id","in":"path","required":true,"schema":{"type":"integer","title":"Target User Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"summary":"Admin Delete User","operationId":"admin_delete_user_api_admin_users__target_user_id__delete","parameters":[{"name":"target_user_id","in":"path","required":true,"schema":{"type":"integer","title":"Target User Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/admin/users/{target_user_id}/profile":{"patch":{"summary":"Admin Update Profile","operationId":"admin_update_profile_api_admin_users__target_user_id__profile_patch","parameters":[{"name":"target_user_id","in":"path","required":true,"schema":{"type":"integer","title":"Target User Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserProfileRequest"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/admin/users/{target_user_id}/goals":{"patch":{"summary":"Admin Update Goals","operationId":"admin_update_goals_api_admin_users__target_user_id__goals_patch","parameters":[{"name":"target_user_id","in":"path","required":true,"schema":{"type":"integer","title":"Target User Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Goal"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/admin/users/{target_user_id}/cancel-auto-renew":{"post":{"summary":"Admin Cancel Auto Renew","operationId":"admin_cancel_auto_renew_api_admin_users__target_user_id__cancel_auto_renew_post","parameters":[{"name":"target_user_id","in":"path","required":true,"schema":{"type":"integer","title":"Target User Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/admin/logs":{"get":{"summary":"Admin Logs","operationId":"admin_logs_api_admin_logs_get","parameters":[{"name":"q","in":"query","required":false,"schema":{"type":"string","default":"","title":"Q"}},{"name":"user_id","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"User Id"}},{"name":"status_code","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Status Code"}},{"name":"only_errors","in":"query","required":false,"schema":{"type":"boolean","default":false,"title":"Only Errors"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","maximum":500,"minimum":1,"default":100,"title":"Limit"}},{"name":"offset","in":"query","required":false,"schema":{"type":"integer","minimum":0,"default":0,"title":"Offset"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}}},"components":{"schemas":{"AddSelectedMealsRequest":{"properties":{"emotion":{"type":"string","title":"Emotion"},"items":{"items":{},"type":"array","title":"Items"}},"type":"object","required":["emotion","items"],"title":"AddSelectedMealsRequest"},"Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post":{"properties":{"image":{"type":"string","contentMediaType":"application/octet-stream","title":"Image"}},"type":"object","required":["image"],"title":"Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post"},"Body_onboarding_transcribe_api_onboarding_transcribe_post":{"properties":{"audio":{"type":"string","contentMediaType":"application/octet-stream","title":"Audio"}},"type":"object","required":["audio"],"title":"Body_onboarding_transcribe_api_onboarding_transcribe_post"},"Body_recognize_photo_api_recognize_photo_post":{"properties":{"image":{"type":"string","contentMediaType":"application/octet-stream","title":"Image"}},"type":"object","required":["image"],"title":"Body_recognize_photo_api_recognize_photo_post"},"Body_transcribe_api_transcribe_post":{"properties":{"audio":{"type":"string","contentMediaType":"application/octet-stream","title":"Audio"}},"type":"object","required":["audio"],"title":"Body_transcribe_api_transcribe_post"},"CalculationRequest":{"properties":{"age":{"type":"integer","title":"Age"},"weight":{"type":"number","title":"Weight"},"height":{"type":"number","title":"Height"},"training_days":{"type":"string","title":"Training Days"},"deficit_mode":{"type":"string","title":"Deficit Mode","default":"active"}},"type":"object","required":["age","weight","height","training_days"],"title":"CalculationRequest"},"CalculationResponse":{"properties":{"bmr":{"type":"number","title":"Bmr"},"tdee":{"type":"number","title":"Tdee"},"target_calories":{"type":"number","title":"Target Calories"},"protein":{"type":"number","title":"Protein"},"fat":{"type":"number","title":"Fat"},"carbs":{"type":"number","title":"Carbs"},"days_to_goal":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Days To Goal"},"target_weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Target Weight"},"chart_data":{"anyOf":[{"items":{},"type":"array"},{"type":"null"}],"title":"Chart Data"}},"type":"object","required":["bmr","tdee","target_calories","protein","fat","carbs"],"title":"CalculationResponse"},"CancelAutoRenewRequest":{"properties":{"tariff_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Tariff Id"}},"type":"object","title":"CancelAutoRenewRequest"},"CancelAutoRenewResponse":{"properties":{"success":{"type":"boolean","title":"Success"},"affected":{"type":"integer","title":"Affected"}},"type":"object","required":["success","affected"],"title":"CancelAutoRenewResponse"},"ChangePasswordRequest":{"properties":{"old_password":{"type":"string","title":"Old Password"},"new_password":{"type":"string","title":"New Password"}},"type":"object","required":["old_password","new_password"],"title":"ChangePasswordRequest"},"EmailLoginRequest":{"properties":{"email":{"type":"string","title":"Email"},"password":{"type":"string","title":"Password"},"device_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Device Id"}},"type":"object","required":["email","password"],"title":"EmailLoginRequest"},"EmailRegisterRequest":{"properties":{"email":{"type":"string","title":"Email"},"password":{"type":"string","title":"Password"},"username":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Username"},"device_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Device Id"}},"type":"object","required":["email","password"],"title":"EmailRegisterRequest"},"Goal":{"properties":{"calories":{"type":"integer","title":"Calories"},"protein":{"type":"integer","title":"Protein"},"fat":{"type":"integer","title":"Fat"},"carbs":{"type":"integer","title":"Carbs"}},"type":"object","required":["calories","protein","fat","carbs"],"title":"Goal"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"MeResponse":{"properties":{"id":{"type":"integer","title":"Id"},"email":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Email"},"username":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Username"},"telegram_id":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Telegram Id"},"is_active":{"type":"boolean","title":"Is Active"}},"type":"object","required":["id","is_active"],"title":"MeResponse"},"MealCreate":{"properties":{"name":{"type":"string","title":"Name"},"calories":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Calories"},"protein":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Protein"},"fat":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Fat"},"carbs":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Carbs"},"weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Weight"},"emotion":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Emotion","default":""}},"type":"object","required":["name"],"title":"MealCreate"},"MealResponse":{"properties":{"id":{"type":"integer","title":"Id"},"name":{"type":"string","title":"Name"},"calories":{"type":"number","title":"Calories"},"protein":{"type":"number","title":"Protein"},"fat":{"type":"number","title":"Fat"},"carbs":{"type":"number","title":"Carbs"},"emotion":{"type":"string","title":"Emotion"},"time":{"type":"string","title":"Time"}},"type":"object","required":["id","name","calories","protein","fat","carbs","emotion","time"],"title":"MealResponse"},"MealUpdate":{"properties":{"name":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Name"},"calories":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Calories"},"protein":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Protein"},"fat":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Fat"},"carbs":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Carbs"},"emotion":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Emotion"},"date":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Date"}},"type":"object","title":"MealUpdate"},"OnboardingAnswerRequest":{"properties":{"question_id":{"type":"integer","title":"Question Id"},"answer":{"type":"string","title":"Answer"}},"type":"object","required":["question_id","answer"],"title":"OnboardingAnswerRequest"},"ParseMealRequest":{"properties":{"text":{"type":"string","title":"Text"},"language":{"type":"string","title":"Language","default":"ru"}},"type":"object","required":["text"],"title":"ParseMealRequest"},"ParseMealSuggestionsResponse":{"properties":{"items":{"items":{},"type":"array","title":"Items"}},"type":"object","required":["items"],"title":"ParseMealSuggestionsResponse"},"PaymentCreateRequest":{"properties":{"tariff_id":{"type":"integer","title":"Tariff Id"},"email":{"type":"string","title":"Email"}},"type":"object","required":["tariff_id","email"],"title":"PaymentCreateRequest"},"PaymentCreateResponse":{"properties":{"payment_id":{"type":"string","title":"Payment Id"},"status":{"type":"string","title":"Status"},"confirmation_url":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Confirmation Url"}},"type":"object","required":["payment_id","status"],"title":"PaymentCreateResponse"},"PaywallResponse":{"properties":{"tariffs":{"items":{"$ref":"#/components/schemas/TariffResponse"},"type":"array","title":"Tariffs"},"show_discount_timer":{"type":"boolean","title":"Show Discount Timer"},"discount_timer_expires_at":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Discount Timer Expires At"}},"type":"object","required":["tariffs","show_discount_timer"],"title":"PaywallResponse"},"RecognizePhotoResponse":{"properties":{"items":{"items":{},"type":"array","title":"Items","default":[]},"error":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Error"}},"type":"object","title":"RecognizePhotoResponse"},"RefreshRequest":{"properties":{"refresh_token":{"type":"string","title":"Refresh Token"}},"type":"object","required":["refresh_token"],"title":"RefreshRequest"},"StatsResponse":{"properties":{"calories":{"additionalProperties":true,"type":"object","title":"Calories"},"protein":{"additionalProperties":true,"type":"object","title":"Protein"},"fat":{"additionalProperties":true,"type":"object","title":"Fat"},"carbs":{"additionalProperties":true,"type":"object","title":"Carbs"},"compulsive_count":{"type":"integer","title":"Compulsive Count"}},"type":"object","required":["calories","protein","fat","carbs","compulsive_count"],"title":"StatsResponse"},"SubscriptionResponse":{"properties":{"tariff_id":{"type":"integer","title":"Tariff Id"},"tariff_title":{"type":"string","title":"Tariff Title"},"amount":{"type":"integer","title":"Amount"},"currency":{"type":"string","title":"Currency"},"starts_at":{"type":"string","title":"Starts At"},"expires_at":{"type":"string","title":"Expires At"},"auto_renew":{"type":"boolean","title":"Auto Renew"}},"type":"object","required":["tariff_id","tariff_title","amount","currency","starts_at","expires_at","auto_renew"],"title":"SubscriptionResponse"},"TariffResponse":{"properties":{"id":{"type":"integer","title":"Id"},"code":{"type":"string","title":"Code"},"title":{"type":"string","title":"Title"},"price":{"type":"integer","title":"Price"},"full_price":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Full Price"},"currency":{"type":"string","title":"Currency"},"duration_days":{"type":"integer","title":"Duration Days"},"is_trial":{"type":"boolean","title":"Is Trial"},"trial_days":{"type":"integer","title":"Trial Days"}},"type":"object","required":["id","code","title","price","currency","duration_days","is_trial","trial_days"],"title":"TariffResponse"},"TokenResponse":{"properties":{"access_token":{"type":"string","title":"Access Token"},"refresh_token":{"type":"string","title":"Refresh Token"},"token_type":{"type":"string","title":"Token Type","default":"bearer"},"expires_in":{"type":"integer","title":"Expires In"}},"type":"object","required":["access_token","refresh_token","expires_in"],"title":"TokenResponse"},"TranscribeResponse":{"properties":{"text":{"type":"string","title":"Text"}},"type":"object","required":["text"],"title":"TranscribeResponse"},"UserProfileRequest":{"properties":{"age":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Age"},"weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Weight"},"height":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Height"},"training_days":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Training Days"},"reward":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Reward"},"current_weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Current Weight"},"target_weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Target Weight"},"onboarding_completed":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Onboarding Completed"},"language":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Language"}},"type":"object","title":"UserProfileRequest"},"UserProfileResponse":{"properties":{"age":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Age"},"weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Weight"},"height":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Height"},"training_days":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Training Days"},"reward":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Reward"},"current_weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Current Weight"},"target_weight":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Target Weight"},"onboarding_completed":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Onboarding Completed"},"language":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Language"}},"type":"object","title":"UserProfileResponse"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"},"input":{"title":"Input"},"ctx":{"type":"object","title":"Context"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Calories API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/login": {
+      "get": {
+        "summary": "Login Page",
+        "operationId": "login_page_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth": {
+      "get": {
+        "summary": "Auth Callback",
+        "operationId": "auth_callback_auth_get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "summary": "Logout",
+        "operationId": "logout_logout_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Register with email + password",
+        "operationId": "register_email_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Login with email + password",
+        "operationId": "login_email_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Refresh access token",
+        "operationId": "refresh_tokens_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Logout (revoke refresh token)",
+        "operationId": "logout_email_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Logout from all devices",
+        "operationId": "logout_all_api_v1_auth_logout_all_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Get current user info",
+        "operationId": "get_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Change password (invalidates all sessions)",
+        "operationId": "change_password_api_v1_auth_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/account": {
+      "delete": {
+        "tags": [
+          "auth-email"
+        ],
+        "summary": "Permanently delete account and all user data",
+        "description": "Permanently delete the authenticated user and all their data.",
+        "operationId": "delete_account_api_v1_auth_account_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/google": {
+      "post": {
+        "tags": [
+          "auth-oauth"
+        ],
+        "summary": "Sign in with Google",
+        "operationId": "auth_google_api_v1_auth_google_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/apple": {
+      "post": {
+        "tags": [
+          "auth-oauth"
+        ],
+        "summary": "Sign in with Apple",
+        "operationId": "auth_apple_api_v1_auth_apple_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppleAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meals": {
+      "get": {
+        "summary": "Get Meals",
+        "operationId": "get_meals_api_meals_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MealResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Meals Api Meals Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Meal",
+        "operationId": "add_meal_api_meals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MealResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meals/history": {
+      "get": {
+        "summary": "Get Meals History",
+        "operationId": "get_meals_history_api_meals_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 200,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MealResponse"
+                  },
+                  "title": "Response Get Meals History Api Meals History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meals/{meal_id}": {
+      "patch": {
+        "summary": "Update Meal",
+        "operationId": "update_meal_api_meals__meal_id__patch",
+        "parameters": [
+          {
+            "name": "meal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Meal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Meal",
+        "operationId": "delete_meal_api_meals__meal_id__delete",
+        "parameters": [
+          {
+            "name": "meal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Meal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meals/add_selected": {
+      "post": {
+        "summary": "Add Selected Meals",
+        "operationId": "add_selected_meals_api_meals_add_selected_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSelectedMealsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "summary": "Get Stats",
+        "operationId": "get_stats_api_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/goals": {
+      "get": {
+        "summary": "Get Goals",
+        "operationId": "get_goals_api_goals_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Goal"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Set Goals",
+        "operationId": "set_goals_api_goals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Save Profile",
+        "operationId": "save_profile_api_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/answer": {
+      "post": {
+        "summary": "Save Onboarding Answer",
+        "operationId": "save_onboarding_answer_api_onboarding_answer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/answers": {
+      "get": {
+        "summary": "Get Onboarding Answers",
+        "operationId": "get_onboarding_answers_api_onboarding_answers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/complete": {
+      "post": {
+        "summary": "Complete Onboarding",
+        "operationId": "complete_onboarding_api_onboarding_complete_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/submit": {
+      "post": {
+        "summary": "Submit Onboarding",
+        "description": "Atomic bulk endpoint: saves all onboarding data in one request.\nIdempotent — safe to call multiple times (retries).",
+        "operationId": "submit_onboarding_api_onboarding_submit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/recognize_photo": {
+      "post": {
+        "summary": "Onboarding Recognize Photo",
+        "operationId": "onboarding_recognize_photo_api_onboarding_recognize_photo_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizePhotoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/parse_meal": {
+      "post": {
+        "summary": "Onboarding Parse Meal",
+        "operationId": "onboarding_parse_meal_api_onboarding_parse_meal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/transcribe": {
+      "post": {
+        "summary": "Onboarding Transcribe",
+        "operationId": "onboarding_transcribe_api_onboarding_transcribe_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_onboarding_transcribe_api_onboarding_transcribe_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscribeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calculation/result": {
+      "get": {
+        "summary": "Get Calculation Result",
+        "operationId": "get_calculation_result_api_calculation_result_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calculate": {
+      "post": {
+        "summary": "Calculate",
+        "operationId": "calculate_api_calculate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/parse_meal": {
+      "post": {
+        "summary": "Parse Meal",
+        "operationId": "parse_meal_api_parse_meal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/parse_meal_suggestions": {
+      "post": {
+        "summary": "Parse Meal Suggestions",
+        "operationId": "parse_meal_suggestions_api_parse_meal_suggestions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseMealSuggestionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/transcribe": {
+      "post": {
+        "summary": "Transcribe",
+        "operationId": "transcribe_api_transcribe_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_transcribe_api_transcribe_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscribeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recognize_photo": {
+      "post": {
+        "summary": "Recognize Photo",
+        "operationId": "recognize_photo_api_recognize_photo_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_recognize_photo_api_recognize_photo_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizePhotoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/recognize_photo": {
+      "post": {
+        "summary": "Recognize Photo V2",
+        "description": "Recognize food in a photo and return extended nutrient data (v2).\n\nIncludes fiber, fat breakdown, micronutrients, and glycemic index.\nUse `source` to control which data provider is used for nutrient values.",
+        "operationId": "recognize_photo_v2_api_v2_recognize_photo_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "auto",
+                "ai_only",
+                "fatsecret_only"
+              ],
+              "type": "string",
+              "description": "Nutrient data source: 'auto' = cache→FatSecret→Claude, 'ai_only' = Claude only, 'fatsecret_only' = FatSecret (Claude fallback if not found)",
+              "default": "auto",
+              "title": "Source"
+            },
+            "description": "Nutrient data source: 'auto' = cache→FatSecret→Claude, 'ai_only' = Claude only, 'fatsecret_only' = FatSecret (Claude fallback if not found)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_recognize_photo_v2_api_v2_recognize_photo_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizePhotoV2Response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/parse_meal": {
+      "post": {
+        "summary": "Parse Meal V2",
+        "description": "Parse a text meal description and return extended nutrient data (v2).\n\nIncludes fiber, fat breakdown, micronutrients, and glycemic index.\nUse `source` to control which data provider is used for nutrient values.",
+        "operationId": "parse_meal_v2_api_v2_parse_meal_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "auto",
+                "ai_only",
+                "fatsecret_only"
+              ],
+              "type": "string",
+              "description": "Nutrient data source: 'auto' = cache→FatSecret→Claude, 'ai_only' = Claude only (no FatSecret), 'fatsecret_only' = FatSecret only (Claude fallback if not found)",
+              "default": "auto",
+              "title": "Source"
+            },
+            "description": "Nutrient data source: 'auto' = cache→FatSecret→Claude, 'ai_only' = Claude only (no FatSecret), 'fatsecret_only' = FatSecret only (Claude fallback if not found)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseMealV2Response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/parse_meal_suggestions": {
+      "post": {
+        "summary": "Parse Meal Suggestions V2",
+        "description": "Parse a text meal description and return extended per-100g nutrient suggestions (v2).\n\nUseful for autocomplete / weight adjustment UI where per-100g values are needed.",
+        "operationId": "parse_meal_suggestions_v2_api_v2_parse_meal_suggestions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseMealSuggestionsV2Response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/correct_recognition": {
+      "post": {
+        "summary": "Correct Recognition V2",
+        "description": "Re-run recognition with a user correction comment.\n\nTakes the list of currently recognized item names and a correction\nstring from the user, then returns an updated list of suggestions.",
+        "operationId": "correct_recognition_v2_api_v2_correct_recognition_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectRecognitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseMealSuggestionsV2Response"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/parse_meal_variants": {
+      "post": {
+        "summary": "Parse Meal Variants V2",
+        "description": "Parse user meal description into food groups with 3+ variants each for user selection.",
+        "operationId": "parse_meal_variants_v2_api_v2_parse_meal_variants_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseMealVariantsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseMealVariantsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/tariffs": {
+      "get": {
+        "summary": "List Tariffs",
+        "operationId": "list_tariffs_api_payments_tariffs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaywallResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/tariffs": {
+      "get": {
+        "summary": "Public Tariffs",
+        "operationId": "public_tariffs_api_public_tariffs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TariffResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Public Tariffs Api Public Tariffs Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/create": {
+      "post": {
+        "summary": "Create Payment",
+        "operationId": "create_payment_api_payments_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/auto-renew/cancel": {
+      "post": {
+        "summary": "Cancel Auto Renew",
+        "operationId": "cancel_auto_renew_api_payments_auto_renew_cancel_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelAutoRenewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelAutoRenewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/subscription": {
+      "get": {
+        "summary": "Get Subscription",
+        "operationId": "get_subscription_api_payments_subscription_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Subscription Api Payments Subscription Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/webhook/yookassa": {
+      "post": {
+        "summary": "Yookassa Webhook",
+        "operationId": "yookassa_webhook_api_webhook_yookassa_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/webhook/monetize": {
+      "post": {
+        "summary": "Monetize Webhook",
+        "operationId": "monetize_webhook_api_webhook_monetize_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/autopay/process": {
+      "post": {
+        "summary": "Process Autopay",
+        "operationId": "process_autopay_api_payments_autopay_process_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/me": {
+      "get": {
+        "summary": "Admin Me",
+        "operationId": "admin_me_api_admin_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "summary": "Admin Users",
+        "operationId": "admin_users_api_admin_users_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{target_user_id}": {
+      "get": {
+        "summary": "Admin User Details",
+        "operationId": "admin_user_details_api_admin_users__target_user_id__get",
+        "parameters": [
+          {
+            "name": "target_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Target User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Admin Delete User",
+        "operationId": "admin_delete_user_api_admin_users__target_user_id__delete",
+        "parameters": [
+          {
+            "name": "target_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Target User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{target_user_id}/profile": {
+      "patch": {
+        "summary": "Admin Update Profile",
+        "operationId": "admin_update_profile_api_admin_users__target_user_id__profile_patch",
+        "parameters": [
+          {
+            "name": "target_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Target User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{target_user_id}/goals": {
+      "patch": {
+        "summary": "Admin Update Goals",
+        "operationId": "admin_update_goals_api_admin_users__target_user_id__goals_patch",
+        "parameters": [
+          {
+            "name": "target_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Target User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Goal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{target_user_id}/cancel-auto-renew": {
+      "post": {
+        "summary": "Admin Cancel Auto Renew",
+        "operationId": "admin_cancel_auto_renew_api_admin_users__target_user_id__cancel_auto_renew_post",
+        "parameters": [
+          {
+            "name": "target_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Target User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/logs": {
+      "get": {
+        "summary": "Admin Logs",
+        "operationId": "admin_logs_api_admin_logs_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "status_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Code"
+            }
+          },
+          {
+            "name": "only_errors",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Only Errors"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/batch-photo-test": {
+      "post": {
+        "summary": "Batch Photo Test",
+        "description": "Upload a ZIP of food photos; returns Excel/CSV with КБЖУ and data source per item.",
+        "operationId": "batch_photo_test_api_admin_batch_photo_test_post",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          },
+          {
+            "name": "fmt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(xlsx|csv)$",
+              "default": "xlsx",
+              "title": "Fmt"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_batch_photo_test_api_admin_batch_photo_test_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/devices/register": {
+      "post": {
+        "summary": "Register Device Token",
+        "description": "Register or update FCM push token for the current user's device.",
+        "operationId": "register_device_token_api_devices_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/devices/token": {
+      "delete": {
+        "summary": "Unregister Device Token",
+        "description": "Remove all FCM tokens for the current user (call on logout).",
+        "operationId": "unregister_device_token_api_devices_token_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/push/users": {
+      "get": {
+        "summary": "Get Users Push Status",
+        "description": "Return all users with their push notification registration status.",
+        "operationId": "get_users_push_status_api_admin_push_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/notifications/send": {
+      "post": {
+        "summary": "Send Notification",
+        "description": "Send push notification to specific users by ID.",
+        "operationId": "send_notification_api_admin_notifications_send_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendNotificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/notifications/broadcast": {
+      "post": {
+        "summary": "Broadcast Notification",
+        "description": "Send push notification to ALL users that have a registered FCM token.",
+        "operationId": "broadcast_notification_api_admin_notifications_broadcast_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastNotificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/notifications/logs": {
+      "get": {
+        "summary": "Get Notification Logs",
+        "description": "Return notification send history, optionally filtered by user.",
+        "operationId": "get_notification_logs_api_admin_notifications_logs_get",
+        "parameters": [
+          {
+            "name": "user_id_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id Filter"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/messages": {
+      "get": {
+        "summary": "Get Chat History",
+        "description": "Return chat history (oldest first).",
+        "operationId": "get_chat_history_api_chat_messages_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Clear Chat History",
+        "description": "Clear all chat history for the current user.",
+        "operationId": "clear_chat_history_api_chat_messages_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/send": {
+      "post": {
+        "summary": "Send Chat Message",
+        "description": "Send a user message and get the AI nutritionist's reply.",
+        "operationId": "send_chat_message_api_chat_send_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/ai_consent": {
+      "get": {
+        "summary": "Get Ai Consent",
+        "description": "Return the user's current AI consent status (true / false / null if not set).",
+        "operationId": "get_ai_consent_api_user_ai_consent_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Set Ai Consent",
+        "description": "Upsert the user's AI consent decision.",
+        "operationId": "set_ai_consent_api_user_ai_consent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/barcode/{barcode}": {
+      "get": {
+        "summary": "Lookup Barcode",
+        "description": "Look up a product by barcode.\n\nPriority:\n  1. FatSecret food.find_id_for_barcode.v2 — returns full nutrient profile\n  2. OpenFoodFacts — fallback with basic macros",
+        "operationId": "lookup_barcode_api_barcode__barcode__get",
+        "parameters": [
+          {
+            "name": "barcode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Barcode"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(ru|en)$",
+              "default": "ru",
+              "title": "Language"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BarcodeProductResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddSelectedMealsRequest": {
+        "properties": {
+          "emotion": {
+            "type": "string",
+            "title": "Emotion",
+            "default": ""
+          },
+          "items": {
+            "items": {},
+            "type": "array",
+            "title": "Items"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meal Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "AddSelectedMealsRequest"
+      },
+      "AiConsentRequest": {
+        "properties": {
+          "consent": {
+            "type": "boolean",
+            "title": "Consent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consent"
+        ],
+        "title": "AiConsentRequest"
+      },
+      "AppleAuthRequest": {
+        "properties": {
+          "identity_token": {
+            "type": "string",
+            "title": "Identity Token"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identity_token",
+          "user_id"
+        ],
+        "title": "AppleAuthRequest"
+      },
+      "BarcodeProductResponse": {
+        "properties": {
+          "found": {
+            "type": "boolean",
+            "title": "Found"
+          },
+          "barcode": {
+            "type": "string",
+            "title": "Barcode"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "name_ru": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Ru"
+          },
+          "brand_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand Name"
+          },
+          "calories": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calories"
+          },
+          "protein": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protein"
+          },
+          "fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fat"
+          },
+          "carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carbs"
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "sodium": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sodium"
+          },
+          "potassium": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potassium"
+          },
+          "cholesterol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol"
+          },
+          "iron": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iron"
+          },
+          "calcium": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calcium"
+          },
+          "vitamin_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin C"
+          },
+          "vitamin_d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin D"
+          },
+          "serving_size": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving Size"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "brands": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brands"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "found",
+          "barcode"
+        ],
+        "title": "BarcodeProductResponse"
+      },
+      "Body_batch_photo_test_api_admin_batch_photo_test_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_batch_photo_test_api_admin_batch_photo_test_post"
+      },
+      "Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "Body_onboarding_recognize_photo_api_onboarding_recognize_photo_post"
+      },
+      "Body_onboarding_transcribe_api_onboarding_transcribe_post": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "Body_onboarding_transcribe_api_onboarding_transcribe_post"
+      },
+      "Body_recognize_photo_api_recognize_photo_post": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "Body_recognize_photo_api_recognize_photo_post"
+      },
+      "Body_recognize_photo_v2_api_v2_recognize_photo_post": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "Body_recognize_photo_v2_api_v2_recognize_photo_post"
+      },
+      "Body_transcribe_api_transcribe_post": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "Body_transcribe_api_transcribe_post"
+      },
+      "BroadcastNotificationRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "manual"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "body"
+        ],
+        "title": "BroadcastNotificationRequest"
+      },
+      "CalculationRequest": {
+        "properties": {
+          "age": {
+            "type": "integer",
+            "title": "Age"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "height": {
+            "type": "number",
+            "title": "Height"
+          },
+          "training_days": {
+            "type": "string",
+            "title": "Training Days"
+          },
+          "deficit_mode": {
+            "type": "string",
+            "title": "Deficit Mode",
+            "default": "active"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          }
+        },
+        "type": "object",
+        "required": [
+          "age",
+          "weight",
+          "height",
+          "training_days"
+        ],
+        "title": "CalculationRequest"
+      },
+      "CalculationResponse": {
+        "properties": {
+          "bmr": {
+            "type": "number",
+            "title": "Bmr"
+          },
+          "tdee": {
+            "type": "number",
+            "title": "Tdee"
+          },
+          "target_calories": {
+            "type": "number",
+            "title": "Target Calories"
+          },
+          "protein": {
+            "type": "number",
+            "title": "Protein"
+          },
+          "fat": {
+            "type": "number",
+            "title": "Fat"
+          },
+          "carbs": {
+            "type": "number",
+            "title": "Carbs"
+          },
+          "days_to_goal": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days To Goal"
+          },
+          "target_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Weight"
+          },
+          "chart_data": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chart Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bmr",
+          "tdee",
+          "target_calories",
+          "protein",
+          "fat",
+          "carbs"
+        ],
+        "title": "CalculationResponse"
+      },
+      "CancelAutoRenewRequest": {
+        "properties": {
+          "tariff_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tariff Id"
+          }
+        },
+        "type": "object",
+        "title": "CancelAutoRenewRequest"
+      },
+      "CancelAutoRenewResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "affected": {
+            "type": "integer",
+            "title": "Affected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "affected"
+        ],
+        "title": "CancelAutoRenewResponse"
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "old_password": {
+            "type": "string",
+            "title": "Old Password"
+          },
+          "new_password": {
+            "type": "string",
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "old_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest"
+      },
+      "CorrectRecognitionRequest": {
+        "properties": {
+          "current_items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Current Items"
+          },
+          "current_items_data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CurrentItemData"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Items Data"
+          },
+          "correction": {
+            "type": "string",
+            "title": "Correction"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "ru"
+          },
+          "original_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_items",
+          "correction"
+        ],
+        "title": "CorrectRecognitionRequest"
+      },
+      "CurrentItemData": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight_grams": {
+            "type": "number",
+            "title": "Weight Grams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weight_grams"
+        ],
+        "title": "CurrentItemData"
+      },
+      "EmailLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "EmailLoginRequest"
+      },
+      "EmailRegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "EmailRegisterRequest"
+      },
+      "Goal": {
+        "properties": {
+          "calories": {
+            "type": "integer",
+            "title": "Calories"
+          },
+          "protein": {
+            "type": "integer",
+            "title": "Protein"
+          },
+          "fat": {
+            "type": "integer",
+            "title": "Fat"
+          },
+          "carbs": {
+            "type": "integer",
+            "title": "Carbs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calories",
+          "protein",
+          "fat",
+          "carbs"
+        ],
+        "title": "Goal"
+      },
+      "GoogleAuthRequest": {
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "title": "Id Token"
+          },
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id_token"
+        ],
+        "title": "GoogleAuthRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MeResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "telegram_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telegram Id"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "is_active"
+        ],
+        "title": "MeResponse"
+      },
+      "MealCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "calories": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calories"
+          },
+          "protein": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protein"
+          },
+          "fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fat"
+          },
+          "carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carbs"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "emotion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emotion",
+            "default": ""
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "sugar": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar"
+          },
+          "sugar_alcohols": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar Alcohols"
+          },
+          "net_carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Carbs"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "unsaturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsaturated Fat"
+          },
+          "glycemic_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glycemic Index"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meal Type"
+          },
+          "sodium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sodium Mg"
+          },
+          "calcium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calcium Mg"
+          },
+          "iron_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iron Mg"
+          },
+          "potassium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potassium Mg"
+          },
+          "magnesium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Magnesium Mg"
+          },
+          "phosphorus_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phosphorus Mg"
+          },
+          "zinc_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zinc Mg"
+          },
+          "selenium_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selenium Mcg"
+          },
+          "manganese_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manganese Mg"
+          },
+          "copper_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copper Mg"
+          },
+          "cholesterol_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg"
+          },
+          "vitamin_a_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin A Mcg"
+          },
+          "vitamin_c_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin C Mg"
+          },
+          "vitamin_d_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin D Mcg"
+          },
+          "vitamin_e_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin E Mg"
+          },
+          "vitamin_k_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin K Mcg"
+          },
+          "vitamin_b1_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B1 Mg"
+          },
+          "vitamin_b2_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B2 Mg"
+          },
+          "vitamin_b3_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B3 Mg"
+          },
+          "vitamin_b5_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B5 Mg"
+          },
+          "vitamin_b6_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B6 Mg"
+          },
+          "vitamin_b7_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B7 Mcg"
+          },
+          "vitamin_b9_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B9 Mcg"
+          },
+          "vitamin_b12_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B12 Mcg"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MealCreate"
+      },
+      "MealResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "calories": {
+            "type": "number",
+            "title": "Calories"
+          },
+          "protein": {
+            "type": "number",
+            "title": "Protein"
+          },
+          "fat": {
+            "type": "number",
+            "title": "Fat"
+          },
+          "carbs": {
+            "type": "number",
+            "title": "Carbs"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "emotion": {
+            "type": "string",
+            "title": "Emotion"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time"
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "sugar": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar"
+          },
+          "sugar_alcohols": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar Alcohols"
+          },
+          "net_carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Carbs"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "unsaturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsaturated Fat"
+          },
+          "glycemic_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glycemic Index"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meal Type"
+          },
+          "sodium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sodium Mg"
+          },
+          "calcium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calcium Mg"
+          },
+          "iron_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iron Mg"
+          },
+          "potassium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potassium Mg"
+          },
+          "magnesium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Magnesium Mg"
+          },
+          "phosphorus_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phosphorus Mg"
+          },
+          "zinc_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zinc Mg"
+          },
+          "selenium_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selenium Mcg"
+          },
+          "manganese_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manganese Mg"
+          },
+          "copper_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copper Mg"
+          },
+          "cholesterol_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg"
+          },
+          "vitamin_a_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin A Mcg"
+          },
+          "vitamin_c_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin C Mg"
+          },
+          "vitamin_d_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin D Mcg"
+          },
+          "vitamin_e_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin E Mg"
+          },
+          "vitamin_k_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin K Mcg"
+          },
+          "vitamin_b1_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B1 Mg"
+          },
+          "vitamin_b2_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B2 Mg"
+          },
+          "vitamin_b3_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B3 Mg"
+          },
+          "vitamin_b5_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B5 Mg"
+          },
+          "vitamin_b6_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B6 Mg"
+          },
+          "vitamin_b7_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B7 Mcg"
+          },
+          "vitamin_b9_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B9 Mcg"
+          },
+          "vitamin_b12_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin B12 Mcg"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "calories",
+          "protein",
+          "fat",
+          "carbs",
+          "emotion",
+          "time"
+        ],
+        "title": "MealResponse"
+      },
+      "MealUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "calories": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calories"
+          },
+          "protein": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protein"
+          },
+          "fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fat"
+          },
+          "carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carbs"
+          },
+          "emotion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emotion"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "sugar": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar"
+          },
+          "sugar_alcohols": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar Alcohols"
+          },
+          "net_carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Carbs"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "unsaturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsaturated Fat"
+          },
+          "glycemic_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glycemic Index"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meal Type"
+          }
+        },
+        "type": "object",
+        "title": "MealUpdate"
+      },
+      "MealVariantGroup": {
+        "properties": {
+          "food": {
+            "type": "string",
+            "title": "Food"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/MealVariantItem"
+            },
+            "type": "array",
+            "title": "Variants"
+          }
+        },
+        "type": "object",
+        "required": [
+          "food",
+          "variants"
+        ],
+        "title": "MealVariantGroup"
+      },
+      "MealVariantItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "name_en": {
+            "type": "string",
+            "title": "Name En"
+          },
+          "weight_grams": {
+            "type": "number",
+            "title": "Weight Grams"
+          },
+          "nutrients_per_100g": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "claude"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "name_en",
+          "weight_grams",
+          "nutrients_per_100g"
+        ],
+        "title": "MealVariantItem"
+      },
+      "NutrientsV2": {
+        "properties": {
+          "calories": {
+            "type": "number",
+            "title": "Calories"
+          },
+          "protein": {
+            "type": "number",
+            "title": "Protein"
+          },
+          "fat": {
+            "type": "number",
+            "title": "Fat"
+          },
+          "carbs": {
+            "type": "number",
+            "title": "Carbs"
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "sugar_alcohols": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar Alcohols"
+          },
+          "net_carbs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Carbs"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "monounsaturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monounsaturated Fat"
+          },
+          "polyunsaturated_fat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Polyunsaturated Fat"
+          },
+          "sodium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sodium Mg"
+          },
+          "cholesterol_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg"
+          },
+          "potassium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potassium Mg"
+          },
+          "calcium_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calcium Mg"
+          },
+          "iron_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iron Mg"
+          },
+          "vitamin_a_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin A Mcg"
+          },
+          "vitamin_c_mg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin C Mg"
+          },
+          "vitamin_d_mcg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitamin D Mcg"
+          },
+          "glycemic_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glycemic Index"
+          },
+          "glycemic_index_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glycemic Index Category"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calories",
+          "protein",
+          "fat",
+          "carbs"
+        ],
+        "title": "NutrientsV2"
+      },
+      "OnboardingAnswerRequest": {
+        "properties": {
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "answer"
+        ],
+        "title": "OnboardingAnswerRequest"
+      },
+      "OnboardingSubmitRequest": {
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "training_days": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Days"
+          },
+          "target_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Weight"
+          },
+          "reward": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reward"
+          },
+          "health_conditions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Health Conditions"
+          },
+          "diet_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diet Type"
+          },
+          "food_restrictions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Food Restrictions"
+          },
+          "goals": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goals"
+          }
+        },
+        "type": "object",
+        "title": "OnboardingSubmitRequest",
+        "description": "Single bulk request — saves everything onboarding collected in one shot."
+      },
+      "ParseMealRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "ru"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ParseMealRequest"
+      },
+      "ParseMealSuggestionsResponse": {
+        "properties": {
+          "items": {
+            "items": {},
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ParseMealSuggestionsResponse"
+      },
+      "ParseMealSuggestionsV2Item": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams"
+          },
+          "nutrients_per_100g": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "claude"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "nutrients_per_100g"
+        ],
+        "title": "ParseMealSuggestionsV2Item"
+      },
+      "ParseMealSuggestionsV2Response": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ParseMealSuggestionsV2Item"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ParseMealSuggestionsV2Response"
+      },
+      "ParseMealV2Item": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight_grams": {
+            "type": "number",
+            "title": "Weight Grams"
+          },
+          "found": {
+            "type": "boolean",
+            "title": "Found"
+          },
+          "nutrients_per_100g": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "nutrients_total": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "claude"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weight_grams",
+          "found",
+          "nutrients_per_100g",
+          "nutrients_total"
+        ],
+        "title": "ParseMealV2Item"
+      },
+      "ParseMealV2Response": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ParseMealV2Item"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "summary_name": {
+            "type": "string",
+            "title": "Summary Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "summary_name"
+        ],
+        "title": "ParseMealV2Response"
+      },
+      "ParseMealVariantsRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "ru"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ParseMealVariantsRequest"
+      },
+      "ParseMealVariantsResponse": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/MealVariantGroup"
+            },
+            "type": "array",
+            "title": "Groups"
+          }
+        },
+        "type": "object",
+        "required": [
+          "groups"
+        ],
+        "title": "ParseMealVariantsResponse"
+      },
+      "PaymentCreateRequest": {
+        "properties": {
+          "tariff_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tariff Id"
+          },
+          "price_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "PaymentCreateRequest"
+      },
+      "PaymentCreateResponse": {
+        "properties": {
+          "payment_id": {
+            "type": "string",
+            "title": "Payment Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "confirmation_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_id",
+          "status"
+        ],
+        "title": "PaymentCreateResponse"
+      },
+      "PaywallResponse": {
+        "properties": {
+          "tariffs": {
+            "items": {
+              "$ref": "#/components/schemas/TariffResponse"
+            },
+            "type": "array",
+            "title": "Tariffs"
+          },
+          "show_discount_timer": {
+            "type": "boolean",
+            "title": "Show Discount Timer"
+          },
+          "discount_timer_expires_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discount Timer Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tariffs",
+          "show_discount_timer"
+        ],
+        "title": "PaywallResponse"
+      },
+      "RecognizePhotoResponse": {
+        "properties": {
+          "items": {
+            "items": {},
+            "type": "array",
+            "title": "Items",
+            "default": []
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "is_food": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Food"
+          },
+          "not_food_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Food Reason"
+          },
+          "message_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Key"
+          }
+        },
+        "type": "object",
+        "title": "RecognizePhotoResponse"
+      },
+      "RecognizePhotoV2Item": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight_grams": {
+            "type": "number",
+            "title": "Weight Grams"
+          },
+          "nutrients_per_100g": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "nutrients_total": {
+            "$ref": "#/components/schemas/NutrientsV2"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "claude"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "weight_grams",
+          "nutrients_per_100g",
+          "nutrients_total"
+        ],
+        "title": "RecognizePhotoV2Item"
+      },
+      "RecognizePhotoV2Response": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecognizePhotoV2Item"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "is_food": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Food"
+          },
+          "not_food_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Food Reason"
+          },
+          "message_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "RecognizePhotoV2Response"
+      },
+      "RefreshRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshRequest"
+      },
+      "RegisterTokenRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "platform": {
+            "type": "string",
+            "title": "Platform"
+          },
+          "app_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "platform"
+        ],
+        "title": "RegisterTokenRequest"
+      },
+      "SendMessageRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "ru"
+          },
+          "utc_offset_hours": {
+            "type": "integer",
+            "title": "Utc Offset Hours",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "SendMessageRequest"
+      },
+      "SendNotificationRequest": {
+        "properties": {
+          "user_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "User Ids"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "manual"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_ids",
+          "title",
+          "body"
+        ],
+        "title": "SendNotificationRequest"
+      },
+      "StatsResponse": {
+        "properties": {
+          "calories": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Calories"
+          },
+          "protein": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Protein"
+          },
+          "fat": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Fat"
+          },
+          "carbs": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Carbs"
+          },
+          "compulsive_count": {
+            "type": "integer",
+            "title": "Compulsive Count"
+          },
+          "net_carbs": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Carbs"
+          },
+          "fiber": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiber"
+          },
+          "sugar": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sugar"
+          },
+          "saturated_fat": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saturated Fat"
+          },
+          "unsaturated_fat": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsaturated Fat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calories",
+          "protein",
+          "fat",
+          "carbs",
+          "compulsive_count"
+        ],
+        "title": "StatsResponse"
+      },
+      "SubscriptionResponse": {
+        "properties": {
+          "tariff_id": {
+            "type": "integer",
+            "title": "Tariff Id"
+          },
+          "tariff_title": {
+            "type": "string",
+            "title": "Tariff Title"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "starts_at": {
+            "type": "string",
+            "title": "Starts At"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "auto_renew": {
+            "type": "boolean",
+            "title": "Auto Renew"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tariff_id",
+          "tariff_title",
+          "amount",
+          "currency",
+          "starts_at",
+          "expires_at",
+          "auto_renew"
+        ],
+        "title": "SubscriptionResponse"
+      },
+      "TariffResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          },
+          "full_price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Price"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "duration_days": {
+            "type": "integer",
+            "title": "Duration Days"
+          },
+          "is_trial": {
+            "type": "boolean",
+            "title": "Is Trial"
+          },
+          "trial_days": {
+            "type": "integer",
+            "title": "Trial Days"
+          },
+          "price_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "title",
+          "price",
+          "currency",
+          "duration_days",
+          "is_trial",
+          "trial_days"
+        ],
+        "title": "TariffResponse"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in"
+        ],
+        "title": "TokenResponse"
+      },
+      "TranscribeResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "TranscribeResponse"
+      },
+      "UserProfileRequest": {
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "training_days": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Days"
+          },
+          "reward": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reward"
+          },
+          "current_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Weight"
+          },
+          "target_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Weight"
+          },
+          "onboarding_completed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarding Completed"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          }
+        },
+        "type": "object",
+        "title": "UserProfileRequest"
+      },
+      "UserProfileResponse": {
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "training_days": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Days"
+          },
+          "reward": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reward"
+          },
+          "current_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Weight"
+          },
+          "target_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Weight"
+          },
+          "onboarding_completed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboarding Completed"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          }
+        },
+        "type": "object",
+        "title": "UserProfileResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

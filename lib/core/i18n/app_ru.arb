@@ -361,6 +361,9 @@
   "addMeal_voice_tap_stop": "Нажмите ещё раз чтобы остановить",
   "addMeal_voice_tap_start": "Нажмите чтобы начать запись",
   "addMeal_recognize_ai": "Распознать с помощью AI",
+  "addMeal_not_food_title": "Еда не найдена",
+  "addMeal_not_food_message": "На фото не удалось распознать еду. Поднесите камеру ближе к блюду и попробуйте ещё раз.",
+  "addMeal_not_food_retry": "Попробовать ещё",
   "addMeal_saving": "Сохраняем...",
   "addMeal_ai_analyzing": "AI анализирует данные...",
   "addMeal_parsing_title": "Поиск в базе данных",
@@ -380,6 +383,10 @@
   "addMeal_barcode_torch_on": "Включить фонарик",
   "addMeal_barcode_detected": "Штрихкод найден",
   "addMeal_barcode_confirm": "Добавить в журнал",
+
+  "settings_delete_account_title": "Удалить аккаунт?",
+  "settings_delete_account_body": "Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.",
+  "settings_delete_account_btn": "Удалить аккаунт",
 
   "settings_privacy_policy": "Политика конфиденциальности",
   "settings_terms": "Пользовательское соглашение",

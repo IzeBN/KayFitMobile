@@ -1700,6 +1700,24 @@ abstract class AppLocalizations {
   /// **'Распознать с помощью AI'**
   String get addMeal_recognize_ai;
 
+  /// No description provided for @addMeal_not_food_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Еда не найдена'**
+  String get addMeal_not_food_title;
+
+  /// No description provided for @addMeal_not_food_message.
+  ///
+  /// In ru, this message translates to:
+  /// **'На фото не удалось распознать еду. Поднесите камеру ближе к блюду и попробуйте ещё раз.'**
+  String get addMeal_not_food_message;
+
+  /// No description provided for @addMeal_not_food_retry.
+  ///
+  /// In ru, this message translates to:
+  /// **'Попробовать ещё'**
+  String get addMeal_not_food_retry;
+
   /// No description provided for @addMeal_saving.
   ///
   /// In ru, this message translates to:
@@ -1807,6 +1825,24 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Добавить в журнал'**
   String get addMeal_barcode_confirm;
+
+  /// No description provided for @settings_delete_account_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить аккаунт?'**
+  String get settings_delete_account_title;
+
+  /// No description provided for @settings_delete_account_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.'**
+  String get settings_delete_account_body;
+
+  /// No description provided for @settings_delete_account_btn.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить аккаунт'**
+  String get settings_delete_account_btn;
 
   /// No description provided for @settings_privacy_policy.
   ///

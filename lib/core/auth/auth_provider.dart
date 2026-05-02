@@ -9,10 +9,20 @@ import '../api/api_client.dart';
 import '../notifications/notification_service.dart';
 import '../ai_consent/ai_consent_provider.dart';
 import 'onboarding_sync.dart';
+import 'token_pair.dart';
 
 part 'auth_provider.g.dart';
 
 const _kCachedUserKey = 'cached_user';
+
+// ── SecureTokenStorage Riverpod provider ────────────────────────────────────
+// Returns the singleton instance created in initApiClient() so all parts of
+// the app share the same storage object (and the same underlying Keychain).
+
+// ignore: deprecated_member_use
+final secureStorageProvider = Provider<SecureTokenStorage>(
+  (_) => secureTokenStorage,
+);
 
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
@@ -30,65 +40,75 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> checkSession({bool backgroundRefresh = false}) async {
     if (!backgroundRefresh) state = const AsyncValue.loading();
+
+    final storage = ref.read(secureStorageProvider);
+
     try {
-      final token = await TokenStorage.getAccess();
-      if (token == null) {
+      // Load the full token pair so we can inspect expiresAt locally and
+      // avoid one unnecessary round-trip (EC3 / UC2 optimisation).
+      final pair = await storage.loadTokens();
+
+      if (pair == null) {
+        // No tokens at all → not logged in.
         await _clearCache();
-        if (!backgroundRefresh) {
-          state = const AsyncValue.data(null);
-        }
+        if (!backgroundRefresh) state = const AsyncValue.data(null);
         return;
       }
 
-      final user = await _fetchMe(token);
-      if (user != null) {
-        await _saveCache(user);
-        state = AsyncValue.data(user);
-        syncOnboardingPending().catchError(
-          (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
+      // If token not yet expired, try /me with it.
+      if (!pair.isExpired) {
+        final user = await _fetchMe(pair.accessToken);
+        if (user != null) {
+          await _saveCache(user);
+          state = AsyncValue.data(user);
+          _postLoginSideEffects();
+          return;
+        }
+        // /me returned 401 despite non-expired token (clock skew, early revoke)
+        // → fall through to refresh.
+      }
+
+      // Token is expired (or /me returned 401) → attempt silent refresh.
+      try {
+        final plain = Dio(BaseOptions(baseUrl: baseUrl));
+        final resp = await plain.post(
+          '/api/v1/auth/refresh',
+          data: {'refresh_token': pair.refreshToken},
         );
-        NotificationService.registerTokenAfterLogin();
-        ref.read(aiConsentProvider.notifier).load();
-        return;
-      }
+        final data = resp.data as Map<String, dynamic>;
+        final newPair = TokenPair.fromApiResponse(data);
+        await storage.saveTokens(newPair);
 
-      final refreshToken = await TokenStorage.getRefresh();
-      if (refreshToken != null) {
-        try {
-          final plain = Dio(BaseOptions(baseUrl: baseUrl));
-          final resp = await plain.post(
-            '/api/v1/auth/refresh',
-            data: {'refresh_token': refreshToken},
-          );
-          final data = resp.data as Map<String, dynamic>;
-          final newAccess = data['access_token'] as String;
-          final newRefresh = data['refresh_token'] as String;
-          await TokenStorage.save(newAccess, newRefresh);
-          final refreshedUser = await _fetchMe(newAccess);
-          if (refreshedUser != null) {
-            await _saveCache(refreshedUser);
-            state = AsyncValue.data(refreshedUser);
-            syncOnboardingPending().catchError(
-              (e) { debugPrint('[auth] onboarding retry error: $e'); return false; },
-            );
-            NotificationService.registerTokenAfterLogin();
-            ref.read(aiConsentProvider.notifier).load();
-            return;
-          }
-        } catch (e) {
-          debugPrint('[auth] refresh failed: $e');
+        final refreshedUser = await _fetchMe(newPair.accessToken);
+        if (refreshedUser != null) {
+          await _saveCache(refreshedUser);
+          state = AsyncValue.data(refreshedUser);
+          _postLoginSideEffects();
+          return;
         }
+      } on DioException catch (e) {
+        debugPrint('[auth] refresh failed: $e');
       }
 
-      await TokenStorage.clear();
+      // Refresh failed or /me still returned null → clear and log out.
+      await storage.clearTokens();
       await _clearCache();
-      if (!backgroundRefresh) {
-        state = const AsyncValue.data(null);
-      }
+      if (!backgroundRefresh) state = const AsyncValue.data(null);
     } catch (e) {
       debugPrint('[auth] checkSession error: $e');
       if (!backgroundRefresh) state = const AsyncValue.data(null);
     }
+  }
+
+  void _postLoginSideEffects() {
+    syncOnboardingPending().catchError(
+      (e) {
+        debugPrint('[auth] onboarding retry error: $e');
+        return false;
+      },
+    );
+    NotificationService.registerTokenAfterLogin();
+    ref.read(aiConsentProvider.notifier).load();
   }
 
   static Future<void> _saveCache(UserProfile user) async {
@@ -120,7 +140,20 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> loginWithTokens(String access, String refresh) async {
-    await TokenStorage.save(access, refresh);
+    // Construct a TokenPair with unknown expiresAt → will refresh immediately.
+    final pair = TokenPair(
+      accessToken: access,
+      refreshToken: refresh,
+      expiresAt: DateTime.now(),
+    );
+    final storage = ref.read(secureStorageProvider);
+    await storage.saveTokens(pair);
+    await checkSession();
+  }
+
+  Future<void> loginWithTokenPair(TokenPair pair) async {
+    final storage = ref.read(secureStorageProvider);
+    await storage.saveTokens(pair);
     await checkSession();
   }
 
@@ -131,17 +164,21 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> logout() async {
     await NotificationService.unregisterToken();
 
+    final storage = ref.read(secureStorageProvider);
+
     try {
-      final refreshToken = await TokenStorage.getRefresh();
+      final refreshToken = await storage.loadRefreshToken();
       if (refreshToken != null) {
+        // Best-effort revocation — errors are swallowed intentionally (UC8).
         await apiDio.post(
           '/api/v1/auth/logout',
           data: {'refresh_token': refreshToken},
         );
       }
     } catch (_) {}
-    await TokenStorage.clear();
-    await _clearCache();
+
+    await storage.clearTokens();
+    await _clearCacheAndProgress();
     state = const AsyncValue.data(null);
   }
 
@@ -149,8 +186,23 @@ class AuthNotifier extends _$AuthNotifier {
     try {
       await apiDio.delete('/api/v1/auth/account');
     } catch (_) {}
-    await TokenStorage.clear();
-    await _clearCache();
+    final storage = ref.read(secureStorageProvider);
+    await storage.clearTokens();
+    await _clearCacheAndProgress();
     state = const AsyncValue.data(null);
+  }
+
+  /// Clears cached_user and onboarding progress keys on logout (UC8).
+  /// onboarding_done is intentionally kept so the user is sent to /login
+  /// instead of /onboarding on next cold start.
+  static Future<void> _clearCacheAndProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await Future.wait([
+        prefs.remove(_kCachedUserKey),
+        prefs.remove('onboarding_answers'),
+        prefs.remove('onboarding_current_step'),
+      ]);
+    } catch (_) {}
   }
 }

@@ -856,6 +856,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addMeal_recognize_ai => 'Recognize with AI';
 
   @override
+  String get addMeal_not_food_title => 'No food detected';
+
+  @override
+  String get addMeal_not_food_message =>
+      'We couldn\'t find food in this photo. Move the camera closer to the dish and try again.';
+
+  @override
+  String get addMeal_not_food_retry => 'Try again';
+
+  @override
   String get addMeal_saving => 'Saving...';
 
   @override
@@ -908,6 +918,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addMeal_barcode_confirm => 'Add to journal';
+
+  @override
+  String get settings_delete_account_title => 'Delete account?';
+
+  @override
+  String get settings_delete_account_body =>
+      'All your data will be permanently deleted. This action cannot be undone.';
+
+  @override
+  String get settings_delete_account_btn => 'Delete account';
 
   @override
   String get settings_privacy_policy => 'Privacy Policy';

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/auth/auth_provider.dart';
 import 'core/ai_consent/ai_consent_provider.dart';
+import 'core/navigation/navigation_providers.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/journal/screens/journal_screen.dart';
@@ -19,19 +20,9 @@ import 'features/chat/screens/chat_screen.dart';
 import 'features/ai_consent/screens/ai_consent_screen.dart';
 import 'shared/widgets/bottom_nav.dart';
 
+export 'core/navigation/navigation_providers.dart';
+
 const _kOnboardingDoneKey = 'onboarding_done';
-
-// Tracks whether user has seen onboarding this session.
-// Loaded once at startup from SharedPreferences.
-final onboardingDoneProvider = StateProvider<bool>((ref) => false);
-
-/// Set to true after email auth when onboarding data was synced.
-/// Router redirects to /way-to-goal once; WayToGoalScreen clears it.
-final showWayToGoalProvider = StateProvider<bool>((ref) => false);
-
-/// Set to true when AI consent is triggered from onboarding demo.
-/// AiConsentScreen uses this to navigate back to /onboarding after consent.
-final consentFromOnboardingProvider = StateProvider<bool>((ref) => false);
 
 /// Call after successful onboarding completion to mark it done.
 Future<void> markOnboardingDone(WidgetRef ref) async {
