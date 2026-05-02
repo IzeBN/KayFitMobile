@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:kayfit/core/ai_consent/ai_consent_provider.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
+import 'package:kayfit/shared/widgets/keyboard_dismisser.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/chat_message.dart';
 
@@ -38,7 +40,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat();
-    AnalyticsService.chatOpened();
+    // Guard against Firebase not being initialized (e.g. in widget tests).
+    try {
+      AnalyticsService.chatOpened();
+    } catch (_) {}
     _loadHistory();
   }
 
@@ -114,7 +119,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       _isSending = true;
     });
     _scrollToBottom();
-    AnalyticsService.chatMessageSent(_messages.length);
+    try {
+      AnalyticsService.chatMessageSent(_messages.length);
+    } catch (_) {}
 
     try {
       final utcOffsetHours = DateTime.now().timeZoneOffset.inHours;
@@ -133,7 +140,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         _messages.removeLast();
         _messages.add(reply);
       });
-      AnalyticsService.chatResponseReceived(_messages.length);
+      try {
+        AnalyticsService.chatResponseReceived(_messages.length);
+      } catch (_) {}
       _scrollToBottom();
     } catch (_) {
       setState(() {
@@ -206,49 +215,54 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Column(
-        children: [
-          // ── Beautiful gradient header ──────────────────────────────────
-          _ChatHeader(
-            l10n: l10n,
-            animCtrl: _headerCtrl,
-            hasMessages: _messages.isNotEmpty,
-            onClear: _clearHistory,
-          ),
+    return KeyboardDismisser(
+      child: Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Column(
+          children: [
+            // ── Beautiful gradient header ────────────────────────────────
+            _ChatHeader(
+              l10n: l10n,
+              animCtrl: _headerCtrl,
+              hasMessages: _messages.isNotEmpty,
+              onClear: _clearHistory,
+              onBack: () => context.go('/'),
+            ),
 
-          // ── Citation / disclaimer banner ─────────────────────────────
-          _ChatDisclaimerBanner(),
+            // ── Citation / disclaimer banner ───────────────────────────
+            _ChatDisclaimerBanner(),
 
-          // ── Messages ──────────────────────────────────────────────────
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.accent, strokeWidth: 2.5),
-                  )
-                : _messages.isEmpty
-                    ? _EmptyState(l10n: l10n, onSend: _sendSuggestion)
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        itemCount: _messages.length,
-                        itemBuilder: (context, index) => _AnimatedBubble(
-                          message: _messages[index],
-                          isNewest: index == _messages.length - 1,
+            // ── Messages ────────────────────────────────────────────────
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.accent, strokeWidth: 2.5),
+                    )
+                  : _messages.isEmpty
+                      ? _EmptyState(l10n: l10n, onSend: _sendSuggestion)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) => _AnimatedBubble(
+                            message: _messages[index],
+                            isNewest: index == _messages.length - 1,
+                          ),
                         ),
-                      ),
-          ),
+            ),
 
-          // ── Input row ─────────────────────────────────────────────────
-          _InputRow(
-            controller: _textController,
-            isSending: _isSending,
-            hint: l10n.chat_input_hint,
-            onSend: _sendMessage,
-          ),
-        ],
+            // ── Input row ───────────────────────────────────────────────
+            _InputRow(
+              controller: _textController,
+              isSending: _isSending,
+              hint: l10n.chat_input_hint,
+              onSend: _sendMessage,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -263,19 +277,21 @@ class _ChatHeader extends StatelessWidget {
   final AnimationController animCtrl;
   final bool hasMessages;
   final VoidCallback onClear;
+  final VoidCallback onBack;
 
   const _ChatHeader({
     required this.l10n,
     required this.animCtrl,
     required this.hasMessages,
     required this.onClear,
+    required this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, top + 12, 8, 16),
+      padding: EdgeInsets.fromLTRB(4, top + 4, 8, 16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF064E1F), Color(0xFF16A34A)],
@@ -285,6 +301,16 @@ class _ChatHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Back button
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            tooltip: 'Back',
+            onPressed: onBack,
+          ),
           // Animated AI avatar
           AnimatedBuilder(
             animation: animCtrl,

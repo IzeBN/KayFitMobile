@@ -5,6 +5,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/keyboard_dismisser.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -177,7 +178,8 @@ class _EditMealScreenState extends State<EditMealScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return KeyboardDismisser(
+      child: Scaffold(
       backgroundColor: AppColors.bg,
       body: _loading
           ? const Center(child: LoadingIndicator())
@@ -321,6 +323,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                 ],
               ),
             ),
+      ),
     );
   }
 
