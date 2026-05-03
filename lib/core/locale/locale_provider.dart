@@ -11,6 +11,9 @@ class LocaleNotifier extends StateNotifier<Locale> {
   static const _key = 'app_locale';
   static const _supportedCodes = {'ru', 'en'};
 
+  /// English by default. Only switch to RU if the user explicitly chose it
+  /// (persisted via [setLocale]). System locale is intentionally NOT used —
+  /// the product wants EN as the global default regardless of device language.
   LocaleNotifier() : super(const Locale('en')) {
     _load();
   }
@@ -21,14 +24,6 @@ class LocaleNotifier extends StateNotifier<Locale> {
 
     if (code != null && _supportedCodes.contains(code)) {
       state = Locale(code);
-      return;
-    }
-
-    // No saved preference — derive from system locale.
-    final systemCode =
-        PlatformDispatcher.instance.locale.languageCode;
-    if (_supportedCodes.contains(systemCode)) {
-      state = Locale(systemCode);
     }
     // else: remain at default Locale('en')
   }
