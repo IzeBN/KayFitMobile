@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kayfit/shared/theme/app_theme.dart';
+import 'package:kayfit/shared/widgets/keyboard_dismisser.dart';
 
 /// Layout scaffold for all onboarding steps.
 ///
@@ -42,31 +43,33 @@ class OnboardingScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: backgroundColor ?? OBColors.bg,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            header,
-            Expanded(child: body),
-          ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+    return KeyboardDismisser(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: backgroundColor ?? OBColors.bg,
+        body: SafeArea(
+          bottom: false,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              primaryCta,
-              if (secondaryCta != null) ...[
-                const SizedBox(height: 8),
-                secondaryCta!,
-              ],
+              header,
+              Expanded(child: body),
             ],
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                primaryCta,
+                if (secondaryCta != null) ...[
+                  const SizedBox(height: 8),
+                  secondaryCta!,
+                ],
+              ],
+            ),
           ),
         ),
       ),
