@@ -128,7 +128,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _Step.info_1,
       _Step.info_2,
       _Step.info_3,
-      _Step.method,
+      // _Step.method removed (manual QA: «как добавить еду» screen вырезан)
       _Step.result,
       _Step.auth,
     ];
