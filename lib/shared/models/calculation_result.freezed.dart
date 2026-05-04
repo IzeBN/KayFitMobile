@@ -31,6 +31,11 @@ mixin _$CalculationResult {
   double? get targetWeight => throw _privateConstructorUsedError;
   List<dynamic>? get chartData => throw _privateConstructorUsedError;
 
+  /// Short (≤150 chars) personalized plan text from AI.
+  /// Generated server-side from diet, restrictions and goal.
+  /// Frontend hides the banner when null.
+  String? get personalizedPlan => throw _privateConstructorUsedError;
+
   /// Serializes this CalculationResult to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -58,6 +63,7 @@ abstract class $CalculationResultCopyWith<$Res> {
     int? daysToGoal,
     double? targetWeight,
     List<dynamic>? chartData,
+    String? personalizedPlan,
   });
 }
 
@@ -85,6 +91,7 @@ class _$CalculationResultCopyWithImpl<$Res, $Val extends CalculationResult>
     Object? daysToGoal = freezed,
     Object? targetWeight = freezed,
     Object? chartData = freezed,
+    Object? personalizedPlan = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -124,6 +131,10 @@ class _$CalculationResultCopyWithImpl<$Res, $Val extends CalculationResult>
                 ? _value.chartData
                 : chartData // ignore: cast_nullable_to_non_nullable
                       as List<dynamic>?,
+            personalizedPlan: freezed == personalizedPlan
+                ? _value.personalizedPlan
+                : personalizedPlan // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -149,6 +160,7 @@ abstract class _$$CalculationResultImplCopyWith<$Res>
     int? daysToGoal,
     double? targetWeight,
     List<dynamic>? chartData,
+    String? personalizedPlan,
   });
 }
 
@@ -175,6 +187,7 @@ class __$$CalculationResultImplCopyWithImpl<$Res>
     Object? daysToGoal = freezed,
     Object? targetWeight = freezed,
     Object? chartData = freezed,
+    Object? personalizedPlan = freezed,
   }) {
     return _then(
       _$CalculationResultImpl(
@@ -214,6 +227,10 @@ class __$$CalculationResultImplCopyWithImpl<$Res>
             ? _value._chartData
             : chartData // ignore: cast_nullable_to_non_nullable
                   as List<dynamic>?,
+        personalizedPlan: freezed == personalizedPlan
+            ? _value.personalizedPlan
+            : personalizedPlan // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -233,6 +250,7 @@ class _$CalculationResultImpl implements _CalculationResult {
     this.daysToGoal,
     this.targetWeight,
     final List<dynamic>? chartData,
+    this.personalizedPlan,
   }) : _chartData = chartData;
 
   factory _$CalculationResultImpl.fromJson(Map<String, dynamic> json) =>
@@ -264,9 +282,15 @@ class _$CalculationResultImpl implements _CalculationResult {
     return EqualUnmodifiableListView(value);
   }
 
+  /// Short (≤150 chars) personalized plan text from AI.
+  /// Generated server-side from diet, restrictions and goal.
+  /// Frontend hides the banner when null.
+  @override
+  final String? personalizedPlan;
+
   @override
   String toString() {
-    return 'CalculationResult(bmr: $bmr, tdee: $tdee, targetCalories: $targetCalories, protein: $protein, fat: $fat, carbs: $carbs, daysToGoal: $daysToGoal, targetWeight: $targetWeight, chartData: $chartData)';
+    return 'CalculationResult(bmr: $bmr, tdee: $tdee, targetCalories: $targetCalories, protein: $protein, fat: $fat, carbs: $carbs, daysToGoal: $daysToGoal, targetWeight: $targetWeight, chartData: $chartData, personalizedPlan: $personalizedPlan)';
   }
 
   @override
@@ -288,7 +312,9 @@ class _$CalculationResultImpl implements _CalculationResult {
             const DeepCollectionEquality().equals(
               other._chartData,
               _chartData,
-            ));
+            ) &&
+            (identical(other.personalizedPlan, personalizedPlan) ||
+                other.personalizedPlan == personalizedPlan));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -304,6 +330,7 @@ class _$CalculationResultImpl implements _CalculationResult {
     daysToGoal,
     targetWeight,
     const DeepCollectionEquality().hash(_chartData),
+    personalizedPlan,
   );
 
   /// Create a copy of CalculationResult
@@ -334,6 +361,7 @@ abstract class _CalculationResult implements CalculationResult {
     final int? daysToGoal,
     final double? targetWeight,
     final List<dynamic>? chartData,
+    final String? personalizedPlan,
   }) = _$CalculationResultImpl;
 
   factory _CalculationResult.fromJson(Map<String, dynamic> json) =
@@ -357,6 +385,12 @@ abstract class _CalculationResult implements CalculationResult {
   double? get targetWeight;
   @override
   List<dynamic>? get chartData;
+
+  /// Short (≤150 chars) personalized plan text from AI.
+  /// Generated server-side from diet, restrictions and goal.
+  /// Frontend hides the banner when null.
+  @override
+  String? get personalizedPlan;
 
   /// Create a copy of CalculationResult
   /// with the given fields replaced by the non-null parameter values.

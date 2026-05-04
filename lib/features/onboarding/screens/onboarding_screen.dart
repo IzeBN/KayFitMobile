@@ -332,7 +332,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _goNext();
   }
 
-  void _handleWeightNext(AppLocalizations l10n) {
+  Future<void> _handleWeightNext(AppLocalizations l10n) async {
     final w = double.tryParse(_weightCtrl.text);
     if (w == null || w < 30 || w > 300) {
       setState(() => _error = l10n.ob_err_weight);
@@ -344,10 +344,59 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() => _error = l10n.ob_err_target_weight);
       return;
     }
+    // BMI warning for extreme targets (ticket 3.5).
+    // Skip if height not yet provided (shouldn't happen — earlier step).
+    if (_height != null && _height! > 0) {
+      final hM = _height! / 100.0;
+      final bmi = tw / (hM * hM);
+      // Healthy WHO range 18.5–24.9; we warn outside 17.0–30.0.
+      if (bmi < 17.0 || bmi > 30.0) {
+        final proceed = await _showExtremeWeightWarning(l10n, bmi);
+        if (proceed != true) return;
+      }
+    }
     _targetWeight = tw;
     AnalyticsService.onboardingWeightEntered(w.toInt(), tw.toInt());
     _savePending();
     _goNext();
+  }
+
+  Future<bool?> _showExtremeWeightWarning(
+      AppLocalizations l10n, double bmi) async {
+    final isRu = ref.read(localeProvider).languageCode == 'ru';
+    final tooLow = bmi < 17.0;
+    final title =
+        isRu ? 'Цель за пределами нормы' : 'Target outside healthy range';
+    final body = tooLow
+        ? (isRu
+            ? 'При таком целевом весе ваш ИМТ будет ${bmi.toStringAsFixed(1)} — это ниже здорового диапазона (18.5–24.9). Рекомендуем обсудить с врачом или диетологом.'
+            : 'At this target weight your BMI will be ${bmi.toStringAsFixed(1)} — below the healthy range (18.5–24.9). We recommend consulting a doctor or nutritionist.')
+        : (isRu
+            ? 'При таком целевом весе ваш ИМТ будет ${bmi.toStringAsFixed(1)} — это в зоне ожирения (>30). Рекомендуем обсудить с врачом или диетологом.'
+            : 'At this target weight your BMI will be ${bmi.toStringAsFixed(1)} — in the obese range (>30). We recommend consulting a doctor or nutritionist.');
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Text(title),
+        content: Text(body,
+            style: const TextStyle(color: AppColors.textMuted, height: 1.4)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(isRu ? 'Изменить' : 'Edit',
+                style: const TextStyle(color: AppColors.textMuted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(isRu ? 'Продолжить' : 'Continue',
+                style: const TextStyle(color: AppColors.accentOver)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _handleTrainingNext(AppLocalizations l10n) {
@@ -756,7 +805,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _MethodStep(l10n: l10n);
 
       case _Step.result:
-        return _ResultStep(l10n: l10n, preview: _preview);
+        return _ResultStep(
+          l10n: l10n,
+          preview: _preview,
+          currentWeight: _weight,
+        );
 
       case _Step.auth:
         // Auto-navigate to login
@@ -2606,12 +2659,21 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
 class _ResultStep extends StatelessWidget {
   final AppLocalizations l10n;
   final CalculationResult preview;
+  final double? currentWeight;
 
-  const _ResultStep({required this.l10n, required this.preview});
+  const _ResultStep({
+    required this.l10n,
+    required this.preview,
+    this.currentWeight,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return PlanResultView(calc: preview, l10n: l10n);
+    return PlanResultView(
+      calc: preview,
+      l10n: l10n,
+      currentWeight: currentWeight,
+    );
   }
 }
 

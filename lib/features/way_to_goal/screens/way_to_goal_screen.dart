@@ -34,31 +34,64 @@ class WayToGoalScreen extends ConsumerWidget {
           l10n: l10n,
         ),
         data: (calc) => SafeArea(
+          bottom: false,
           child: PlanResultView(
             calc: calc,
             l10n: l10n,
-            footer: GestureDetector(
-              onTap: () {
-                AnalyticsService.wayToGoalStartDiaryTapped();
-                context.go('/');
-              },
-              child: Container(
-                width: double.infinity,
-                height: 64,
-                decoration: BoxDecoration(
-                  gradient: OBColors.gradient,
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: OBColors.buttonShadow,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  l10n.wg_start_diary,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
+            // Reserve room so the last card isn't hidden under the sticky CTA.
+            bottomPadding: 96,
+          ),
+        ),
+      ),
+      bottomNavigationBar: result.maybeWhen(
+        data: (_) => _StickyStartButton(l10n: l10n),
+        orElse: () => null,
+      ),
+    );
+  }
+}
+
+class _StickyStartButton extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _StickyStartButton({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        // Soft fade so cards behind the bar do not look abruptly cropped.
+        decoration: BoxDecoration(
+          color: OBColors.bg,
+          boxShadow: [
+            BoxShadow(
+              color: OBColors.bg.withValues(alpha: 0),
+              blurRadius: 0,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: GestureDetector(
+          onTap: () {
+            AnalyticsService.wayToGoalStartDiaryTapped();
+            context.go('/');
+          },
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: OBColors.gradient,
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: OBColors.buttonShadow,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              l10n.wg_start_diary,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
           ),
