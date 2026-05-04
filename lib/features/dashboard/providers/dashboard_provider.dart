@@ -5,10 +5,20 @@ import '../../../shared/models/stats.dart';
 
 part 'dashboard_provider.g.dart';
 
+String _localDateIso() {
+  final n = DateTime.now();
+  return '${n.year.toString().padLeft(4, '0')}-'
+      '${n.month.toString().padLeft(2, '0')}-'
+      '${n.day.toString().padLeft(2, '0')}';
+}
+
 @riverpod
 Future<MacroStats> todayStats(TodayStatsRef ref) async {
   try {
-    final resp = await apiDio.get('/api/stats');
+    final resp = await apiDio.get(
+      '/api/stats',
+      queryParameters: {'date': _localDateIso()},
+    );
     final data = resp.data as Map<String, dynamic>;
 
     // Backend returns nested: {calories: {current, goal}, protein: {current, goal}, ...}
@@ -46,7 +56,10 @@ Future<MacroStats> todayStats(TodayStatsRef ref) async {
 
 @riverpod
 Future<List<Meal>> todayMeals(TodayMealsRef ref) async {
-  final resp = await apiDio.get('/api/meals');
+  final resp = await apiDio.get(
+    '/api/meals',
+    queryParameters: {'date': _localDateIso()},
+  );
   final list = resp.data as List<dynamic>;
   return list.map((e) => Meal.fromJson(e as Map<String, dynamic>)).toList();
 }
