@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Kayfit 2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; font-family: 'Geist', -apple-system, system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  input, button, textarea { font-family: inherit; }
+  @keyframes kfSpin { to { transform: rotate(360deg); } }
+  @keyframes kfPulse { 0%{transform:scale(1);opacity:.4} 100%{transform:scale(1.4);opacity:0} }
+  @keyframes kfScan { 0%,100%{top:10%}50%{top:90%} }
+  @keyframes kfFade { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="android-frame.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="kayfit-app.jsx"></script>
+<script type="text/babel" src="kayfit-screens.jsx"></script>
+<script type="text/babel">
+// ─── App entry ──────────────────────────────────────────────
+// Slot a KayfitApp inside an iOS or Android frame.
+
+function PhoneFrame({ platform = 'ios', children, dark = false }) {
+  // The starter frames render their own status bar / home indicator on top.
+  // We use them as bare shells (no title) and put our app inside.
+  if (platform === 'ios') {
+    return (
+      <IOSDevice width={390} height={760} dark={dark}>
+        <div style={{ position: 'absolute', inset: 0, paddingTop: 54 }}>
+          {children}
+        </div>
+      </IOSDevice>
+    );
+  }
+  return (
+    <AndroidDevice width={390} height={760} dark={dark}>
+      <div style={{ position: 'absolute', inset: 0 }}>{children}</div>
+    </AndroidDevice>
+  );
+}
+
+function Variant({ platform = 'ios', dark = false, ...appProps }) {
+  return (
+    <div style={{ position: 'relative', width: 390, height: 760, overflow: 'hidden' }}>
+      <PhoneFrame platform={platform} dark={dark}>
+        <KayfitApp {...appProps} dark={dark}/>
+      </PhoneFrame>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="overview" title="Kayfit 2.0" subtitle="Radically minimal calorie tracker · two screens, one task · monochrome system">
+
+        <DCArtboard id="v1-ios" label="V1 · Apple rings · iOS" width={390} height={760}>
+          <Variant platform="ios" summaryStyle="apple" addLayout="grid"/>
+        </DCArtboard>
+
+        <DCArtboard id="v2-ios" label="V2 · Hero number · iOS" width={390} height={760}>
+          <Variant platform="ios" summaryStyle="hero" addLayout="grid"/>
+        </DCArtboard>
+
+        <DCArtboard id="v3-ios" label="V3 · Calendar open · iOS" width={390} height={760}>
+          <Variant platform="ios" summaryStyle="bar" addLayout="grid" defaultCalendarExpanded/>
+        </DCArtboard>
+
+        <DCArtboard id="v4-ios" label="V4 · Dark · iOS" width={390} height={760}>
+          <Variant platform="ios" dark summaryStyle="numeric" addLayout="grid"/>
+        </DCArtboard>
+
+        <DCArtboard id="v5-ios" label="V5 · Chat-first · iOS" width={390} height={760}>
+          <Variant platform="ios" startTab="chat" summaryStyle="ring" addLayout="list"/>
+        </DCArtboard>
+
+        <DCArtboard id="v6-ios" label="V6 · Numeric manifesto · iOS" width={390} height={760}>
+          <Variant platform="ios" summaryStyle="numeric" addLayout="list"/>
+        </DCArtboard>
+
+      </DCSection>
+
+      <DCSection id="android" title="Android" subtitle="Same system, Material 3 chrome">
+
+        <DCArtboard id="v1-and" label="V1 · Apple rings · Android" width={390} height={760}>
+          <Variant platform="android" summaryStyle="apple" addLayout="grid"/>
+        </DCArtboard>
+
+        <DCArtboard id="v2-and" label="V2 · Hero · Android" width={390} height={760}>
+          <Variant platform="android" summaryStyle="hero" addLayout="grid"/>
+        </DCArtboard>
+
+        <DCArtboard id="v4-and" label="V4 · Dark · Android" width={390} height={760}>
+          <Variant platform="android" dark summaryStyle="numeric" addLayout="list"/>
+        </DCArtboard>
+
+      </DCSection>
+
+      <DCSection id="flow" title="Add-meal flow" subtitle="Tap + → choose method → AI recognizes → preview / edit → save">
+
+        <DCArtboard id="f-add" label="1 · Choose input" width={390} height={760}>
+          <FlowDemo step="add"/>
+        </DCArtboard>
+
+        <DCArtboard id="f-photo" label="2 · Photo capture" width={390} height={760}>
+          <FlowDemo step="photo"/>
+        </DCArtboard>
+
+        <DCArtboard id="f-recognizing" label="3 · Recognizing" width={390} height={760}>
+          <FlowDemo step="recognizing"/>
+        </DCArtboard>
+
+        <DCArtboard id="f-preview" label="4 · Preview & edit" width={390} height={760}>
+          <FlowDemo step="preview"/>
+        </DCArtboard>
+
+        <DCArtboard id="f-voice" label="Voice variant" width={390} height={760}>
+          <FlowDemo step="voice"/>
+        </DCArtboard>
+
+        <DCArtboard id="f-barcode" label="Barcode variant" width={390} height={760}>
+          <FlowDemo step="barcode"/>
+        </DCArtboard>
+
+      </DCSection>
+
+      <DCSection id="chat" title="Chat · merged AI nutritionist + input" subtitle="Photo / voice / barcode are inline; a logged meal becomes a chat bubble">
+
+        <DCArtboard id="chat-light" label="Chat · light" width={390} height={760}>
+          <Variant platform="ios" startTab="chat" summaryStyle="ring"/>
+        </DCArtboard>
+
+        <DCArtboard id="chat-dark" label="Chat · dark" width={390} height={760}>
+          <Variant platform="ios" dark startTab="chat" summaryStyle="numeric"/>
+        </DCArtboard>
+
+      </DCSection>
+
+      <DCPostIt top={20} right={60} rotate={2} width={220}>
+        Two screens. One add button. Everything else is on the chat — including the nutritionist and any input.
+      </DCPostIt>
+
+    </DesignCanvas>
+  );
+}
+
+// FlowDemo — shows a specific step of the add-meal flow inside a phone frame.
+function FlowDemo({ step }) {
+  const t = getTheme(false);
+  return (
+    <div style={{ position: 'relative', width: 390, height: 760, overflow: 'hidden' }}>
+      <PhoneFrame platform="ios">
+        <FlowStep step={step} t={t}/>
+      </PhoneFrame>
+    </div>
+  );
+}
+
+function FlowStep({ step, t }) {
+  if (step === 'add') {
+    return (
+      <div style={{ position: 'relative', height: '100%', background: t.bg }}>
+        <JournalScreen t={t} meals={SEED_TODAY} summaryStyle="ring"
+          onMealTap={() => {}} onAccount={() => {}}
+          calendarExpanded={false} setCalendarExpanded={() => {}}
+          selectedDate="today" setSelectedDate={() => {}}
+          groupBy="type"/>
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <AddSheet t={t} layout="grid" onPick={() => {}} onClose={() => {}}/>
+        </div>
+      </div>
+    );
+  }
+  if (step === 'photo' || step === 'voice' || step === 'barcode') {
+    const FixedRecog = () => {
+      const [_, force] = React.useState(0);
+      return <RecognitionScreen t={t} method={step} onCancel={() => {}} onSave={() => {}}/>;
+    };
+    return (
+      <div style={{ height: '100%', background: t.bg }}>
+        <RecognitionStep step={step} t={t} target="capture"/>
+      </div>
+    );
+  }
+  if (step === 'recognizing') {
+    return <RecognitionStep step="photo" t={t} target="recognizing"/>;
+  }
+  if (step === 'preview') {
+    return <RecognitionStep step="photo" t={t} target="preview"/>;
+  }
+  return null;
+}
+
+// Renders RecognitionScreen frozen at a specific internal step
+function RecognitionStep({ step, t, target }) {
+  // Re-implement minimally — the real RecognitionScreen auto-advances.
+  // Here we render the same layouts but force one phase.
+  const items = [
+    { id: 'i1', name: 'grilled chicken breast', grams: 150, kcal: 247, p: 46, f: 5, c: 0 },
+    { id: 'i2', name: 'jasmine rice', grams: 180, kcal: 234, p: 4, f: 0, c: 52 },
+    { id: 'i3', name: 'steamed broccoli', grams: 90, kcal: 31, p: 3, f: 0, c: 6 },
+  ];
+  if (target === 'preview') {
+    const total = items.reduce((s, i) => s + i.kcal, 0);
+    const totalP = items.reduce((s, i) => s + i.p, 0);
+    const totalF = items.reduce((s, i) => s + i.f, 0);
+    const totalC = items.reduce((s, i) => s + i.c, 0);
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: t.bg, fontFamily: KAYFIT_FONTS.sans }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px' }}>
+          <Icon name="close" size={20} color={t.fg}/>
+          <div style={{ fontSize: 13, color: t.fgDim, textTransform: 'uppercase', letterSpacing: 1 }}>review</div>
+          <div style={{ width: 28 }}/>
+        </div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <div style={{ padding: '8px 20px 24px' }}>
+            <div style={{ fontSize: 11, color: t.fgDim, textTransform: 'uppercase', letterSpacing: 1 }}>total</div>
+            <div style={{ fontFamily: KAYFIT_FONTS.mono, fontSize: 56, fontWeight: 500, color: t.fg, letterSpacing: -2, lineHeight: 1, marginTop: 4 }}>
+              {total}<span style={{ fontSize: 18, color: t.fgDim, marginLeft: 6 }}>kcal</span>
+            </div>
+            <div style={{ fontFamily: KAYFIT_FONTS.mono, fontSize: 12, color: t.fgDim, marginTop: 8 }}>
+              P {totalP}g <span style={{ opacity: 0.4 }}>·</span> F {totalF}g <span style={{ opacity: 0.4 }}>·</span> C {totalC}g
+            </div>
+          </div>
+          <div style={{ borderTop: `1px solid ${t.hairline}` }}>
+            <div style={{ padding: '12px 20px 6px', fontSize: 10, color: t.fgMute, textTransform: 'uppercase', letterSpacing: 1 }}>items · tap to edit</div>
+            {items.map(it => (
+              <div key={it.id} style={{ padding: '10px 20px', borderTop: `1px solid ${t.hairline}` }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                  <div style={{ flex: 1, fontSize: 14, color: t.fg }}>{it.name}</div>
+                  <div style={{ fontFamily: KAYFIT_FONTS.mono, fontSize: 14, color: t.fg }}>{it.kcal}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <div style={{ padding: '4px 6px', border: `1px solid ${t.border}`, borderRadius: 4, fontFamily: KAYFIT_FONTS.mono, fontSize: 12, color: t.fg, minWidth: 50, textAlign: 'left' }}>{it.grams}</div>
+                  <span style={{ fontSize: 11, color: t.fgDim, fontFamily: KAYFIT_FONTS.mono }}>g</span>
+                  <span style={{ fontSize: 11, color: t.fgMute, fontFamily: KAYFIT_FONTS.mono, marginLeft: 8 }}>P {it.p} · F {it.f} · C {it.c}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: '12px 16px 16px', borderTop: `1px solid ${t.hairline}` }}>
+          <div style={{ width: '100%', padding: '14px', borderRadius: 8, background: t.fg, color: t.accentFg, fontSize: 14, fontWeight: 600, textAlign: 'center', textTransform: 'lowercase', letterSpacing: 0.3 }}>
+            ✓  save to journal
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // capture or recognizing
+  const captureLabel = { photo: 'aim at your plate', voice: 'tell me what you ate', barcode: 'point at the barcode' }[step];
+  const recognizing = target === 'recognizing';
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: t.bg, fontFamily: KAYFIT_FONTS.sans }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px' }}>
+        <Icon name="close" size={20} color={t.fg}/>
+        <div style={{ fontSize: 13, color: t.fgDim, textTransform: 'uppercase', letterSpacing: 1 }}>{step}</div>
+        <div style={{ width: 28 }}/>
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, gap: 24 }}>
+        {step === 'photo' && (
+          <div style={{ width: 240, height: 240, border: `2px ${recognizing ? 'solid' : 'dashed'} ${t.border}`, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `repeating-linear-gradient(45deg, ${t.bg}, ${t.bg} 8px, ${t.hairline} 8px, ${t.hairline} 9px)` }}>
+            <Icon name="camera" size={32} color={t.fgDim}/>
+          </div>
+        )}
+        {step === 'voice' && (
+          <div style={{ width: 200, height: 200, borderRadius: '50%', border: `2px solid ${t.fg}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="mic" size={48} color={t.fg}/>
+          </div>
+        )}
+        {step === 'barcode' && (
+          <div style={{ width: 240, height: 140, border: `2px solid ${t.fg}`, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="barcode" size={48} color={t.fg}/>
+          </div>
+        )}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 15, color: t.fg, marginBottom: 4 }}>
+            {recognizing ? 'analyzing…' : captureLabel}
+          </div>
+          <div style={{ fontSize: 12, color: t.fgDim, fontFamily: KAYFIT_FONTS.mono }}>
+            {recognizing ? 'AI is identifying items' : 'tap to capture'}
+          </div>
+        </div>
+        {!recognizing && (
+          <div style={{ width: 64, height: 64, borderRadius: '50%', border: `2px solid ${t.fg}`, background: t.fg, marginTop: 20 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', background: t.fg, border: `2px solid ${t.bg}`, margin: 'auto', marginTop: 6 }}/>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
