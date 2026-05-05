@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/add_meal/screens/add_meal_sheet.dart';
 import '../../../features/dashboard/providers/dashboard_provider.dart';
 import '../../../features/journal/screens/journal_screen.dart'
     show journalDayMealsProvider;
@@ -142,6 +143,20 @@ class _JournalV2ScreenState extends ConsumerState<JournalV2Screen> {
   String get _dateKey =>
       _calSelected == 'today' ? _todayIso() : _calSelected;
 
+  Future<void> _showAddMeal(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
+      builder: (_) => const AddMealSheet(),
+    );
+    ref.invalidate(journalDayMealsProvider(_dateKey));
+    ref.invalidate(todayStatsProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     const t = K2Theme.light;
@@ -157,7 +172,7 @@ class _JournalV2ScreenState extends ConsumerState<JournalV2Screen> {
         onTab: (key) {
           if (key == 'chat') context.go('/chat');
         },
-        onAdd: () => context.go('/chat'),
+        onAdd: () => _showAddMeal(context),
       ),
       body: SafeArea(
         child: Column(
@@ -263,7 +278,7 @@ class _TopBar extends StatelessWidget {
                 color: theme.fg,
                 size: 26,
               ),
-              onPressed: () {},
+              onPressed: () => context.go('/settings'),
               tooltip: 'Account',
             ),
             const Spacer(),
@@ -286,7 +301,7 @@ class _TopBar extends StatelessWidget {
                 color: theme.fg,
                 size: 26,
               ),
-              onPressed: () {},
+              onPressed: () => context.go('/settings'),
               tooltip: 'Menu',
             ),
           ],
@@ -415,35 +430,48 @@ class _EmptyMeals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.restaurant_menu_outlined,
-            size: 40,
-            color: theme.fgMute,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No meals today',
-            style: TextStyle(
-              fontSize: 15,
-              color: theme.fgDim,
-              fontFamily: K2Fonts.sans,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight.isFinite
+                  ? constraints.maxHeight
+                  : 0,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.restaurant_menu_outlined,
+                    size: 40,
+                    color: theme.fgMute,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No meals today',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: theme.fgDim,
+                      fontFamily: K2Fonts.sans,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap + to log your first meal',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.fgMute,
+                      fontFamily: K2Fonts.sans,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Tap + to log your first meal',
-            style: TextStyle(
-              fontSize: 13,
-              color: theme.fgMute,
-              fontFamily: K2Fonts.sans,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
