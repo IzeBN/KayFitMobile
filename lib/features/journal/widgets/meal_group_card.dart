@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/models/meal.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/dismissible_sheet_wrapper.dart';
 import '../../../shared/widgets/extended_nutrients_grid.dart';
 
 const _mealTypeConfig = {
@@ -229,7 +230,12 @@ class MealGroupCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _GroupDetailSheet(mealType: mealType, meals: meals),
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
+      builder: (_) => DismissibleSheetWrapper(
+        child: _GroupDetailSheet(mealType: mealType, meals: meals),
+      ),
     );
   }
 
@@ -238,10 +244,15 @@ class MealGroupCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _MealDetailSheet(
-        meal: meal,
-        onDelete: onDeleteMeal,
-        onEdit: onEditMeal,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
+      builder: (_) => DismissibleSheetWrapper(
+        child: _MealDetailSheet(
+          meal: meal,
+          onDelete: onDeleteMeal,
+          onEdit: onEditMeal,
+        ),
       ),
     );
   }

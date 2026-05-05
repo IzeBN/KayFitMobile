@@ -31,4 +31,13 @@ class NutrientsV2 with _$NutrientsV2 {
 
   factory NutrientsV2.fromJson(Map<String, dynamic> json) =>
       _$NutrientsV2FromJson(json);
+
+  /// Zero-calorie placeholder used by the frontend whitelist guard.
+  /// All required macros are set to 0; optional fields are left null.
+  factory NutrientsV2.zero() => const NutrientsV2(
+        calories: 0,
+        protein: 0,
+        fat: 0,
+        carbs: 0,
+      );
 }

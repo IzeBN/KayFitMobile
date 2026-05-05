@@ -17,6 +17,10 @@ class CalculationResult with _$CalculationResult {
     int? daysToGoal,
     double? targetWeight,
     List<dynamic>? chartData,
+    /// Short (≤150 chars) personalized plan text from AI.
+    /// Generated server-side from diet, restrictions and goal.
+    /// Frontend hides the banner when null.
+    String? personalizedPlan,
   }) = _CalculationResult;
 
   factory CalculationResult.fromJson(Map<String, dynamic> json) =>

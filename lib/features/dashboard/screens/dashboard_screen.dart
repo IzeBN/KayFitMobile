@@ -157,6 +157,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
       builder: (_) => const AddMealSheet(),
     );
     ref.invalidate(todayMealsProvider);

@@ -5,6 +5,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/keyboard_dismisser.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ class _EditMealScreenState extends State<EditMealScreen>
   final _proteinCtrl = TextEditingController();
   final _fatCtrl = TextEditingController();
   final _carbsCtrl = TextEditingController();
+  final _weightCtrl = TextEditingController();
 
   bool _loading = true;
   bool _saving = false;
@@ -79,6 +81,8 @@ class _EditMealScreenState extends State<EditMealScreen>
       _proteinCtrl.text = (meal['protein'] as num).toStringAsFixed(1);
       _fatCtrl.text = (meal['fat'] as num).toStringAsFixed(1);
       _carbsCtrl.text = (meal['carbs'] as num).toStringAsFixed(1);
+      final w = meal['weight'] as num?;
+      _weightCtrl.text = w != null ? w.toStringAsFixed(0) : '';
     } catch (_) {
       // leave fields empty
     } finally {
@@ -94,12 +98,31 @@ class _EditMealScreenState extends State<EditMealScreen>
     HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {
+      final wRaw = _weightCtrl.text.trim();
+      final parsedWeight = wRaw.isEmpty ? null : double.tryParse(wRaw);
+      if (wRaw.isNotEmpty && parsedWeight == null) {
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.edit_meal_err_invalid_number),
+              backgroundColor: AppColors.accentOver,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+        setState(() => _saving = false);
+        return;
+      }
       await apiDio.patch('/api/meals/${widget.mealId}', data: {
         'name': _nameCtrl.text.trim(),
         'calories': double.parse(_caloriesCtrl.text),
         'protein': double.parse(_proteinCtrl.text),
         'fat': double.parse(_fatCtrl.text),
         'carbs': double.parse(_carbsCtrl.text),
+        if (parsedWeight != null) 'weight_grams': parsedWeight,
       });
       AnalyticsService.editMealSaved(widget.mealId);
       if (mounted) {
@@ -149,6 +172,7 @@ class _EditMealScreenState extends State<EditMealScreen>
     _proteinCtrl.dispose();
     _fatCtrl.dispose();
     _carbsCtrl.dispose();
+    _weightCtrl.dispose();
     super.dispose();
   }
 
@@ -177,7 +201,8 @@ class _EditMealScreenState extends State<EditMealScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return KeyboardDismisser(
+      child: Scaffold(
       backgroundColor: AppColors.bg,
       body: _loading
           ? const Center(child: LoadingIndicator())
@@ -256,8 +281,21 @@ class _EditMealScreenState extends State<EditMealScreen>
                         )),
                         const SizedBox(height: 10),
 
-                        // Calories
+                        // Weight (optional)
                         _buildFade(2, _StyledNumField(
+                          controller: _weightCtrl,
+                          label: l10n.edit_meal_weight_label,
+                          suffix: l10n.macro_g,
+                          icon: Icons.scale_rounded,
+                          iconColor: AppColors.textMuted,
+                          iconBg: AppColors.bg,
+                          errEnterValue: null,
+                          errInvalidNumber: l10n.edit_meal_err_invalid_number,
+                        )),
+                        const SizedBox(height: 10),
+
+                        // Calories
+                        _buildFade(3, _StyledNumField(
                           controller: _caloriesCtrl,
                           label: l10n.macro_calories,
                           suffix: l10n.macro_kcal,
@@ -270,7 +308,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                         const SizedBox(height: 10),
 
                         // Protein
-                        _buildFade(3, _StyledNumField(
+                        _buildFade(4, _StyledNumField(
                           controller: _proteinCtrl,
                           label: l10n.macro_protein,
                           suffix: l10n.macro_g,
@@ -283,7 +321,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                         const SizedBox(height: 10),
 
                         // Fat
-                        _buildFade(4, _StyledNumField(
+                        _buildFade(5, _StyledNumField(
                           controller: _fatCtrl,
                           label: l10n.macro_fat,
                           suffix: l10n.macro_g,
@@ -296,7 +334,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                         const SizedBox(height: 10),
 
                         // Carbs
-                        _buildFade(5, _StyledNumField(
+                        _buildFade(6, _StyledNumField(
                           controller: _carbsCtrl,
                           label: l10n.macro_carbs,
                           suffix: l10n.macro_g,
@@ -309,7 +347,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                         const SizedBox(height: 24),
 
                         // Save button
-                        _buildFade(6, _SaveButton(
+                        _buildFade(7, _SaveButton(
                           saving: _saving,
                           label: l10n.common_save,
                           onTap: _save,
@@ -321,6 +359,7 @@ class _EditMealScreenState extends State<EditMealScreen>
                 ],
               ),
             ),
+      ),
     );
   }
 
@@ -692,7 +731,7 @@ class _StyledNumField extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final Color iconBg;
-  final String errEnterValue;
+  final String? errEnterValue;
   final String errInvalidNumber;
 
   const _StyledNumField({
@@ -702,7 +741,7 @@ class _StyledNumField extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.iconBg,
-    required this.errEnterValue,
+    this.errEnterValue,
     required this.errInvalidNumber,
   });
 
@@ -759,7 +798,9 @@ class _StyledNumField extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               ),
               validator: (v) {
-                if (v == null || v.isEmpty) return errEnterValue;
+                if (v == null || v.isEmpty) {
+                  return errEnterValue; // null → no error for optional fields
+                }
                 final n = double.tryParse(v);
                 if (n == null || n < 0) return errInvalidNumber;
                 return null;

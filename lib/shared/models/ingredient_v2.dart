@@ -1,3 +1,4 @@
+import '../utils/zero_calorie_whitelist.dart';
 import 'nutrients_v2.dart';
 
 /// A food item returned by the v2 recognition / parse endpoints.
@@ -26,6 +27,23 @@ class IngredientV2 {
   /// Parse from a v2 API item that contains both `nutrients_per_100g` and
   /// `nutrients_total` sub-objects.
   factory IngredientV2.fromApiItem(Map<String, dynamic> item) {
+    final name = item['name'] as String? ?? '';
+    final weight = (item['weight_grams'] as num?)?.toDouble() ?? 100.0;
+
+    // Frontend zero-calorie guard: water, tea, ice, etc. — backend may still
+    // miss some variants on free-form text input, so we override here.
+    if (isZeroCalorieName(name) || (item['is_zero_calorie'] as bool? ?? false)) {
+      final zero = NutrientsV2.zero();
+      return IngredientV2(
+        name: name,
+        weightGrams: weight,
+        nutrientsPer100g: zero,
+        nutrientsTotal: zero,
+        source: item['source'] as String? ?? 'claude',
+        sourceUrl: item['source_url'] as String?,
+      );
+    }
+
     final per100Raw =
         item['nutrients_per_100g'] as Map<String, dynamic>? ?? {};
     final totalRaw =
@@ -35,8 +53,8 @@ class IngredientV2 {
     final total = NutrientsV2.fromJson(_ensureDoubles(totalRaw));
 
     return IngredientV2(
-      name: item['name'] as String? ?? '',
-      weightGrams: (item['weight_grams'] as num?)?.toDouble() ?? 100.0,
+      name: name,
+      weightGrams: weight,
       nutrientsPer100g: per100,
       nutrientsTotal: total,
       source: item['source'] as String? ?? 'claude',
@@ -48,13 +66,28 @@ class IngredientV2 {
   /// [weightGrams] is provided by the caller (user hint or default 100 g).
   factory IngredientV2.fromSuggestion(
       Map<String, dynamic> item, double weightGrams) {
+    final name = item['name'] as String? ?? '';
+
+    // Frontend zero-calorie guard for the text-input flow (HIGH-3).
+    if (isZeroCalorieName(name) || (item['is_zero_calorie'] as bool? ?? false)) {
+      final zero = NutrientsV2.zero();
+      return IngredientV2(
+        name: name,
+        weightGrams: weightGrams,
+        nutrientsPer100g: zero,
+        nutrientsTotal: zero,
+        source: item['source'] as String? ?? 'claude',
+        sourceUrl: item['source_url'] as String?,
+      );
+    }
+
     final per100Raw =
         item['nutrients_per_100g'] as Map<String, dynamic>? ?? {};
     final per100 = NutrientsV2.fromJson(_ensureDoubles(per100Raw));
     final total = _scaleNutrients(per100, weightGrams / 100.0);
 
     return IngredientV2(
-      name: item['name'] as String? ?? '',
+      name: name,
       weightGrams: weightGrams,
       nutrientsPer100g: per100,
       nutrientsTotal: total,

@@ -13,6 +13,8 @@ import '../../../shared/models/ingredient_v2.dart';
 import '../../../shared/models/nutrients_v2.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/utils/nutrient_parser.dart';
+import '../../../shared/widgets/dismissible_sheet_wrapper.dart';
+import '../../../shared/widgets/keyboard_dismisser.dart';
 import '../../../shared/widgets/meal_type_picker.dart';
 import '../../../shared/widgets/nutrient_detail_sheet.dart';
 
@@ -169,7 +171,12 @@ class _RecognitionResultSheetV2State
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _V2IngredientSearchSheet(),
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
+      builder: (_) => DismissibleSheetWrapper(
+        child: const _V2IngredientSearchSheet(),
+      ),
     );
     if (result != null && result.isNotEmpty && mounted) {
       setState(() => _items.addAll(result));
@@ -534,6 +541,19 @@ class _RecognitionResultSheetV2State
             l10n: l10n,
           ),
         ),
+
+        // ── Close (X) button ──────────────────────────────────────────
+        Positioned(
+          top: 20,
+          right: 8,
+          child: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            iconSize: 20,
+            color: AppColors.textMuted,
+            tooltip: 'Close',
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+        ),
       ],
         ),
       ),
@@ -782,6 +802,7 @@ class _IngredientTile extends StatefulWidget {
 class _IngredientTileState extends State<_IngredientTile>
     with SingleTickerProviderStateMixin {
   late final TextEditingController _weightCtrl;
+  late final FocusNode _weightFocus;
   late final AnimationController _expandCtrl;
   late final Animation<double> _expandAnim;
 
@@ -790,6 +811,10 @@ class _IngredientTileState extends State<_IngredientTile>
     super.initState();
     _weightCtrl = TextEditingController(
         text: widget.item.weightGrams.toStringAsFixed(0));
+    // Apply weight when the field loses focus (tap outside, keyboard dismiss).
+    // Without this `onSubmitted` only fires on the Return key — most users
+    // never press Return on a numeric keyboard, so calories never updated.
+    _weightFocus = FocusNode()..addListener(_onWeightFocusChange);
     _expandCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
@@ -797,6 +822,14 @@ class _IngredientTileState extends State<_IngredientTile>
     );
     _expandAnim =
         CurvedAnimation(parent: _expandCtrl, curve: Curves.easeOutCubic);
+  }
+
+  void _onWeightFocusChange() {
+    if (_weightFocus.hasFocus) return;
+    final w = double.tryParse(_weightCtrl.text.trim());
+    if (w != null && w > 0 && w != widget.item.weightGrams) {
+      widget.onWeightChanged(w);
+    }
   }
 
   @override
@@ -812,6 +845,9 @@ class _IngredientTileState extends State<_IngredientTile>
 
   @override
   void dispose() {
+    _weightFocus
+      ..removeListener(_onWeightFocusChange)
+      ..dispose();
     _weightCtrl.dispose();
     _expandCtrl.dispose();
     super.dispose();
@@ -823,13 +859,18 @@ class _IngredientTileState extends State<_IngredientTile>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => NutrientDetailSheet(
-        name: item.name,
-        weightGrams: item.weightGrams,
-        per100g: item.nutrientsPer100g,
-        total: item.nutrientsTotal,
-        source: item.source,
-        sourceUrl: item.sourceUrl,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
+      builder: (_) => DismissibleSheetWrapper(
+        child: NutrientDetailSheet(
+          name: item.name,
+          weightGrams: item.weightGrams,
+          per100g: item.nutrientsPer100g,
+          total: item.nutrientsTotal,
+          source: item.source,
+          sourceUrl: item.sourceUrl,
+        ),
       ),
     );
   }
@@ -913,6 +954,7 @@ class _IngredientTileState extends State<_IngredientTile>
                               height: 22,
                               child: TextField(
                                 controller: _weightCtrl,
+                                focusNode: _weightFocus,
                                 keyboardType: TextInputType.number,
                                 style: TextStyle(
                                   fontSize: 12,
@@ -1490,7 +1532,8 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
     final bottomPad = MediaQuery.of(context).padding.bottom;
     final keyboardPad = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
+    return KeyboardDismisser(
+      child: Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -1700,6 +1743,7 @@ class _V2IngredientSearchSheetState extends State<_V2IngredientSearchSheet> {
           if (_groups.isEmpty && !_loading)
             SizedBox(height: bottomPad + 16),
         ],
+      ),
       ),
     );
   }

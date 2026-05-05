@@ -416,10 +416,11 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
         },
       );
       final data = resp.data as Map<String, dynamic>;
-      await TokenStorage.save(
-        data['access_token'] as String,
-        data['refresh_token'] as String,
-      );
+      await secureTokenStorage.saveTokens(TokenPair(
+        accessToken: data['access_token'] as String,
+        refreshToken: data['refresh_token'] as String,
+        expiresAt: DateTime.now(), // unknown — trigger immediate refresh
+      ));
       AnalyticsService.loginSuccess('email');
       await _afterLogin();
     } on DioException catch (e) {
@@ -435,13 +436,15 @@ class _LoginFormState extends ConsumerState<_LoginForm> {
   }
 
   Future<void> _afterLogin() async {
-    final token = await TokenStorage.getAccess();
+    final token = await secureTokenStorage.loadAccessToken();
     if (token == null || !mounted) return;
     final hadPending = await syncOnboardingPending();
     await markOnboardingDone(ref);
     if (!mounted) return;
     if (hadPending) {
-      ref.read(showWayToGoalProvider.notifier).state = true;
+      // User just finished onboarding and saw the plan there — do NOT redirect
+      // to /way-to-goal (caused duplicate "Your plan is ready" screens).
+      // Only invalidate caches so the dashboard reflects fresh server data.
       ref.invalidate(calculationResultProvider);
       ref.invalidate(todayStatsProvider);
     }
@@ -548,10 +551,11 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
 
       final resp = await apiDio.post('/api/v1/auth/register', data: body);
       final data = resp.data as Map<String, dynamic>;
-      await TokenStorage.save(
-        data['access_token'] as String,
-        data['refresh_token'] as String,
-      );
+      await secureTokenStorage.saveTokens(TokenPair(
+        accessToken: data['access_token'] as String,
+        refreshToken: data['refresh_token'] as String,
+        expiresAt: DateTime.now(), // unknown — trigger immediate refresh
+      ));
       AnalyticsService.registerSuccess();
       await _afterLogin();
     } on DioException catch (e) {
@@ -567,13 +571,15 @@ class _RegisterFormState extends ConsumerState<_RegisterForm> {
   }
 
   Future<void> _afterLogin() async {
-    final token = await TokenStorage.getAccess();
+    final token = await secureTokenStorage.loadAccessToken();
     if (token == null || !mounted) return;
     final hadPending = await syncOnboardingPending();
     await markOnboardingDone(ref);
     if (!mounted) return;
     if (hadPending) {
-      ref.read(showWayToGoalProvider.notifier).state = true;
+      // User just finished onboarding and saw the plan there — do NOT redirect
+      // to /way-to-goal (caused duplicate "Your plan is ready" screens).
+      // Only invalidate caches so the dashboard reflects fresh server data.
       ref.invalidate(calculationResultProvider);
       ref.invalidate(todayStatsProvider);
     }

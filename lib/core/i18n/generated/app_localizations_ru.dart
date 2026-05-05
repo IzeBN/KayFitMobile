@@ -805,6 +805,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get edit_meal_err_invalid_number => 'Введите корректное число';
 
   @override
+  String get edit_meal_weight_label => 'Вес (г)';
+
+  @override
   String get addMeal_subscription_needed => 'Нужна подписка';
 
   @override
@@ -854,6 +857,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get addMeal_recognize_ai => 'Распознать с помощью AI';
+
+  @override
+  String get addMeal_not_food_title => 'Еда не найдена';
+
+  @override
+  String get addMeal_not_food_message =>
+      'На фото не удалось распознать еду. Поднесите камеру ближе к блюду и попробуйте ещё раз.';
+
+  @override
+  String get addMeal_not_food_retry => 'Попробовать ещё';
 
   @override
   String get addMeal_saving => 'Сохраняем...';
@@ -908,6 +921,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get addMeal_barcode_confirm => 'Добавить в журнал';
+
+  @override
+  String get settings_delete_account_title => 'Удалить аккаунт?';
+
+  @override
+  String get settings_delete_account_body =>
+      'Все ваши данные будут удалены без возможности восстановления. Это действие необратимо.';
+
+  @override
+  String get settings_delete_account_btn => 'Удалить аккаунт';
+
+  @override
+  String get settings_ai_consent => 'Обработка данных ИИ';
 
   @override
   String get settings_privacy_policy => 'Политика конфиденциальности';

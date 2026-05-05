@@ -10,6 +10,11 @@ import 'shared/theme/app_theme.dart';
 class KayfitApp extends ConsumerWidget {
   const KayfitApp({super.key});
 
+  static const _supportedLocales = [
+    Locale('ru'),
+    Locale('en'),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
@@ -24,16 +29,21 @@ class KayfitApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,
-      locale: const Locale('en'),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-      ],
+      supportedLocales: _supportedLocales,
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (deviceLocale == null) return const Locale('en');
+        final isSupported = supportedLocales.any(
+          (l) => l.languageCode == deviceLocale.languageCode,
+        );
+        return isSupported ? deviceLocale : const Locale('en');
+      },
     );
   }
 }

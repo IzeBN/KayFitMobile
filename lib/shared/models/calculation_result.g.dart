@@ -18,6 +18,7 @@ _$CalculationResultImpl _$$CalculationResultImplFromJson(
   daysToGoal: (json['days_to_goal'] as num?)?.toInt(),
   targetWeight: (json['target_weight'] as num?)?.toDouble(),
   chartData: json['chart_data'] as List<dynamic>?,
+  personalizedPlan: json['personalized_plan'] as String?,
 );
 
 Map<String, dynamic> _$$CalculationResultImplToJson(
@@ -32,4 +33,5 @@ Map<String, dynamic> _$$CalculationResultImplToJson(
   'days_to_goal': instance.daysToGoal,
   'target_weight': instance.targetWeight,
   'chart_data': instance.chartData,
+  'personalized_plan': instance.personalizedPlan,
 };

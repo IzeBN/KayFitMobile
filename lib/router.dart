@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/auth/auth_provider.dart';
 import 'core/ai_consent/ai_consent_provider.dart';
+import 'core/navigation/navigation_providers.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/journal/screens/journal_screen.dart';
@@ -17,21 +18,12 @@ import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/way_to_goal/screens/way_to_goal_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/ai_consent/screens/ai_consent_screen.dart';
+import 'features/kayfit2/screens/kayfit2_preview_screen.dart';
 import 'shared/widgets/bottom_nav.dart';
 
+export 'core/navigation/navigation_providers.dart';
+
 const _kOnboardingDoneKey = 'onboarding_done';
-
-// Tracks whether user has seen onboarding this session.
-// Loaded once at startup from SharedPreferences.
-final onboardingDoneProvider = StateProvider<bool>((ref) => false);
-
-/// Set to true after email auth when onboarding data was synced.
-/// Router redirects to /way-to-goal once; WayToGoalScreen clears it.
-final showWayToGoalProvider = StateProvider<bool>((ref) => false);
-
-/// Set to true when AI consent is triggered from onboarding demo.
-/// AiConsentScreen uses this to navigate back to /onboarding after consent.
-final consentFromOnboardingProvider = StateProvider<bool>((ref) => false);
 
 /// Call after successful onboarding completion to mark it done.
 Future<void> markOnboardingDone(WidgetRef ref) async {
@@ -72,7 +64,8 @@ class _RouterNotifier extends ChangeNotifier {
         loc == '/email-auth' ||
         loc == '/onboarding' ||
         loc == '/way-to-goal' ||
-        loc == '/ai-consent';
+        loc == '/ai-consent' ||
+        loc == '/kayfit2/preview';
 
     if (!isLoggedIn) {
       if (isPublic) return null;
@@ -88,8 +81,12 @@ class _RouterNotifier extends ChangeNotifier {
       return '/way-to-goal';
     }
 
-    if (isLoggedIn && aiConsent == null && !showWayToGoal &&
-        loc != '/ai-consent' && loc != '/way-to-goal') {
+    // AI consent is MANDATORY: only `true` lets the user past this gate.
+    // `null` (never answered) and `false` (declined) both redirect back.
+    // /kayfit2/preview is exempt — it's a design preview screen.
+    if (isLoggedIn && aiConsent != true && !showWayToGoal &&
+        loc != '/ai-consent' && loc != '/way-to-goal' &&
+        loc != '/kayfit2/preview') {
       return '/ai-consent';
     }
 
@@ -133,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings/goals',
         builder: (context, state) => const GoalsScreen(),
+      ),
+      GoRoute(
+        path: '/kayfit2/preview',
+        builder: (context, state) => const Kayfit2PreviewScreen(),
       ),
       GoRoute(
         path: '/meals/:id/edit',

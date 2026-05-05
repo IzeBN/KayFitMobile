@@ -151,6 +151,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: false,
       builder: (_) => _isToday
           ? const AddMealSheet()
           : AddMealSheet(mealDate: _selectedDate),

@@ -7,25 +7,103 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../core/i18n/generated/app_localizations.dart';
 
 /// Shared plan-result view used by WayToGoalScreen and OnboardingScreen (_ResultStep).
-/// Pass [footer] to inject a CTA button at the bottom.
+/// CTA buttons are owned by the parent (sticky bottom in WayToGoalScreen,
+/// onboarding scaffold in onboarding) — this widget renders only the scroll
+/// content. [bottomPadding] reserves space below the last card so a fixed
+/// footer outside this widget does not occlude content.
+/// [currentWeight] enables maintenance detection: when |current - target| < 0.5 kg
+/// the chart and days-to-goal block are hidden in favour of a maintain message.
 class PlanResultView extends StatelessWidget {
   final CalculationResult calc;
   final AppLocalizations l10n;
-  final Widget? footer;
+  final double? currentWeight;
+  final double bottomPadding;
 
   const PlanResultView({
     super.key,
     required this.calc,
     required this.l10n,
-    this.footer,
+    this.currentWeight,
+    this.bottomPadding = 24,
   });
+
+  bool get _isMaintain {
+    // Detect by calorie target vs TDEE first — handles muscle-gain or
+    // recomposition where current_weight == target_weight but the user
+    // is actually on a surplus/deficit.
+    final calDelta = (calc.targetCalories - calc.tdee).abs();
+    if (calDelta > 80) return false; // significant surplus or deficit
+    // Otherwise fall back to weight delta.
+    final tw = calc.targetWeight;
+    final cw = currentWeight;
+    if (tw == null || cw == null) return false;
+    return (tw - cw).abs() < 0.5;
+  }
+
+  /// Direction of the plan: surplus / deficit / maintain.
+  /// Computed from calorie delta relative to TDEE (matches _isMaintain).
+  _PlanDirection get _direction {
+    final delta = calc.targetCalories - calc.tdee;
+    if (delta > 80) return _PlanDirection.gain;
+    if (delta < -80) return _PlanDirection.lose;
+    return _PlanDirection.maintain;
+  }
+
+  /// Local fallback for the personalised banner: shown when the backend
+  /// hasn't returned `personalizedPlan` yet (PR-4-BE not deployed).
+  /// Direction-aware copy + protein recommendation from current weight.
+  String _localPlanFallback(bool isRu) {
+    final cw = currentWeight ?? calc.targetWeight ?? 70;
+    // Roughly 1.6 g/kg for general goals, 1.8–2.0 g/kg for muscle gain.
+    final dir = _direction;
+    final perKg = dir == _PlanDirection.gain ? 1.8 : 1.6;
+    final proteinG = (cw * perKg).round();
+    if (isRu) {
+      switch (dir) {
+        case _PlanDirection.gain:
+          return 'Набор массы: цельтесь в $proteinG г белка/день, добавьте 1–2 силовые тренировки и углеводы вокруг тренировок.';
+        case _PlanDirection.lose:
+          return 'Снижение веса: $proteinG г белка/день, овощи в каждом приёме, вода до еды — мягкий дефицит без срывов.';
+        case _PlanDirection.maintain:
+          return 'Поддержание формы: $proteinG г белка/день, сбалансированная тарелка — ½ овощи, ¼ белок, ¼ сложные углеводы.';
+      }
+    }
+    switch (dir) {
+      case _PlanDirection.gain:
+        return 'Muscle gain: aim for $proteinG g protein/day, add 1–2 strength sessions, time carbs around training.';
+      case _PlanDirection.lose:
+        return 'Weight loss: $proteinG g protein/day, veggies on every plate, water before meals — gentle deficit, no crashes.';
+      case _PlanDirection.maintain:
+        return 'Maintain: $proteinG g protein/day, balanced plate — ½ veg, ¼ protein, ¼ complex carbs.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final maintain = _isMaintain;
+    final maintainTitle = isRu ? 'Поддержание веса' : 'Weight maintenance';
+    final maintainBody = isRu
+        ? 'Текущий и целевой вес совпадают. Эти калории помогут удержать форму без потери и набора.'
+        : 'Your current and target weight match. These calories will keep you steady — no loss, no gain.';
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+      padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
       children: [
         const SizedBox(height: 24),
+
+        // ── Personalized AI plan banner (focal point — always visible) ──────
+        // Server text wins; otherwise we compute a direction-aware fallback
+        // locally so the focal banner is never empty.
+        _PersonalPlanBanner(
+          text: (calc.personalizedPlan != null &&
+                  calc.personalizedPlan!.isNotEmpty)
+              ? calc.personalizedPlan!
+              : _localPlanFallback(isRu),
+          isRu: isRu,
+        ),
+        const SizedBox(height: 12),
+
         // ── Hero gradient card ───────────────────────────────────────────────
         Container(
           width: double.infinity,
@@ -148,7 +226,43 @@ class PlanResultView extends StatelessWidget {
         // ── Scientific source citation (prominent placement) ─────────────
         _CitationCard(l10n: l10n),
 
-        if (calc.daysToGoal != null || calc.targetWeight != null) ...[
+        if (maintain) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppColors.accentSoft,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.balance_rounded,
+                    size: 22, color: AppColors.accent),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(maintainTitle,
+                          style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text)),
+                      const SizedBox(height: 4),
+                      Text(maintainBody,
+                          style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textMuted,
+                              height: 1.4)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (calc.daysToGoal != null || calc.targetWeight != null) ...[
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(18),
@@ -176,9 +290,11 @@ class PlanResultView extends StatelessWidget {
           ),
         ],
 
-        // ── Weight forecast chart ────────────────────────────────────────────
-        const SizedBox(height: 12),
-        _WeightChart(calc: calc, l10n: l10n),
+        // ── Weight forecast chart (skipped in maintain mode) ─────────────────
+        if (!maintain) ...[
+          const SizedBox(height: 12),
+          _WeightChart(calc: calc, l10n: l10n),
+        ],
 
         const SizedBox(height: 12),
 
@@ -217,12 +333,76 @@ class PlanResultView extends StatelessWidget {
         ),
 
         const SizedBox(height: 28),
-
-        ?footer,
       ],
     );
   }
 }
+
+// ── Personalized AI plan banner ─────────────────────────────────────────────
+
+class _PersonalPlanBanner extends StatelessWidget {
+  final String text;
+  final bool isRu;
+  const _PersonalPlanBanner({required this.text, required this.isRu});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = isRu ? 'Ваш персональный план' : 'Your personal plan';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C3AED), Color(0xFF3B82F6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded,
+                  size: 20, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              height: 1.35,
+              letterSpacing: -0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _PlanDirection { gain, lose, maintain }
 
 // ── Macro chip ──────────────────────────────────────────────────────────────
 
