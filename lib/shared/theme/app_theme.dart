@@ -29,9 +29,9 @@ class AppColors {
   static const text = Color(0xFF111827);
   static const textMuted = Color(0xFF6B7280);
   static const border = Color(0xFFE5E7EB);
-  static const accent = Color(0xFF16A34A);
-  static const accentSoft = Color(0xFFDCFCE7);
-  static const accentDark = Color(0xFF15803D);
+  static const accent = Color(0xFF007AFF); // Apple system blue
+  static const accentSoft = Color(0xFFDCEEFF); // blue-10 tint
+  static const accentDark = Color(0xFF0062CC); // blue-700
   static const warm = Color(0xFFEA580C);
   static const warmSoft = Color(0xFFFFEDD5);
   static const support = Color(0xFFBE185D);
