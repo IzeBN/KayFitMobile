@@ -836,7 +836,15 @@ class _IngredientTileState extends State<_IngredientTile>
   void didUpdateWidget(_IngredientTile old) {
     super.didUpdateWidget(old);
     if (old.item.weightGrams != widget.item.weightGrams) {
-      _weightCtrl.text = widget.item.weightGrams.toStringAsFixed(0);
+      // Preserve cursor when the new value already matches the field
+      // (typical onChanged round-trip — no need to disturb the user).
+      final newText = widget.item.weightGrams.toStringAsFixed(0);
+      if (_weightCtrl.text != newText) {
+        _weightCtrl.value = TextEditingValue(
+          text: newText,
+          selection: TextSelection.collapsed(offset: newText.length),
+        );
+      }
     }
     if (old.isExpanded != widget.isExpanded) {
       widget.isExpanded ? _expandCtrl.forward() : _expandCtrl.reverse();
@@ -977,6 +985,17 @@ class _IngredientTileState extends State<_IngredientTile>
                                   ),
                                   filled: false,
                                 ),
+                                // Apply on every keystroke so calories
+                                // recompute live as the user types — keyboard
+                                // dismiss / focus loss / Return all redundant
+                                // safety nets but this is the primary path.
+                                onChanged: (v) {
+                                  final w = double.tryParse(v.trim());
+                                  if (w != null && w > 0 &&
+                                      w != widget.item.weightGrams) {
+                                    widget.onWeightChanged(w);
+                                  }
+                                },
                                 onSubmitted: (v) {
                                   final w = double.tryParse(v);
                                   if (w != null && w > 0) {
