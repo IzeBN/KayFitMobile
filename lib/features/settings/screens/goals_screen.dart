@@ -96,9 +96,16 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen>
         'fat': int.parse(_fatCtrl.text),
         'carbs': int.parse(_carbsCtrl.text),
       });
-      // Invalidate the stats provider so the dashboard rings re-fetch goals
-      // from the backend on the next frame instead of serving stale cache.
+      // Force a refetch of stats from the backend BEFORE popping back, so the
+      // dashboard rings render the new goals on the very next frame instead of
+      // flashing stale values while the refetch is still in flight.
       ref.invalidate(todayStatsProvider);
+      try {
+        await ref.read(todayStatsProvider.future);
+      } catch (_) {
+        // Refetch failed — invalidation alone is enough, UI will retry when
+        // it next subscribes. Don't block the save success path.
+      }
       AnalyticsService.goalsSaved();
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
