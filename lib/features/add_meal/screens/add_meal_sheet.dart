@@ -18,7 +18,12 @@ import '../../../shared/utils/nutrient_parser.dart';
 import '../../../shared/widgets/keyboard_dismisser.dart';
 import 'package:dio/dio.dart';
 import 'barcode_scanner_screen_v2.dart';
+import 'recognition_result_sheet_kf2.dart';
 import 'recognition_result_sheet_v2.dart';
+
+// KF2_PREVIEW: set to false via --dart-define=KF2_PREVIEW=false to fall back.
+const _useKF2 =
+    bool.fromEnvironment('KF2_PREVIEW', defaultValue: true);
 
 enum _InputMode { choose, text, voice, photo }
 enum _LoadingType { none, voice, photo, parsing }
@@ -175,7 +180,14 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
             initialChildSize: 0.92,
             minChildSize: 0.5,
             maxChildSize: 0.95,
-            builder: (_, __) => RecognitionResultSheetV2(
+            builder: (_, __) => _useKF2
+                ? RecognitionResultSheetKF2(
+                    dishName: summaryName,
+                    ingredients: v2items,
+                    mealDate: widget.mealDate,
+                    originalText: text,
+                  )
+                : RecognitionResultSheetV2(
               dishName: summaryName,
               ingredients: v2items,
               mealDate: widget.mealDate,
@@ -370,7 +382,14 @@ class _AddMealSheetState extends ConsumerState<AddMealSheet>
             initialChildSize: 0.92,
             minChildSize: 0.5,
             maxChildSize: 0.95,
-            builder: (_, __) => RecognitionResultSheetV2(
+            builder: (_, __) => _useKF2
+                ? RecognitionResultSheetKF2(
+                    dishName: dishName,
+                    ingredients: v2items,
+                    mealDate: widget.mealDate,
+                    originalText: null,
+                  )
+                : RecognitionResultSheetV2(
               dishName: dishName,
               ingredients: v2items,
               mealDate: widget.mealDate,

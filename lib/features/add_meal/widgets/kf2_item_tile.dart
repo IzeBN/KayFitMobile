@@ -1,0 +1,597 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../shared/models/ingredient_v2.dart';
+import '../../../shared/models/nutrients_v2.dart';
+import '../../../shared/theme/kayfit2_theme.dart';
+
+/// A single ingredient row in the KF2 preview-edit sheet.
+///
+/// Shows: item name + kcal on the first row; weight pill + P·F·C on the
+/// second row; ✏ and × action icons on the right.
+///
+/// Tapping ✏ reveals inline P/F/C TextFields that recalculate kcal by the
+/// 4/9/4 rule. Tapping × removes the item (caller handles list mutation).
+class KF2ItemTile extends StatefulWidget {
+  const KF2ItemTile({
+    super.key,
+    required this.item,
+    required this.onWeightChanged,
+    required this.onMacrosChanged,
+    required this.onDelete,
+    required this.theme,
+  });
+
+  final IngredientV2 item;
+  final ValueChanged<double> onWeightChanged;
+
+  /// Called with (protein, fat, carbs) in grams when the user edits macros.
+  final void Function(double p, double f, double c) onMacrosChanged;
+  final VoidCallback onDelete;
+  final K2Theme theme;
+
+  @override
+  State<KF2ItemTile> createState() => _KF2ItemTileState();
+}
+
+class _KF2ItemTileState extends State<KF2ItemTile> {
+  late final TextEditingController _weightCtrl;
+  late final FocusNode _weightFocus;
+  Timer? _debounce;
+
+  bool _editingMacros = false;
+
+  late final TextEditingController _proteinCtrl;
+  late final TextEditingController _fatCtrl;
+  late final TextEditingController _carbsCtrl;
+  late final FocusNode _proteinFocus;
+  late final FocusNode _fatFocus;
+  late final FocusNode _carbsFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    final w = widget.item.weightGrams;
+    _weightCtrl = TextEditingController(text: w.toStringAsFixed(0));
+    _weightFocus = FocusNode()..addListener(_onWeightFocusChange);
+
+    final n = widget.item.nutrientsTotal;
+    _proteinCtrl =
+        TextEditingController(text: n.protein.toStringAsFixed(1));
+    _fatCtrl = TextEditingController(text: n.fat.toStringAsFixed(1));
+    _carbsCtrl = TextEditingController(text: n.carbs.toStringAsFixed(1));
+
+    _proteinFocus = FocusNode();
+    _fatFocus = FocusNode();
+    _carbsFocus = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(KF2ItemTile old) {
+    super.didUpdateWidget(old);
+    // Keep weight field in sync when weight changes externally (e.g. from
+    // another source), but preserve cursor position.
+    if (old.item.weightGrams != widget.item.weightGrams &&
+        !_weightFocus.hasFocus) {
+      final newText = widget.item.weightGrams.toStringAsFixed(0);
+      if (_weightCtrl.text != newText) {
+        _weightCtrl.value = TextEditingValue(
+          text: newText,
+          selection: TextSelection.collapsed(offset: newText.length),
+        );
+      }
+    }
+    // Keep macro fields in sync when macros change externally.
+    if (!_editingMacros) {
+      final n = widget.item.nutrientsTotal;
+      _syncMacroField(_proteinCtrl, n.protein);
+      _syncMacroField(_fatCtrl, n.fat);
+      _syncMacroField(_carbsCtrl, n.carbs);
+    }
+  }
+
+  void _syncMacroField(TextEditingController ctrl, double value) {
+    final newText = value.toStringAsFixed(1);
+    if (ctrl.text != newText) {
+      ctrl.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _weightFocus
+      ..removeListener(_onWeightFocusChange)
+      ..dispose();
+    _weightCtrl.dispose();
+    _proteinCtrl.dispose();
+    _fatCtrl.dispose();
+    _carbsCtrl.dispose();
+    _proteinFocus.dispose();
+    _fatFocus.dispose();
+    _carbsFocus.dispose();
+    super.dispose();
+  }
+
+  void _onWeightFocusChange() {
+    if (_weightFocus.hasFocus) return;
+    final w = double.tryParse(_weightCtrl.text.trim());
+    if (w != null && w > 0 && w != widget.item.weightGrams) {
+      widget.onWeightChanged(w);
+    }
+  }
+
+  void _onWeightChanged(String v) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final w = double.tryParse(v.trim());
+      if (w != null && w > 0 && w != widget.item.weightGrams) {
+        widget.onWeightChanged(w);
+      }
+    });
+  }
+
+  void _onMacroChanged() {
+    final p = double.tryParse(_proteinCtrl.text.trim()) ?? 0;
+    final f = double.tryParse(_fatCtrl.text.trim()) ?? 0;
+    final c = double.tryParse(_carbsCtrl.text.trim()) ?? 0;
+    widget.onMacrosChanged(p.clamp(0, double.infinity),
+        f.clamp(0, double.infinity), c.clamp(0, double.infinity));
+  }
+
+  void _toggleMacroEdit() {
+    setState(() => _editingMacros = !_editingMacros);
+    if (_editingMacros) {
+      Future.delayed(const Duration(milliseconds: 80),
+          () => _proteinFocus.requestFocus());
+    }
+  }
+
+  bool get _weightInvalid {
+    final w = double.tryParse(_weightCtrl.text.trim());
+    return w == null || w <= 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final n = item.nutrientsTotal;
+    final t = widget.theme;
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      child: Container(
+        decoration: BoxDecoration(
+          color: t.card,
+          border: Border(
+            bottom: BorderSide(color: t.hairline),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Row 1: name · kcal · actions ────────────────────────────
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    item.name,
+                    style: TextStyle(
+                      fontFamily: K2Fonts.sans,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: t.fg,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  n.calories.toStringAsFixed(0),
+                  style: TextStyle(
+                    fontFamily: K2Fonts.mono,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: t.fgDim,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _toggleMacroEdit,
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: _editingMacros ? K2Colors.accent : t.fgMute,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    widget.onDelete();
+                  },
+                  child: const Icon(
+                    Icons.close,
+                    size: 18,
+                    color: K2Colors.error,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // ── Row 2: weight pill · P·F·C ───────────────────────────────
+            Row(
+              children: [
+                _WeightPill(
+                  ctrl: _weightCtrl,
+                  focus: _weightFocus,
+                  isInvalid: _weightInvalid,
+                  onChanged: _onWeightChanged,
+                  onSubmitted: (v) {
+                    final w = double.tryParse(v);
+                    if (w != null && w > 0) widget.onWeightChanged(w);
+                    FocusScope.of(context).unfocus();
+                  },
+                  theme: t,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  ' g',
+                  style: TextStyle(
+                    fontFamily: K2Fonts.mono,
+                    fontSize: 12,
+                    color: t.fgMute,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'P ${n.protein.toStringAsFixed(0)} · '
+                  'F ${n.fat.toStringAsFixed(0)} · '
+                  'C ${n.carbs.toStringAsFixed(0)}',
+                  style: TextStyle(
+                    fontFamily: K2Fonts.mono,
+                    fontSize: 11,
+                    color: t.fgMute,
+                  ),
+                ),
+              ],
+            ),
+            // ── Macro inline edit ────────────────────────────────────────
+            if (_editingMacros) ...[
+              const SizedBox(height: 10),
+              _KF2MacroInlineEdit(
+                proteinCtrl: _proteinCtrl,
+                fatCtrl: _fatCtrl,
+                carbsCtrl: _carbsCtrl,
+                proteinFocus: _proteinFocus,
+                fatFocus: _fatFocus,
+                carbsFocus: _carbsFocus,
+                onChanged: _onMacroChanged,
+                onDone: () => setState(() => _editingMacros = false),
+                theme: t,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Weight pill ──────────────────────────────────────────────────────────────
+
+class _WeightPill extends StatelessWidget {
+  const _WeightPill({
+    required this.ctrl,
+    required this.focus,
+    required this.isInvalid,
+    required this.onChanged,
+    required this.onSubmitted,
+    required this.theme,
+  });
+
+  final TextEditingController ctrl;
+  final FocusNode focus;
+  final bool isInvalid;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
+  final K2Theme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor =
+        isInvalid && ctrl.text.isNotEmpty ? K2Colors.error : theme.border;
+
+    return Container(
+      width: 52,
+      height: 28,
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Center(
+        child: TextField(
+          controller: ctrl,
+          focusNode: focus,
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: K2Fonts.mono,
+            fontSize: 12,
+            color: theme.fg,
+          ),
+          decoration: const InputDecoration(
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            border: InputBorder.none,
+          ),
+          onChanged: onChanged,
+          onSubmitted: onSubmitted,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Macro inline edit ────────────────────────────────────────────────────────
+
+class _KF2MacroInlineEdit extends StatelessWidget {
+  const _KF2MacroInlineEdit({
+    required this.proteinCtrl,
+    required this.fatCtrl,
+    required this.carbsCtrl,
+    required this.proteinFocus,
+    required this.fatFocus,
+    required this.carbsFocus,
+    required this.onChanged,
+    required this.onDone,
+    required this.theme,
+  });
+
+  final TextEditingController proteinCtrl;
+  final TextEditingController fatCtrl;
+  final TextEditingController carbsCtrl;
+  final FocusNode proteinFocus;
+  final FocusNode fatFocus;
+  final FocusNode carbsFocus;
+  final VoidCallback onChanged;
+  final VoidCallback onDone;
+  final K2Theme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _MacroField(
+              label: 'PROTEIN',
+              ctrl: proteinCtrl,
+              focus: proteinFocus,
+              onChanged: (_) => onChanged(),
+              theme: theme,
+            ),
+            const SizedBox(width: 8),
+            _MacroField(
+              label: 'FAT',
+              ctrl: fatCtrl,
+              focus: fatFocus,
+              onChanged: (_) => onChanged(),
+              theme: theme,
+            ),
+            const SizedBox(width: 8),
+            _MacroField(
+              label: 'CARBS',
+              ctrl: carbsCtrl,
+              focus: carbsFocus,
+              onChanged: (_) => onChanged(),
+              theme: theme,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            onDone();
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: theme.fg,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'Done',
+              style: TextStyle(
+                fontFamily: K2Fonts.sans,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: theme.bg,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MacroField extends StatelessWidget {
+  const _MacroField({
+    required this.label,
+    required this.ctrl,
+    required this.focus,
+    required this.onChanged,
+    required this.theme,
+  });
+
+  final String label;
+  final TextEditingController ctrl;
+  final FocusNode focus;
+  final ValueChanged<String> onChanged;
+  final K2Theme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: K2Fonts.sans,
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+              color: theme.fgDim,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Container(
+            height: 32,
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.border),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Center(
+              child: TextField(
+                controller: ctrl,
+                focusNode: focus,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: K2Fonts.mono,
+                  fontSize: 12,
+                  color: theme.fg,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                  border: InputBorder.none,
+                ),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Builds a [NutrientsV2] instance with updated macros, recalculating
+/// [NutrientsV2.calories] using the 4/9/4 rule and back-computing
+/// [IngredientV2.nutrientsPer100g] so that future [IngredientV2.withWeight]
+/// calls remain accurate.
+IngredientV2 rebuildIngredientMacros(
+  IngredientV2 item,
+  double protein,
+  double fat,
+  double carbs,
+) {
+  final calories = protein * 4 + fat * 9 + carbs * 4;
+  final weight = item.weightGrams;
+  final ratio = weight > 0 ? weight / 100.0 : 1.0;
+
+  final newTotal = NutrientsV2(
+    calories: calories,
+    protein: protein,
+    fat: fat,
+    carbs: carbs,
+    // Preserve optional fields scaled down from existing total.
+    fiber: item.nutrientsTotal.fiber,
+    sugar: item.nutrientsTotal.sugar,
+    sugarAlcohols: item.nutrientsTotal.sugarAlcohols,
+    netCarbs: item.nutrientsTotal.netCarbs,
+    saturatedFat: item.nutrientsTotal.saturatedFat,
+    monounsaturatedFat: item.nutrientsTotal.monounsaturatedFat,
+    polyunsaturatedFat: item.nutrientsTotal.polyunsaturatedFat,
+    sodiumMg: item.nutrientsTotal.sodiumMg,
+    cholesterolMg: item.nutrientsTotal.cholesterolMg,
+    potassiumMg: item.nutrientsTotal.potassiumMg,
+    calciumMg: item.nutrientsTotal.calciumMg,
+    ironMg: item.nutrientsTotal.ironMg,
+    vitaminAMcg: item.nutrientsTotal.vitaminAMcg,
+    vitaminCMg: item.nutrientsTotal.vitaminCMg,
+    vitaminDMcg: item.nutrientsTotal.vitaminDMcg,
+    glycemicIndex: item.nutrientsPer100g.glycemicIndex,
+    glycemicIndexCategory: item.nutrientsPer100g.glycemicIndexCategory,
+  );
+
+  // Back-compute per-100g so withWeight stays accurate.
+  final newPer100 = NutrientsV2(
+    calories: calories / ratio,
+    protein: protein / ratio,
+    fat: fat / ratio,
+    carbs: carbs / ratio,
+    fiber: item.nutrientsTotal.fiber != null
+        ? item.nutrientsTotal.fiber! / ratio
+        : null,
+    sugar: item.nutrientsTotal.sugar != null
+        ? item.nutrientsTotal.sugar! / ratio
+        : null,
+    sugarAlcohols: item.nutrientsTotal.sugarAlcohols != null
+        ? item.nutrientsTotal.sugarAlcohols! / ratio
+        : null,
+    netCarbs: item.nutrientsTotal.netCarbs != null
+        ? item.nutrientsTotal.netCarbs! / ratio
+        : null,
+    saturatedFat: item.nutrientsTotal.saturatedFat != null
+        ? item.nutrientsTotal.saturatedFat! / ratio
+        : null,
+    monounsaturatedFat: item.nutrientsTotal.monounsaturatedFat != null
+        ? item.nutrientsTotal.monounsaturatedFat! / ratio
+        : null,
+    polyunsaturatedFat: item.nutrientsTotal.polyunsaturatedFat != null
+        ? item.nutrientsTotal.polyunsaturatedFat! / ratio
+        : null,
+    sodiumMg: item.nutrientsTotal.sodiumMg != null
+        ? item.nutrientsTotal.sodiumMg! / ratio
+        : null,
+    cholesterolMg: item.nutrientsTotal.cholesterolMg != null
+        ? item.nutrientsTotal.cholesterolMg! / ratio
+        : null,
+    potassiumMg: item.nutrientsTotal.potassiumMg != null
+        ? item.nutrientsTotal.potassiumMg! / ratio
+        : null,
+    calciumMg: item.nutrientsTotal.calciumMg != null
+        ? item.nutrientsTotal.calciumMg! / ratio
+        : null,
+    ironMg: item.nutrientsTotal.ironMg != null
+        ? item.nutrientsTotal.ironMg! / ratio
+        : null,
+    vitaminAMcg: item.nutrientsTotal.vitaminAMcg != null
+        ? item.nutrientsTotal.vitaminAMcg! / ratio
+        : null,
+    vitaminCMg: item.nutrientsTotal.vitaminCMg != null
+        ? item.nutrientsTotal.vitaminCMg! / ratio
+        : null,
+    vitaminDMcg: item.nutrientsTotal.vitaminDMcg != null
+        ? item.nutrientsTotal.vitaminDMcg! / ratio
+        : null,
+    glycemicIndex: item.nutrientsPer100g.glycemicIndex,
+    glycemicIndexCategory: item.nutrientsPer100g.glycemicIndexCategory,
+  );
+
+  return item.copyWith(
+    nutrientsTotal: newTotal,
+    nutrientsPer100g: newPer100,
+  );
+}
