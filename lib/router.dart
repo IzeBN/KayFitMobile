@@ -18,10 +18,15 @@ import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/way_to_goal/screens/way_to_goal_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/ai_consent/screens/ai_consent_screen.dart';
+import 'features/journal/screens/journal_v2_screen.dart';
 import 'features/kayfit2/screens/kayfit2_preview_screen.dart';
 import 'shared/widgets/bottom_nav.dart';
 
 export 'core/navigation/navigation_providers.dart';
+
+// Feature flag: enable the KF2 Journal redesign screen.
+// Activate with: flutter run --dart-define=KF2_JOURNAL=true
+const _kfJournal = bool.fromEnvironment('KF2_JOURNAL', defaultValue: false);
 
 const _kOnboardingDoneKey = 'onboarding_done';
 
@@ -74,11 +79,16 @@ class _RouterNotifier extends ChangeNotifier {
 
     // Logged in
     if (loc == '/login' || loc == '/email-auth' || loc == '/onboarding') {
-      return '/';
+      return _kfJournal ? '/journal-v2' : '/';
     }
 
     if (showWayToGoal && loc != '/way-to-goal') {
       return '/way-to-goal';
+    }
+
+    // KF2 Journal flag: redirect home to the V2 redesign.
+    if (_kfJournal && loc == '/') {
+      return '/journal-v2';
     }
 
     // AI consent is MANDATORY: only `true` lets the user past this gate.
@@ -134,6 +144,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/kayfit2/preview',
         builder: (context, state) => const Kayfit2PreviewScreen(),
+      ),
+      GoRoute(
+        path: '/journal-v2',
+        builder: (context, state) => const JournalV2Screen(),
       ),
       GoRoute(
         path: '/meals/:id/edit',
