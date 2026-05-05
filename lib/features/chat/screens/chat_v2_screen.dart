@@ -17,11 +17,15 @@
 
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
@@ -30,6 +34,12 @@ import '../../../features/add_meal/screens/barcode_scanner_screen_v2.dart';
 import '../../../shared/theme/kayfit2_theme.dart';
 import '../../../shared/widgets/kayfit2_tab_bar.dart';
 import '../models/chat_message.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Voice recorder state
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum _VoiceState { idle, recording, transcribing }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Thinking-step model
@@ -71,6 +81,11 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
   bool _isLoading = false;
   bool _isSending = false;
 
+  // Voice recording
+  final _recorder = AudioRecorder();
+  _VoiceState _voiceState = _VoiceState.idle;
+  String? _recordPath;
+
   // Thinking step labels — mirrors the JSX prototype sequence.
   static const _kThinkingSteps = [
     'parsing your message',
@@ -92,6 +107,7 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
   void dispose() {
     _scrollController.dispose();
     _textController.dispose();
+    _recorder.dispose();
     super.dispose();
   }
 
@@ -255,15 +271,120 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
     }
   }
 
-  /// Shows a coming-soon snackbar for voice input.
-  void _handleMic() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Voice input coming soon'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+  /// Handles mic button tap: starts recording, or stops and transcribes.
+  Future<void> _handleMic() async {
+    if (_voiceState == _VoiceState.transcribing) return;
+
+    if (_voiceState == _VoiceState.recording) {
+      await _stopAndTranscribe();
+    } else {
+      await _startRecording();
+    }
+  }
+
+  Future<void> _startRecording() async {
+    final status = await Permission.microphone.request();
+    if (!mounted) return;
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Microphone permission denied'),
+          backgroundColor: K2Colors.error,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          action: status.isPermanentlyDenied
+              ? SnackBarAction(
+                  label: 'Settings',
+                  textColor: Colors.white,
+                  onPressed: openAppSettings,
+                )
+              : null,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final dir = await getTemporaryDirectory();
+      _recordPath = '${dir.path}/chat_voice.m4a';
+      await _recorder.start(
+        const RecordConfig(encoder: AudioEncoder.aacLc),
+        path: _recordPath!,
+      );
+      HapticFeedback.lightImpact();
+      if (mounted) setState(() => _voiceState = _VoiceState.recording);
+    } on Exception catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not start recording: $e'),
+            backgroundColor: K2Colors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _stopAndTranscribe() async {
+    await _recorder.stop();
+    if (!mounted) return;
+    setState(() => _voiceState = _VoiceState.transcribing);
+    HapticFeedback.lightImpact();
+
+    try {
+      final lang = Localizations.localeOf(context).languageCode;
+      final form = FormData.fromMap({
+        'audio': await MultipartFile.fromFile(
+          _recordPath!,
+          filename: 'voice.m4a',
+        ),
+      });
+      final resp =
+          await apiDio.post('/api/transcribe?language=$lang', data: form);
+      final raw = resp.data;
+      final text = raw is Map
+          ? (raw['text'] as String? ?? '')
+          : (raw?.toString() ?? '');
+
+      if (!mounted) return;
+      if (text.isNotEmpty) {
+        _textController.text = text;
+        // Position cursor at end so user can review before sending.
+        _textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: text.length),
+        );
+        // Auto-send the transcribed text through the normal send path.
+        await _send();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not transcribe audio. Please try again.'),
+            backgroundColor: K2Colors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transcription failed: $e'),
+            backgroundColor: K2Colors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _voiceState = _VoiceState.idle);
+    }
   }
 
   /// Opens the legacy barcode scanner via Navigator (no GoRouter route exists).
@@ -339,6 +460,7 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
               onCamera: _handleCamera,
               onMic: _handleMic,
               onBarcode: _handleBarcode,
+              voiceState: _voiceState,
             ),
 
             // ── Input row ──────────────────────────────────────────────────
@@ -832,46 +954,185 @@ class _AttachToolbar extends StatelessWidget {
     required this.onCamera,
     required this.onMic,
     required this.onBarcode,
+    required this.voiceState,
   });
 
   final K2Theme theme;
   final VoidCallback onCamera;
-  final VoidCallback onMic;
+  final Future<void> Function() onMic;
   final VoidCallback onBarcode;
+  final _VoiceState voiceState;
 
   @override
   Widget build(BuildContext context) {
     final t = theme;
-    final buttons = <(IconData, VoidCallback)>[
-      (Icons.camera_alt_outlined, onCamera),
-      (Icons.mic_none_rounded, onMic),
-      (Icons.barcode_reader, onBarcode),
-    ];
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       color: t.bg,
       child: Row(
         children: [
-          for (final (icon, handler) in buttons)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: GestureDetector(
-                onTap: handler,
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: t.border, width: 0.5),
-                    color: t.surface,
-                  ),
-                  child: Icon(icon, size: 15, color: t.fg),
+          // Camera button
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: GestureDetector(
+              onTap: onCamera,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: t.border, width: 0.5),
+                  color: t.surface,
                 ),
+                child: Icon(Icons.camera_alt_outlined, size: 15, color: t.fg),
               ),
             ),
+          ),
+
+          // Mic button — reflects voice state
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: GestureDetector(
+              onTap: voiceState == _VoiceState.transcribing ? null : onMic,
+              child: _MicButton(theme: t, voiceState: voiceState),
+            ),
+          ),
+
+          // Barcode button
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: GestureDetector(
+              onTap: onBarcode,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: t.border, width: 0.5),
+                  color: t.surface,
+                ),
+                child:
+                    Icon(Icons.barcode_reader, size: 15, color: t.fg),
+              ),
+            ),
+          ),
+
+          // "Recording…" / "Transcribing…" label next to mic
+          if (voiceState != _VoiceState.idle) ...[
+            Text(
+              voiceState == _VoiceState.recording
+                  ? 'Recording…'
+                  : 'Transcribing…',
+              style: TextStyle(
+                fontFamily: K2Fonts.mono,
+                fontSize: 11,
+                color: voiceState == _VoiceState.recording
+                    ? K2Colors.error
+                    : t.fgDim,
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// Animated mic button that pulses red while recording and shows a spinner
+/// while transcribing.
+class _MicButton extends StatefulWidget {
+  const _MicButton({required this.theme, required this.voiceState});
+
+  final K2Theme theme;
+  final _VoiceState voiceState;
+
+  @override
+  State<_MicButton> createState() => _MicButtonState();
+}
+
+class _MicButtonState extends State<_MicButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(_MicButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.voiceState != widget.voiceState) _syncAnimation();
+  }
+
+  void _syncAnimation() {
+    if (widget.voiceState == _VoiceState.recording) {
+      _pulseCtrl.repeat(reverse: true);
+    } else {
+      _pulseCtrl.stop();
+      _pulseCtrl.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = widget.theme;
+    final isRecording = widget.voiceState == _VoiceState.recording;
+    final isTranscribing = widget.voiceState == _VoiceState.transcribing;
+
+    return AnimatedBuilder(
+      animation: _pulseCtrl,
+      builder: (context, child) {
+        final scale = isRecording ? (1.0 + 0.12 * _pulseCtrl.value) : 1.0;
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isRecording
+                    ? K2Colors.error
+                    : isTranscribing
+                        ? t.fgDim
+                        : t.border,
+                width: isRecording ? 1.5 : 0.5,
+              ),
+              color: isRecording
+                  ? K2Colors.error.withValues(alpha: 0.12)
+                  : t.surface,
+            ),
+            child: isTranscribing
+                ? Padding(
+                    padding: const EdgeInsets.all(9),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: t.fgDim,
+                    ),
+                  )
+                : Icon(
+                    isRecording
+                        ? Icons.stop_rounded
+                        : Icons.mic_none_rounded,
+                    size: 15,
+                    color: isRecording ? K2Colors.error : t.fg,
+                  ),
+          ),
+        );
+      },
     );
   }
 }
