@@ -272,21 +272,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                               message: msg,
                               isNewest: index == _messages.length - 1,
                             );
-                            if (msg.role == 'assistant' &&
-                                !msg.isLoading &&
-                                _isFoodConfirmation(msg.content)) {
-                              final userMsg = _precedingUserMessage(index);
-                              if (userMsg != null) {
+                            if (msg.role == 'assistant' && !msg.isLoading) {
+                              if (msg.mealAdded != null) {
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     bubble,
-                                    _CorrectionChip(
-                                      onTap: () => _correctMessage(userMsg),
-                                    ),
+                                    _MealAddedBadge(meal: msg.mealAdded!),
                                   ],
                                 );
+                              }
+                              if (_isFoodConfirmation(msg.content)) {
+                                final userMsg = _precedingUserMessage(index);
+                                if (userMsg != null) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      bubble,
+                                      _CorrectionChip(
+                                        onTap: () => _correctMessage(userMsg),
+                                      ),
+                                    ],
+                                  );
+                                }
                               }
                             }
                             return bubble;
@@ -1072,6 +1082,45 @@ class _ChatDisclaimerBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Meal added badge — shown when AI auto-logged a meal to journal
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MealAddedBadge extends StatelessWidget {
+  final MealAdded meal;
+  const _MealAddedBadge({required this.meal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 44, top: 2, bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCFCE7),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF86EFAC)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle_rounded, size: 13, color: Color(0xFF16A34A)),
+            const SizedBox(width: 5),
+            Text(
+              'Добавлено: ${meal.name} — ${meal.calories.toStringAsFixed(0)} ккал',
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF15803D),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
