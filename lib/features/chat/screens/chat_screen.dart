@@ -26,6 +26,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     with TickerProviderStateMixin {
   final _scrollController = ScrollController();
   final _textController = TextEditingController();
+  final _inputFocusNode = FocusNode();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   bool _isSending = false;
@@ -51,6 +52,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   void dispose() {
     _scrollController.dispose();
     _textController.dispose();
+    _inputFocusNode.dispose();
     _headerCtrl.dispose();
     super.dispose();
   }
@@ -171,6 +173,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _sendMessage();
   }
 
+  bool _isFoodConfirmation(String content) {
+    final lower = content.toLowerCase();
+    return lower.contains('ккал') || lower.contains('kcal');
+  }
+
+  String? _precedingUserMessage(int assistantIndex) {
+    for (var i = assistantIndex - 1; i >= 0; i--) {
+      if (_messages[i].role == 'user') return _messages[i].content;
+    }
+    return null;
+  }
+
+  void _correctMessage(String text) {
+    _textController.text = text;
+    _inputFocusNode.requestFocus();
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -247,16 +266,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                               ScrollViewKeyboardDismissBehavior.onDrag,
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           itemCount: _messages.length,
-                          itemBuilder: (context, index) => _AnimatedBubble(
-                            message: _messages[index],
-                            isNewest: index == _messages.length - 1,
-                          ),
+                          itemBuilder: (context, index) {
+                            final msg = _messages[index];
+                            final bubble = _AnimatedBubble(
+                              message: msg,
+                              isNewest: index == _messages.length - 1,
+                            );
+                            if (msg.role == 'assistant' &&
+                                !msg.isLoading &&
+                                _isFoodConfirmation(msg.content)) {
+                              final userMsg = _precedingUserMessage(index);
+                              if (userMsg != null) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    bubble,
+                                    _CorrectionChip(
+                                      onTap: () => _correctMessage(userMsg),
+                                    ),
+                                  ],
+                                );
+                              }
+                            }
+                            return bubble;
+                          },
                         ),
             ),
 
             // ── Input row ───────────────────────────────────────────────
             _InputRow(
               controller: _textController,
+              focusNode: _inputFocusNode,
               isSending: _isSending,
               hint: l10n.chat_input_hint,
               onSend: _sendMessage,
@@ -758,7 +799,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, __) {
+      builder: (context, child) {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(3, (i) {
@@ -792,12 +833,14 @@ class _TypingIndicatorState extends State<_TypingIndicator>
 
 class _InputRow extends StatefulWidget {
   final TextEditingController controller;
+  final FocusNode focusNode;
   final bool isSending;
   final String hint;
   final VoidCallback onSend;
 
   const _InputRow({
     required this.controller,
+    required this.focusNode,
     required this.isSending,
     required this.hint,
     required this.onSend,
@@ -879,6 +922,7 @@ class _InputRowState extends State<_InputRow>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               child: TextField(
                 controller: widget.controller,
+                focusNode: widget.focusNode,
                 minLines: 1,
                 maxLines: 4,
                 textCapitalization: TextCapitalization.sentences,
@@ -1028,6 +1072,57 @@ class _ChatDisclaimerBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Correction chip — shown after food-confirmation AI messages
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CorrectionChip extends StatefulWidget {
+  final VoidCallback onTap;
+  const _CorrectionChip({required this.onTap});
+
+  @override
+  State<_CorrectionChip> createState() => _CorrectionChipState();
+}
+
+class _CorrectionChipState extends State<_CorrectionChip> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 44, top: 2, bottom: 8),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) {
+          setState(() => _pressed = false);
+          widget.onTap();
+        },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: _pressed ? AppColors.accentSoft : AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(Icons.edit_outlined, size: 12, color: AppColors.textMuted),
+              SizedBox(width: 4),
+              Text(
+                'Скорректировать',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
