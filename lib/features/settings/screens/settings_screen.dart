@@ -1,15 +1,21 @@
 import 'dart:async';
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../body_form/body_form_prefs.dart';
+import '../../body_form/i18n/body_form_strings.dart';
+import '../../body_form/screens/body_form_screen.dart';
 import 'document_screen.dart';
 
 // Provider that surfaces the singleton Dio instance to the settings screen
@@ -43,6 +49,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void dispose() {
     _staggerCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _openBodyForm(BuildContext context) async {
+    final saved = await BodyFormPrefs.load();
+    final prefs = await SharedPreferences.getInstance();
+    var gender = '';
+    final raw = prefs.getString('onboarding_answers');
+    if (raw != null) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          gender = decoded['gender'] as String? ?? '';
+        }
+      } on FormatException {
+        // Malformed JSON — fall back to empty gender (male assets).
+      }
+    }
+    if (!context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => BodyFormScreen(
+          isOnboarding: false,
+          gender: gender,
+          initialCurrent: saved?.current ?? 0,
+          initialDesired: saved?.desired ?? 0,
+        ),
+      ),
+    );
   }
 
   Animation<double> _fadeFor(int i) => CurvedAnimation(
@@ -86,6 +121,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             AnalyticsService.settingsGoalsTapped();
             context.push('/settings/goals');
           },
+        ),
+        _ItemDivider(),
+        _NavItem(
+          icon: Icons.accessibility_new_rounded,
+          iconColor: AppColors.accent,
+          iconBg: AppColors.accentSoft,
+          label: BodyFormStrings.settingsLabel(isRu),
+          onTap: () => _openBodyForm(context),
         ),
         _ItemDivider(),
         _NavItem(
@@ -261,7 +304,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             onPressed: () async {
               AnalyticsService.deleteAccountConfirmed();
               Navigator.pop(ctx);
-              await ref.read(authNotifierProvider.notifier).deleteAccount();
+              try {
+                await ref.read(authNotifierProvider.notifier).deleteAccount();
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.error_unknown)),
+                  );
+                }
+              }
             },
             child: Text(
               l10n.common_delete,

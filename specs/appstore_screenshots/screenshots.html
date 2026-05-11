@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Kayfit · Скриншоты для App Store</title>
+<meta name="viewport" content="width=1290"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  /* ─── Tokens ─────────────────────────────────────────────────────── */
+  :root {
+    --blue: #2563EB;
+    --blue-deep: #1E40AF;
+    --bezel: #131316;
+    --screen: #FFFFFF;
+    --fg: #0A0A0A;
+    --fg-dim: #737373;
+    --fg-mute: #A3A3A3;
+    --hairline: #EFEFEF;
+    --check: #2563EB;
+    --ring-kcal-from: #FF2D55;
+    --ring-kcal-to: #FF375F;
+    --ring-prot-from: #A6FF00;
+    --ring-prot-to: #76E60E;
+    --ring-carb-from: #1ECEDA;
+    --ring-carb-to: #3FE9FF;
+    --ring-fat-from: #FF9500;
+    --ring-fat-to: #FFCC00;
+    --shadow-card: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-phone: 0 30px 80px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #1A1A1A; font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+
+  /* App Store iPhone 6.9" Display: 1320 × 2868 px (primary requirement
+     for new submissions per Apple as of 2024 — iPhone 16 Pro Max class). */
+  .frame {
+    width: 1320px;
+    height: 2868px;
+    background: var(--blue);
+    position: relative;
+    overflow: hidden;
+    color: white;
+    margin: 24px auto;
+    box-shadow: 0 0 0 8px #000;
+  }
+
+  /* ─── Title ──────────────────────────────────────────────────────── */
+  .frame-title {
+    position: absolute;
+    top: 200px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    color: white;
+    z-index: 2;
+  }
+  .frame-title .t1 { font-size: 130px; display: block; }
+  .frame-title .t2 { font-size: 130px; display: block; }
+  .frame-title .sub { display: block; font-size: 32px; font-weight: 500; opacity: 0.85; margin-top: 28px; letter-spacing: 0; line-height: 1.25; padding: 0 60px; }
+
+  /* ─── Phone mockup ──────────────────────────────────────────────── */
+  .phone {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 760px;
+    height: 1620px;
+    border-radius: 84px;
+    background: var(--bezel);
+    box-shadow: var(--shadow-phone);
+    padding: 14px;
+  }
+  .phone.lower { top: 750px; }
+  .phone.mid   { top: 720px; }
+
+  .phone .screen {
+    width: 100%;
+    height: 100%;
+    background: var(--screen);
+    border-radius: 70px;
+    overflow: hidden;
+    position: relative;
+    color: var(--fg);
+  }
+
+  .phone .island {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    height: 60px;
+    background: #000;
+    border-radius: 30px;
+    z-index: 5;
+  }
+
+  /* ─── Inner status bar (top of screen) ──────────────────────────── */
+  .status-bar {
+    height: 110px;
+    padding: 38px 70px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Geist', sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+  }
+  .status-bar .right { display: flex; gap: 6px; align-items: center; }
+
+  /* ─── Inner header ──────────────────────────────────────────────── */
+  .screen-h {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    padding: 28px 0;
+    color: var(--fg);
+  }
+
+  /* ─── Tab bar at bottom of phone screen ─────────────────────────── */
+  .tabbar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 140px;
+    background: white;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: flex-start;
+    padding: 16px 30px 30px;
+    gap: 20px;
+  }
+  .tabbar .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #8E8E93;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .tabbar .tab.active { color: var(--blue); }
+  .tabbar .tab svg { width: 32px; height: 32px; }
+  .tabbar .center {
+    width: 70px; height: 70px; border-radius: 35px;
+    background: linear-gradient(135deg, #5AC8FA, var(--blue));
+    box-shadow: 0 6px 18px rgba(37,99,235,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    margin-top: -4px;
+  }
+
+  /* ─── Floating result card ──────────────────────────────────────── */
+  .result-card {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 22px;
+    box-shadow: var(--shadow-card);
+    padding: 28px 32px;
+    color: var(--fg);
+    font-family: 'Geist', sans-serif;
+    z-index: 4;
+    width: 760px;
+  }
+  .result-card .title { font-size: 32px; font-weight: 700; }
+  .result-card .sub { font-size: 24px; color: var(--blue); margin-top: 6px; font-weight: 500; }
+  .result-card .row { display: flex; align-items: center; justify-content: space-between; }
+  .check-circle {
+    width: 56px; height: 56px;
+    border-radius: 28px;
+    background: var(--check);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .check-circle svg { width: 32px; height: 32px; stroke: white; stroke-width: 3; fill: none; }
+
+  /* ─── Apple Activity rings ──────────────────────────────────────── */
+  .rings { width: 260px; height: 260px; flex-shrink: 0; }
+
+  /* ─── Scrollable list inside phone ──────────────────────────────── */
+  .list-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 40px;
+    border-top: 1px solid var(--hairline);
+    font-size: 26px;
+    color: var(--fg);
+  }
+  .list-row .name { font-weight: 600; }
+  .list-row .meta { font-size: 22px; color: var(--fg-dim); margin-top: 4px; }
+  .list-row .right { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 500; }
+  .list-row .add { color: var(--fg-mute); font-size: 38px; font-weight: 300; }
+
+  .meta-pill {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 14px;
+    background: #F0F0F0;
+    color: var(--fg);
+    font-size: 22px;
+    font-weight: 500;
+  }
+
+  /* Voice mic gradient */
+  .mic-circle {
+    width: 140px; height: 140px; border-radius: 70px;
+    background: linear-gradient(135deg, #5AC8FA, var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(37,99,235,0.35);
+  }
+  .mic-pulse {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 100px;
+    border: 2px solid var(--blue);
+    opacity: 0.3;
+  }
+
+  .voice-text {
+    text-align: center;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1.25;
+    padding: 0 50px;
+  }
+  .voice-text .hl { background: rgba(37,99,235,0.18); border-radius: 4px; padding: 0 6px; }
+
+  /* Camera viewfinder with real meal photo */
+  .viewfinder {
+    width: 600px; height: 600px;
+    border-radius: 24px;
+    margin: 30px auto 24px;
+    position: relative;
+    overflow: hidden;
+    background-image: url('meal_photo.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+  .viewfinder .bracket {
+    position: absolute;
+    width: 50px; height: 50px;
+    border: 4px solid white;
+  }
+  .viewfinder .bracket.tl { top: 30px; left: 30px; border-right: 0; border-bottom: 0; }
+  .viewfinder .bracket.tr { top: 30px; right: 30px; border-left: 0; border-bottom: 0; }
+  .viewfinder .bracket.bl { bottom: 30px; left: 30px; border-right: 0; border-top: 0; }
+  .viewfinder .bracket.br { bottom: 30px; right: 30px; border-left: 0; border-top: 0; }
+  .label-pill {
+    position: absolute;
+    background: white;
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--fg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    line-height: 1.2;
+    max-width: 280px;
+  }
+  .label-pill .w { display: block; font-size: 18px; color: var(--fg-dim); font-weight: 500; margin-top: 2px; }
+
+  /* Barcode pattern */
+  .barcode-wrap {
+    width: 460px; height: 280px;
+    border-radius: 16px;
+    background: #FFD86A;
+    margin: 30px auto;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .barcode-bars {
+    width: 280px; height: 80px;
+    background: white;
+    padding: 8px 12px;
+    display: flex; gap: 2px; align-items: stretch;
+  }
+  .barcode-bars .bar {
+    background: #1A1A1A;
+    height: 100%;
+  }
+  .barcode-bars .bar.w2 { width: 4px; }
+  .barcode-bars .bar.w3 { width: 6px; }
+  .barcode-bars .bar.w4 { width: 8px; }
+  .barcode-bars .gap { background: white; }
+  .barcode-bars .gap.w2 { width: 4px; }
+  .barcode-bars .gap.w3 { width: 6px; }
+
+  /* Macro chips */
+  .macro-row { display: flex; justify-content: space-around; padding: 22px 30px; }
+  .macro-row .chip {
+    text-align: center;
+  }
+  .macro-row .chip .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .macro-row .chip .l {
+    font-size: 22px;
+    color: var(--fg-dim);
+    margin-top: 4px;
+  }
+  .macro-row .chip .v.green { color: #16A34A; }
+  .macro-row .chip .v.cyan { color: #0891B2; }
+  .macro-row .chip .v.orange { color: #EA580C; }
+
+  /* Mini ring inside macro card */
+  .macro-mini-ring { width: 80px; height: 80px; }
+
+  /* Chat bubbles */
+  .bubble {
+    border-radius: 24px;
+    padding: 20px 26px;
+    font-size: 26px;
+    line-height: 1.35;
+    max-width: 540px;
+    margin: 16px 40px;
+  }
+  .bubble.ai { background: #F0F0F2; color: var(--fg); align-self: flex-start; }
+  .bubble.user { background: var(--blue); color: white; align-self: flex-end; margin-left: auto; }
+  .bubble.thinking {
+    background: #F0F0F2;
+    color: var(--fg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    padding: 22px 26px;
+  }
+  .bubble.thinking .step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 0;
+    color: var(--fg-dim);
+  }
+  .bubble.thinking .step.done { color: var(--fg); }
+  .bubble.thinking .step.active { color: var(--blue); }
+  .bubble.thinking .step .ic {
+    width: 22px; height: 22px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .bubble.thinking .step.done .ic { background: #16A34A; }
+  .bubble.thinking .step.done .ic::after { content: '✓'; color: white; font-size: 16px; line-height: 1; }
+  .bubble.thinking .step.active .ic { background: var(--blue); }
+  .bubble.thinking .step.active .ic::after { content: ''; width: 12px; height: 12px; border: 2px solid white; border-top-color: transparent; border-radius: 6px; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Calendar strip */
+  .calstrip { display: flex; padding: 14px 30px; gap: 8px; border-bottom: 1px solid var(--hairline); }
+  .calstrip .day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
+  .calstrip .day .lbl { font-size: 18px; color: var(--fg-dim); font-weight: 600; letter-spacing: 0.5px; }
+  .calstrip .day .num {
+    width: 56px; height: 56px; border-radius: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px; font-weight: 500;
+    color: var(--fg);
+    position: relative;
+  }
+  .calstrip .day .num.today { background: var(--blue); color: white; }
+  .calstrip .day .num.good { box-shadow: inset 0 0 0 3px #34C759; }
+  .calstrip .day .num.over { box-shadow: inset 0 0 0 3px #FF3B30; }
+
+  /* ─── Frame-specific positions ──────────────────────────────────── */
+  .frame .floating-1 { top: 1980px; }
+  .frame .floating-2 { top: 1980px; }
+  .frame .floating-3 { top: 2120px; }
+
+  /* Avatar ring used in chat header */
+  .avatar { width: 70px; height: 70px; border-radius: 35px; background: linear-gradient(135deg, #5AC8FA, var(--blue)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+
+  /* ─── Unified summary plate (kcal + macros) ──────────────────────
+     Used everywhere a meal/total summary is shown — chat result,
+     voice total, photo total, barcode product, plan goal.
+     Single visual language for KБЖУ across all screenshots.
+     Macro colors mirror the actual KayFit app interface:
+     protein → green · fat → orange · carbs → indigo. */
+  .summary-plate {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #F8F9FF 0%, #EEF2FF 100%);
+    border-radius: 18px;
+  }
+  .summary-plate .head { flex-shrink: 0; }
+  .summary-plate .head .label {
+    font-size: 18px; color: var(--fg-mute);
+    letter-spacing: 1.2px; font-weight: 600;
+    text-transform: uppercase;
+  }
+  .summary-plate .head .kcal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 38px; font-weight: 600;
+    color: var(--fg); letter-spacing: -1px;
+    margin-top: 4px;
+  }
+  .summary-plate .head .kcal small {
+    font-size: 20px; color: var(--fg-dim);
+    margin-left: 6px; font-weight: 500;
+  }
+  .summary-plate .chips { display: flex; gap: 14px; }
+  .summary-plate .chip { text-align: center; }
+  .summary-plate .chip .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 600;
+  }
+  .summary-plate .chip .l {
+    font-size: 16px; color: var(--fg-dim);
+    margin-top: 2px;
+  }
+  .summary-plate .chip.p .v { color: #16A34A; } /* protein  — green  */
+  .summary-plate .chip.f .v { color: #EA580C; } /* fat      — orange */
+  .summary-plate .chip.c .v { color: #6366F1; } /* carbs    — indigo */
+
+  /* Badge for tab bar count */
+  .nav-meta { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 1 · MAIN — visit card with slogan                          -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-main">
+  <div class="frame-title">
+    <span class="t1">Считай каждый</span>
+    <span class="t2">приём пищи</span>
+    <span class="sub">Дневник калорий со встроенным ИИ</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+
+      <!-- Calendar week strip -->
+      <div class="calstrip">
+        <div class="day"><span class="lbl">M</span><span class="num good">28</span></div>
+        <div class="day"><span class="lbl">T</span><span class="num good">29</span></div>
+        <div class="day"><span class="lbl">W</span><span class="num good">30</span></div>
+        <div class="day"><span class="lbl">T</span><span class="num over">1</span></div>
+        <div class="day"><span class="lbl">F</span><span class="num good">2</span></div>
+        <div class="day"><span class="lbl">S</span><span class="num good">3</span></div>
+        <div class="day"><span class="lbl">S</span><span class="num today">4</span></div>
+      </div>
+
+      <!-- Apple Activity rings + macro list -->
+      <div style="display: flex; align-items: center; gap: 28px; padding: 36px 40px 20px;">
+        <svg class="rings" viewBox="0 0 140 140">
+          <defs>
+            <linearGradient id="g-kcal" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--ring-kcal-from)"/>
+              <stop offset="100%" stop-color="var(--ring-kcal-to)"/>
+            </linearGradient>
+            <linearGradient id="g-prot" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--ring-prot-from)"/>
+              <stop offset="100%" stop-color="var(--ring-prot-to)"/>
+            </linearGradient>
+            <linearGradient id="g-carb" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--ring-carb-from)"/>
+              <stop offset="100%" stop-color="var(--ring-carb-to)"/>
+            </linearGradient>
+            <linearGradient id="g-fat" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--ring-fat-from)"/>
+              <stop offset="100%" stop-color="var(--ring-fat-to)"/>
+            </linearGradient>
+          </defs>
+          <!-- kcal ring 51% (1070/2100) -->
+          <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,55,95,0.12)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="60" fill="none" stroke="url(#g-kcal)" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="192 377" transform="rotate(-90 70 70)"/>
+          <!-- protein 55% (72/130) -->
+          <circle cx="70" cy="70" r="48" fill="none" stroke="rgba(118,230,14,0.14)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="48" fill="none" stroke="url(#g-prot)" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="166 302" transform="rotate(-90 70 70)"/>
+          <!-- carbs 48% (121/250) -->
+          <circle cx="70" cy="70" r="36" fill="none" stroke="rgba(30,206,218,0.14)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="36" fill="none" stroke="url(#g-carb)" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="109 226" transform="rotate(-90 70 70)"/>
+          <!-- fat 44% (31/70) -->
+          <circle cx="70" cy="70" r="24" fill="none" stroke="rgba(255,149,0,0.14)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="24" fill="none" stroke="url(#g-fat)" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="66 151" transform="rotate(-90 70 70)"/>
+        </svg>
+
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: var(--ring-kcal-to);"></div>
+            <span style="font-size: 22px; color: var(--fg-dim); letter-spacing: 1px; min-width: 110px;">КАЛОРИИ</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 26px; margin-left: auto;">1070<span style="color: var(--fg-mute); font-size: 22px;">/2100</span></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: var(--ring-prot-to);"></div>
+            <span style="font-size: 22px; color: var(--fg-dim); letter-spacing: 1px; min-width: 110px;">БЕЛКИ</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 26px; margin-left: auto;">72г<span style="color: var(--fg-mute); font-size: 22px;">/130г</span></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: var(--ring-carb-to);"></div>
+            <span style="font-size: 22px; color: var(--fg-dim); letter-spacing: 1px; min-width: 110px;">УГЛЕВ.</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 26px; margin-left: auto;">121г<span style="color: var(--fg-mute); font-size: 22px;">/250г</span></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: var(--ring-fat-to);"></div>
+            <span style="font-size: 22px; color: var(--fg-dim); letter-spacing: 1px; min-width: 110px;">ЖИРЫ</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 26px; margin-left: auto;">31г<span style="color: var(--fg-mute); font-size: 22px;">/70г</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's meals list -->
+      <div class="list-row">
+        <div>
+          <div class="name">Овсянка с ягодами</div>
+          <div class="meta">завтрак · 08:24</div>
+        </div>
+        <div class="right">320</div>
+      </div>
+      <div class="list-row">
+        <div>
+          <div class="name">Курица с рисом</div>
+          <div class="meta">обед · 13:10</div>
+        </div>
+        <div class="right">540</div>
+      </div>
+      <div class="list-row">
+        <div>
+          <div class="name">Греч. йогурт, миндаль</div>
+          <div class="meta">перекус · 16:30</div>
+        </div>
+        <div class="right">210</div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 2 · AI CHAT                                                  -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-chat">
+  <div class="frame-title">
+    <span class="t1">ИИ-нутрициолог</span>
+    <span class="t2">в кармане</span>
+    <span class="sub">Спрашивай, логируй и учись — всё в одном диалоге</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+      <div class="screen-h" style="display: flex; align-items: center; gap: 14px; justify-content: center;">
+        <div class="avatar">K</div>
+        <span>Kayfit ИИ</span>
+      </div>
+      <div style="border-top: 1px solid var(--hairline);"></div>
+
+      <div style="display: flex; flex-direction: column; padding: 30px 0;">
+        <div class="bubble user">Съел плов с курицей</div>
+        <div class="bubble thinking">
+          <div class="step done"><span class="ic"></span>определяю порцию</div>
+          <div class="step done"><span class="ic"></span>сверяю с USDA</div>
+          <div class="step active"><span class="ic"></span>проверяю базы данных</div>
+          <div class="step"><span class="ic"></span>формирую ответ</div>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card floating-1">
+    <div class="row" style="margin-bottom: 16px;">
+      <div class="title">Плов с курицей</div>
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+      </div>
+    </div>
+    <div class="summary-plate">
+      <div class="head">
+        <div class="label">Записано</div>
+        <div class="kcal">540<small>ккал</small></div>
+      </div>
+      <div class="chips">
+        <div class="chip p"><div class="v">42г</div><div class="l">белк</div></div>
+        <div class="chip f"><div class="v">18г</div><div class="l">жиры</div></div>
+        <div class="chip c"><div class="v">58г</div><div class="l">углев</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 3 · VOICE LOGGING                                            -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-voice">
+  <div class="frame-title">
+    <span class="t1">Скажи —</span>
+    <span class="t2">и готово</span>
+    <span class="sub">Опиши что съел голосом, ИИ распознаёт за секунды</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+      <div class="screen-h">Голосовой ввод</div>
+
+      <!-- Compact mic at top -->
+      <div style="display: flex; justify-content: center; align-items: center; padding: 24px 0 18px; position: relative;">
+        <div style="position: absolute; width: 130px; height: 130px; border-radius: 65px; border: 2px solid var(--blue); opacity: 0.25;"></div>
+        <div style="width: 96px; height: 96px; border-radius: 48px;
+                    background: linear-gradient(135deg, #5AC8FA, var(--blue));
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 6px 18px rgba(37,99,235,0.35);">
+          <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="white" stroke-width="2"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
+        </div>
+      </div>
+
+      <!-- Transcript -->
+      <div style="text-align: center; font-size: 26px; font-weight: 600; color: var(--fg);
+                  line-height: 1.3; padding: 0 50px 20px;">
+        "Съел <span style="background: rgba(37,99,235,0.18); border-radius: 4px; padding: 0 6px;">3 тако с курицей</span>
+        на тортилье, <span style="background: rgba(37,99,235,0.18); border-radius: 4px; padding: 0 6px;">чипсы</span>
+        и <span style="background: rgba(37,99,235,0.18); border-radius: 4px; padding: 0 6px;">гуакамоле</span>"
+      </div>
+
+      <!-- AI clarification Q&A -->
+      <div style="margin: 16px 40px; padding: 18px 22px;
+                  background: #F0F0F2; border-radius: 20px; border-bottom-left-radius: 6px;
+                  display: flex; align-items: center; gap: 12px;">
+        <div class="avatar" style="width: 44px; height: 44px; border-radius: 22px; font-size: 20px; flex-shrink: 0;">K</div>
+        <div style="font-size: 22px; color: var(--fg);">
+          Сколько примерно <b>чипсов</b>?
+        </div>
+      </div>
+      <div style="margin: 8px 40px 0; display: flex; justify-content: flex-end;">
+        <div style="background: var(--blue); color: white;
+                    padding: 12px 22px; border-radius: 20px; border-bottom-right-radius: 6px;
+                    font-size: 22px; font-weight: 500;">≈ 40 г</div>
+      </div>
+
+      <!-- Recognized items list -->
+      <div style="margin-top: 22px; border-top: 1px solid var(--hairline);
+                  padding: 14px 40px 6px; font-size: 18px; color: var(--fg-mute);
+                  letter-spacing: 1.2px; font-weight: 600;">
+        РАСПОЗНАНО · 3 ПОЗИЦИИ
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 40px; border-top: 1px solid var(--hairline);">
+        <div class="check-circle" style="width: 38px; height: 38px;">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 24px; font-weight: 600;">Тако с курицей</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: var(--fg-dim); margin-top: 2px;">3 тако · 35 г белка</div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 500;">510</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 40px; border-top: 1px solid var(--hairline);">
+        <div class="check-circle" style="width: 38px; height: 38px;">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 24px; font-weight: 600;">Чипсы тортилья</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: var(--fg-dim); margin-top: 2px;">40 г · уточнено ИИ</div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 500;">200</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 40px; border-top: 1px solid var(--hairline);">
+        <div class="check-circle" style="width: 38px; height: 38px;">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 24px; font-weight: 600;">Гуакамоле</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: var(--fg-dim); margin-top: 2px;">60 г</div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 500;">96</div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card floating-2">
+    <div class="row" style="margin-bottom: 16px;">
+      <div class="title">Всё записано</div>
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+      </div>
+    </div>
+    <div class="summary-plate">
+      <div class="head">
+        <div class="label">Итого</div>
+        <div class="kcal">806<small>ккал</small></div>
+      </div>
+      <div class="chips">
+        <div class="chip p"><div class="v">39г</div><div class="l">белк</div></div>
+        <div class="chip f"><div class="v">43г</div><div class="l">жиры</div></div>
+        <div class="chip c"><div class="v">67г</div><div class="l">углев</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 4 · PHOTO SCAN                                               -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-photo">
+  <div class="frame-title">
+    <span class="t1">Просто</span>
+    <span class="t2">сфотографируй</span>
+    <span class="sub">ИИ узнаёт каждый ингредиент на тарелке</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+      <div class="screen-h">Скан еды</div>
+
+      <div style="position: relative; padding: 0 30px;">
+        <div class="viewfinder">
+          <div class="bracket tl"></div>
+          <div class="bracket tr"></div>
+          <div class="bracket bl"></div>
+          <div class="bracket br"></div>
+          <!-- Trout — left side of plate, fully inside frame -->
+          <span class="label-pill" style="top: 240px; left: 20px;">
+            Форель
+            <span class="w">130 г</span>
+          </span>
+          <!-- Salad — right side, fully inside frame -->
+          <span class="label-pill" style="top: 110px; right: 20px; max-width: 260px;">
+            Овощной салат: томат, огурец, перец, лук
+            <span class="w">90 г</span>
+          </span>
+          <!-- Broccoli — bottom centered -->
+          <span class="label-pill" style="bottom: 30px; left: 50%; transform: translateX(-50%);">
+            Брокколи
+            <span class="w">90 г</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- TOTAL summary plate (unified) -->
+      <div style="margin: 12px 30px 0;">
+        <div class="summary-plate">
+          <div class="head">
+            <div class="label">Итого</div>
+            <div class="kcal">301<small>ккал</small></div>
+          </div>
+          <div class="chips">
+            <div class="chip p"><div class="v">34г</div><div class="l">белк</div></div>
+            <div class="chip f"><div class="v">12г</div><div class="l">жиры</div></div>
+            <div class="chip c"><div class="v">12г</div><div class="l">углев</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-row" style="margin-top: 14px;">
+        <div>
+          <div class="name">Форель</div>
+          <div class="meta">240 ккал · 130 г</div>
+        </div>
+        <div class="check-circle" style="width: 44px; height: 44px;">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+      <div class="list-row">
+        <div>
+          <div class="name">Брокколи</div>
+          <div class="meta">31 ккал · 90 г</div>
+        </div>
+        <div class="check-circle" style="width: 44px; height: 44px;">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+      <div class="list-row">
+        <div>
+          <div class="name">Овощной салат</div>
+          <div class="meta">30 ккал · 90 г</div>
+        </div>
+        <div class="check-circle" style="width: 44px; height: 44px;">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 5 · BARCODE                                                  -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-barcode">
+  <div class="frame-title">
+    <span class="t1">Сканируй</span>
+    <span class="t2">штрихкоды</span>
+    <span class="sub">Точные данные с упаковки за секунды</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+      <div class="screen-h">Сканирование</div>
+
+      <div class="barcode-wrap">
+        <div class="barcode-bars">
+          <div class="bar w3"></div><div class="gap w2"></div>
+          <div class="bar w2"></div><div class="gap w3"></div>
+          <div class="bar w4"></div><div class="gap w2"></div>
+          <div class="bar w2"></div><div class="gap w2"></div>
+          <div class="bar w3"></div><div class="gap w3"></div>
+          <div class="bar w2"></div><div class="gap w2"></div>
+          <div class="bar w2"></div><div class="gap w2"></div>
+          <div class="bar w4"></div><div class="gap w3"></div>
+          <div class="bar w2"></div><div class="gap w2"></div>
+          <div class="bar w3"></div><div class="gap w2"></div>
+          <div class="bar w2"></div><div class="gap w3"></div>
+          <div class="bar w4"></div><div class="gap w2"></div>
+          <div class="bar w2"></div><div class="gap w2"></div>
+          <div class="bar w3"></div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 20px 30px 6px;">
+        <div style="font-size: 32px; font-weight: 700;">Овощные чипсы с белком</div>
+      </div>
+
+      <div style="margin: 12px 30px 16px;">
+        <div class="summary-plate">
+          <div class="head">
+            <div class="label">За упаковку</div>
+            <div class="kcal">112<small>ккал</small></div>
+          </div>
+          <div class="chips">
+            <div class="chip p"><div class="v">10г</div><div class="l">белк</div></div>
+            <div class="chip f"><div class="v">4г</div><div class="l">жиры</div></div>
+            <div class="chip c"><div class="v">14г</div><div class="l">углев</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-row">
+        <div>
+          <div class="name">Приём пищи</div>
+        </div>
+        <div>
+          <span class="meta-pill">Обед</span>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  FRAME 6 · PERSONAL PLAN                                            -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="frame" id="frame-plan">
+  <div class="frame-title">
+    <span class="t1">Твой план,</span>
+    <span class="t2">рассчитан ИИ</span>
+    <span class="sub">Персональная норма по возрасту, весу и цели</span>
+  </div>
+
+  <div class="phone lower">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="right">●●●● LTE 100</span>
+      </div>
+
+      <!-- Personal AI plan banner -->
+      <div style="margin: 30px; padding: 26px 30px;
+                  background: linear-gradient(135deg, #7C3AED 0%, var(--blue) 100%);
+                  border-radius: 24px; color: white;
+                  box-shadow: 0 12px 32px rgba(124,58,237,0.35);">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 22px; opacity: 0.85; letter-spacing: 0.5px; font-weight: 600;">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="white" stroke-width="2"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4"/></svg>
+          ТВОЙ ПЕРСОНАЛЬНЫЙ ПЛАН
+        </div>
+        <div style="margin-top: 14px; font-size: 30px; font-weight: 700; line-height: 1.3;">
+          Веган-путь к -5 кг. Опирайся на тофу и бобовые, половина тарелки — овощи.
+        </div>
+      </div>
+
+      <!-- Hero kcal -->
+      <div style="margin: 0 30px; padding: 36px;
+                  background: linear-gradient(135deg, #FF597D 0%, #FF8B7B 100%);
+                  border-radius: 26px; color: white;
+                  display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <div style="font-size: 80px;">🎯</div>
+        <div style="font-size: 32px; font-weight: 800; letter-spacing: -0.5px;">Твой план готов!</div>
+        <div style="background: white; color: #FF597D; padding: 18px 40px; border-radius: 20px; margin-top: 20px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 80px; font-weight: 800; line-height: 1; letter-spacing: -3px;">1700</div>
+          <div style="text-align: center; color: var(--fg-dim); font-size: 22px; font-weight: 500; margin-top: 4px;">ккал в день</div>
+        </div>
+      </div>
+
+      <div style="margin: 18px 30px 0;">
+        <div class="summary-plate">
+          <div class="head">
+            <div class="label">Цель на день</div>
+            <div class="kcal">1700<small>ккал</small></div>
+          </div>
+          <div class="chips">
+            <div class="chip p"><div class="v">130г</div><div class="l">белк</div></div>
+            <div class="chip f"><div class="v">70г</div><div class="l">жиры</div></div>
+            <div class="chip c"><div class="v">250г</div><div class="l">углев</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 013 3v13a1 1 0 01-1 1H8a3 3 0 01-3-3V4zM5 17h14"/></svg>
+          <span>Журнал</span>
+        </div>
+        <div class="tab">
+          <div class="center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span style="color: var(--blue); font-weight: 600;">+</span>
+        </div>
+        <div class="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>
+          <span>Чат</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

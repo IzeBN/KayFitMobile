@@ -1,7 +1,7 @@
 name: kayfit
 description: "Kayfit — calorie and nutrition tracker"
 publish_to: 'none'
-version: 1.0.0+10
+version: 1.0.2+1
 
 environment:
   sdk: ^3.11.1
@@ -27,7 +27,6 @@ dependencies:
 
   # Auth
   sign_in_with_apple: ^6.1.0
-  app_links: ^6.1.0
 
   # Models
   freezed_annotation: ^2.4.0
@@ -104,3 +103,4 @@ flutter:
   generate: true
   assets:
     - assets/icon/
+    - assets/onboarding/

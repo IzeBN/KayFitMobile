@@ -554,10 +554,10 @@ class _KF2SheetHeader extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'REVIEW',
+            'KAYFIT',
             style: TextStyle(
               fontFamily: K2Fonts.sans,
-              fontSize: 11,
+              fontSize: 22,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
               color: theme.fg,

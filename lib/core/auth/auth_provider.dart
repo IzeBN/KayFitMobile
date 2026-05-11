@@ -183,9 +183,8 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> deleteAccount() async {
-    try {
-      await apiDio.delete('/api/v1/auth/account');
-    } catch (_) {}
+    // Throws on network/server error — caller must surface to user (Guideline 5.1.1v).
+    await apiDio.delete('/api/v1/auth/account');
     final storage = ref.read(secureStorageProvider);
     await storage.clearTokens();
     await _clearCacheAndProgress();

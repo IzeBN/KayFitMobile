@@ -20,8 +20,10 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -116,7 +118,7 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
   static const _kThinkingSteps = [
     'parsing your message',
     'matching USDA database',
-    'cross-checking FatSecret',
+    'cross-checking nutrition data',
     'compiling nutrition data',
   ];
 
@@ -283,9 +285,12 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
     final consent = ref.read(aiConsentProvider);
     if (consent == false) {
       if (!mounted) return;
+      final isRu = Localizations.localeOf(context).languageCode == 'ru';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('AI chat unavailable: consent was declined'),
+          content: Text(isRu
+              ? 'ИИ-чат недоступен: согласие не предоставлено'
+              : 'AI chat unavailable: consent was declined'),
           backgroundColor: K2Colors.error,
           behavior: SnackBarBehavior.floating,
           shape:
@@ -855,6 +860,9 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
 
             // ── Status strip (dot + label + "online") ─────────────────────
             _StatusStrip(theme: t),
+
+            // ── Disclaimer / citation banner (Guideline 1.4.1) ────────────
+            _ChatDisclaimerBanner(theme: t),
 
             // ── Message list ───────────────────────────────────────────────
             Expanded(
@@ -1944,5 +1952,87 @@ class _PendingMealCard extends StatelessWidget {
       'dinner' => 'Ужин',
       _ => mt,
     };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Disclaimer / citation banner — Guideline 1.4.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ChatDisclaimerBanner extends StatelessWidget {
+  const _ChatDisclaimerBanner({required this.theme});
+
+  final K2Theme theme;
+
+  static const _whoUrl =
+      'https://www.who.int/news-room/fact-sheets/detail/healthy-diet';
+  static const _usdaUrl =
+      'https://odphp.health.gov/our-work/nutrition-physical-activity/dietary-guidelines';
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final disclaimerText = isRu
+        ? 'Ответы ИИ носят информационный характер и не заменяют консультацию врача. Основано на: '
+        : 'AI responses are for informational purposes only. Based on: ';
+    final whoLabel = isRu ? 'Рекомендации ВОЗ' : 'WHO Guidelines';
+    final usdaLabel = isRu ? 'Рекомендации USDA' : 'USDA Guidelines';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.surface,
+        border: Border(bottom: BorderSide(color: theme.hairline, width: 1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(Icons.info_outline, size: 13, color: theme.fgDim),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 11, color: theme.fgDim, height: 1.4),
+                children: [
+                  TextSpan(text: disclaimerText),
+                  TextSpan(
+                    text: whoLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_whoUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  ),
+                  const TextSpan(text: ', '),
+                  TextSpan(
+                    text: usdaLabel,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => launchUrl(
+                            Uri.parse(_usdaUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                  ),
+                  const TextSpan(text: '.'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

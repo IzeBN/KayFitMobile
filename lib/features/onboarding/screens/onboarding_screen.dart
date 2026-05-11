@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,10 @@ import '../../../core/storage/onboarding_pending_storage.dart';
 import '../../../router.dart';
 import '../../../shared/models/calculation_result.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../body_form/body_form_prefs.dart';
+import '../../body_form/screens/body_form_screen.dart';
+import '../../reward/reward_prefs.dart';
+import '../../reward/widgets/reward_step.dart';
 import '../../way_to_goal/widgets/plan_result_view.dart';
 import '../widgets/ob_gradient_button.dart';
 import '../widgets/onboarding_scaffold.dart';
@@ -36,6 +41,9 @@ enum _Step {
   gender,
   weight,
   training,
+  // ignore: constant_identifier_names
+  body_form,
+  reward,
   // ignore: constant_identifier_names
   weight_loss_info,
   // ignore: constant_identifier_names
@@ -124,6 +132,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _Step.gender,
       _Step.weight,
       _Step.training,
+      _Step.body_form,
+      _Step.reward,
       if (_goals.contains('lose_weight')) _Step.weight_loss_info,
       _Step.info_1,
       _Step.info_2,
@@ -143,6 +153,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   double? _weight;
   double? _targetWeight;
   String _trainingFreq = '';
+  int? _bodyFormCurrent;
+  int? _bodyFormDesired;
+  String? _reward;
 
   // New step data
   Set<String> _healthConditions = {'none'};
@@ -153,7 +166,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // Controllers
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
-  final _targetWeightCtrl = TextEditingController();
 
   String? _error;
   bool _showSkipDialog = false;
@@ -190,12 +202,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         }
       }
 
+      // Restore body-form selection (separate SharedPrefs keys).
+      final savedBodyForm = await BodyFormPrefs.load();
+      final savedReward = await RewardPrefs.load();
+
       // Find the step index in the current step list.
       final steps = _buildStepList();
       final restoredIndex = steps.indexOf(savedStep);
-      if (restoredIndex > 0 && mounted) {
+      if (mounted) {
         setState(() {
-          _stepIndex = restoredIndex;
+          if (restoredIndex > 0) {
+            _stepIndex = restoredIndex;
+          }
+          if (savedBodyForm != null) {
+            _bodyFormCurrent = savedBodyForm.current;
+            _bodyFormDesired = savedBodyForm.desired;
+          }
+          if (savedReward != null) {
+            _reward = savedReward;
+          }
         });
       }
     } catch (_) {
@@ -226,9 +251,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // Restore text controller values.
     if (_height != null) _heightCtrl.text = _height!.toStringAsFixed(0);
     if (_weight != null) _weightCtrl.text = _weight!.toStringAsFixed(0);
-    if (_targetWeight != null) {
-      _targetWeightCtrl.text = _targetWeight!.toStringAsFixed(0);
-    }
   }
 
   /// Persist current step name and all answers to SharedPreferences.
@@ -261,7 +283,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void dispose() {
     _heightCtrl.dispose();
     _weightCtrl.dispose();
-    _targetWeightCtrl.dispose();
     super.dispose();
   }
 
@@ -332,71 +353,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _goNext();
   }
 
-  Future<void> _handleWeightNext(AppLocalizations l10n) async {
+  void _handleWeightNext(AppLocalizations l10n) {
     final w = double.tryParse(_weightCtrl.text);
     if (w == null || w < 30 || w > 300) {
       setState(() => _error = l10n.ob_err_weight);
       return;
     }
     _weight = w;
-    final tw = double.tryParse(_targetWeightCtrl.text);
-    if (tw == null || tw < 30 || tw > 300) {
-      setState(() => _error = l10n.ob_err_target_weight);
-      return;
-    }
-    // BMI warning for extreme targets (ticket 3.5).
-    // Skip if height not yet provided (shouldn't happen — earlier step).
-    if (_height != null && _height! > 0) {
-      final hM = _height! / 100.0;
-      final bmi = tw / (hM * hM);
-      // Healthy WHO range 18.5–24.9; we warn outside 17.0–30.0.
-      if (bmi < 17.0 || bmi > 30.0) {
-        final proceed = await _showExtremeWeightWarning(l10n, bmi);
-        if (proceed != true) return;
-      }
-    }
-    _targetWeight = tw;
-    AnalyticsService.onboardingWeightEntered(w.toInt(), tw.toInt());
+    AnalyticsService.onboardingWeightEntered(w.toInt(), w.toInt());
     _savePending();
     _goNext();
-  }
-
-  Future<bool?> _showExtremeWeightWarning(
-      AppLocalizations l10n, double bmi) async {
-    final isRu = ref.read(localeProvider).languageCode == 'ru';
-    final tooLow = bmi < 17.0;
-    final title =
-        isRu ? 'Цель за пределами нормы' : 'Target outside healthy range';
-    final body = tooLow
-        ? (isRu
-            ? 'При таком целевом весе ваш ИМТ будет ${bmi.toStringAsFixed(1)} — это ниже здорового диапазона (18.5–24.9). Рекомендуем обсудить с врачом или диетологом.'
-            : 'At this target weight your BMI will be ${bmi.toStringAsFixed(1)} — below the healthy range (18.5–24.9). We recommend consulting a doctor or nutritionist.')
-        : (isRu
-            ? 'При таком целевом весе ваш ИМТ будет ${bmi.toStringAsFixed(1)} — это в зоне ожирения (>30). Рекомендуем обсудить с врачом или диетологом.'
-            : 'At this target weight your BMI will be ${bmi.toStringAsFixed(1)} — in the obese range (>30). We recommend consulting a doctor or nutritionist.');
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        title: Text(title),
-        content: Text(body,
-            style: const TextStyle(color: AppColors.textMuted, height: 1.4)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(isRu ? 'Изменить' : 'Edit',
-                style: const TextStyle(color: AppColors.textMuted)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(isRu ? 'Продолжить' : 'Continue',
-                style: const TextStyle(color: AppColors.accentOver)),
-          ),
-        ],
-      ),
-    );
   }
 
   void _handleTrainingNext(AppLocalizations l10n) {
@@ -412,6 +378,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _handleTrainingSelect(String value) {
     setState(() => _trainingFreq = value);
+  }
+
+  void _handleRewardSelected(String value) {
+    setState(() => _reward = value);
+    unawaited(RewardPrefs.save(value));
+    _savePending();
+  }
+
+  void _handleBodyFormCompleted(
+    int currentIdx,
+    int desiredIdx,
+    double? calcTargetWeight,
+  ) {
+    setState(() {
+      _bodyFormCurrent = currentIdx;
+      _bodyFormDesired = desiredIdx;
+      // Target weight comes from body form only for lose_weight goal.
+      // Muscle-gain / maintain goals → recomposition → no weight graph.
+      _targetWeight =
+          _goals.contains('lose_weight') ? calcTargetWeight : null;
+    });
+    _savePending();
+    _goNext();
   }
 
   Future<void> _navigateToLogin() async {
@@ -647,6 +636,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         );
 
+      case _Step.body_form:
+        // BodyFormScreen renders its own buttons — no scaffold-level CTA.
+        return const _FooterCtaData(primaryCta: SizedBox.shrink());
+
+      case _Step.reward:
+        return _FooterCtaData(
+          primaryCta: ObGradientButton(
+            label: nextLabel,
+            onTap: _reward == null ? null : _goNext,
+          ),
+          secondaryCta: TextButton(
+            onPressed: () {
+              setState(() => _reward = null);
+              _goNext();
+            },
+            child: Text(
+              isRu ? 'Пропустить' : 'Skip',
+              style: const TextStyle(color: AppColors.textMuted),
+            ),
+          ),
+        );
+
       case _Step.weight_loss_info:
       case _Step.info_1:
       case _Step.info_2:
@@ -737,7 +748,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         return _WeightStep(
           l10n: l10n,
           weightCtrl: _weightCtrl,
-          targetCtrl: _targetWeightCtrl,
           error: _error,
           onChanged: (_) => setState(() => _error = null),
         );
@@ -748,6 +758,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           selected: _trainingFreq,
           onSelect: _handleTrainingSelect,
           error: _error,
+        );
+
+      case _Step.body_form:
+        return BodyFormScreen(
+          isOnboarding: true,
+          gender: _gender,
+          initialCurrent: _bodyFormCurrent ?? 0,
+          initialDesired: _bodyFormDesired ?? 0,
+          currentWeight: _weight,
+          onCompleted: _handleBodyFormCompleted,
+        );
+
+      case _Step.reward:
+        return RewardStep(
+          value: _reward,
+          onChange: _handleRewardSelected,
+          isRu: isRu,
         );
 
       case _Step.weight_loss_info:
@@ -838,10 +865,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(l10n.ob_skip_title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text,
+                      decoration: TextDecoration.none,
+                    )),
                 const SizedBox(height: 8),
                 Text(l10n.ob_skip_sub,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 14,
+                      decoration: TextDecoration.none,
+                    ),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -894,14 +930,14 @@ class _LandingStep extends StatelessWidget {
 
     return Column(
       children: [
-        // Pink-orange header
+        // Blue header
         Container(
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
+              colors: [Color(0xFF007AFF), Color(0xFF0062CC)],
             ),
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
           ),
@@ -1687,14 +1723,12 @@ class _GenderStep extends StatelessWidget {
 class _WeightStep extends StatelessWidget {
   final AppLocalizations l10n;
   final TextEditingController weightCtrl;
-  final TextEditingController targetCtrl;
   final String? error;
   final ValueChanged<String> onChanged;
 
   const _WeightStep({
     required this.l10n,
     required this.weightCtrl,
-    required this.targetCtrl,
     this.error,
     required this.onChanged,
   });
@@ -1706,26 +1740,11 @@ class _WeightStep extends StatelessWidget {
       hint: l10n.ob_step_weight_hint,
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _WeightCard(
-                  label: l10n.ob_step_weight_now,
-                  controller: weightCtrl,
-                  autofocus: true,
-                  onChanged: onChanged,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _WeightCard(
-                  label: l10n.ob_step_weight_goal,
-                  controller: targetCtrl,
-                  autofocus: false,
-                  onChanged: (_) {},
-                ),
-              ),
-            ],
+          _WeightCard(
+            label: l10n.ob_step_weight_now,
+            controller: weightCtrl,
+            autofocus: true,
+            onChanged: onChanged,
           ),
           if (error != null) ...[
             const SizedBox(height: 12),

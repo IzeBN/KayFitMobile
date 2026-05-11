@@ -1,14 +1,19 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kayfit/core/analytics/analytics_service.dart';
 import 'package:kayfit/core/api/api_client.dart';
 import 'package:kayfit/core/auth/auth_provider.dart';
 import 'package:kayfit/core/i18n/generated/app_localizations.dart';
 import 'package:kayfit/core/locale/locale_provider.dart';
+import 'package:kayfit/features/body_form/body_form_prefs.dart';
+import 'package:kayfit/features/body_form/i18n/body_form_strings.dart';
+import 'package:kayfit/features/body_form/screens/body_form_screen.dart';
 import 'package:kayfit/features/settings/screens/document_screen.dart';
 import 'package:kayfit/shared/theme/kayfit2_theme.dart';
 
@@ -35,6 +40,35 @@ class _SettingsV2ScreenState extends ConsumerState<SettingsV2Screen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _track(AnalyticsService.settingsOpened);
     });
+  }
+
+  Future<void> _openBodyForm(BuildContext context) async {
+    final saved = await BodyFormPrefs.load();
+    final prefs = await SharedPreferences.getInstance();
+    var gender = '';
+    final raw = prefs.getString('onboarding_answers');
+    if (raw != null) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          gender = decoded['gender'] as String? ?? '';
+        }
+      } on FormatException {
+        // Malformed JSON — fall back to empty gender (male assets).
+      }
+    }
+    if (!context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => BodyFormScreen(
+          isOnboarding: false,
+          gender: gender,
+          initialCurrent: saved?.current ?? 0,
+          initialDesired: saved?.desired ?? 0,
+        ),
+      ),
+    );
   }
 
   /// Fire-and-forget analytics call that never throws.  Firebase may not be
@@ -89,6 +123,12 @@ class _SettingsV2ScreenState extends ConsumerState<SettingsV2Screen> {
                           _track(AnalyticsService.settingsGoalsTapped);
                           context.push('/settings/goals');
                         },
+                      ),
+                      _Row(
+                        t: t,
+                        icon: Icons.accessibility_new_outlined,
+                        label: BodyFormStrings.settingsLabel(isRu),
+                        onTap: () => _openBodyForm(context),
                       ),
                     ],
                   ),
@@ -283,9 +323,17 @@ class _SettingsV2ScreenState extends ConsumerState<SettingsV2Screen> {
             onPressed: () async {
               _track(AnalyticsService.deleteAccountConfirmed);
               Navigator.pop(ctx);
-              await ref
-                  .read(authNotifierProvider.notifier)
-                  .deleteAccount();
+              try {
+                await ref
+                    .read(authNotifierProvider.notifier)
+                    .deleteAccount();
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.error_unknown)),
+                  );
+                }
+              }
             },
             child: Text(
               l10n.common_delete,

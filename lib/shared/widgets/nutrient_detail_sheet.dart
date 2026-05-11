@@ -494,10 +494,10 @@ class SourceBadge extends StatelessWidget {
         ),
       'fatsecret' => _SourceConfig(
           icon: Icons.search_rounded,
-          label: 'FatSecret',
+          label: 'Nutrition DB',
           color: const Color(0xFF15803D),
           bg: const Color(0xFFDCFCE7),
-          url: sourceUrl ?? 'https://www.fatsecret.com',
+          url: sourceUrl,
         ),
       'claude' => _SourceConfig(
           icon: Icons.auto_awesome_rounded,

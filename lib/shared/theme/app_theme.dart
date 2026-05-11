@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-// Onboarding pink-orange theme (matches Onboarding.css)
+// Onboarding theme — aligned with main app blue palette.
 class OBColors {
-  static const pink = Color(0xFFFF597D);
-  static const orange = Color(0xFFFE7650);
-  static const bg = Color(0xFFFFF1EA);
-  static const border = Color(0xFFF0E4DE);
-  static const pinkSoft = Color(0xFFFFEDF1);
+  static const pink = Color(0xFF007AFF);      // AppColors.accent
+  static const orange = Color(0xFF0062CC);    // AppColors.accentDark
+  static const bg = Color(0xFFFFFFFF);        // white
+  static const border = Color(0xFFE5E7EB);    // AppColors.border
+  static const pinkSoft = Color(0xFFDCEEFF);  // AppColors.accentSoft
 
   static const gradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
+    colors: [Color(0xFF007AFF), Color(0xFF0062CC)],
   );
 
   static List<BoxShadow> get buttonShadow => [
         BoxShadow(
-          color: Color(0xFFFF597D).withValues(alpha: 0.28),
+          color: Color(0xFF007AFF).withValues(alpha: 0.28),
           blurRadius: 20,
           offset: Offset(0, 6),
         ),

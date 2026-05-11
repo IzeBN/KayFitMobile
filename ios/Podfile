@@ -45,9 +45,10 @@ post_install do |installer|
         'PERMISSION_MICROPHONE=1',
         'PERMISSION_CAMERA=1',
         'PERMISSION_PHOTOS=1',
-        'PERMISSION_SPEECH_RECOGNIZER=1',
         'PERMISSION_NOTIFICATIONS=1',
       ]
+      # Force Swift 5 for pods that are not Swift 6 compatible (sign_in_with_apple 6.x)
+      config.build_settings['SWIFT_VERSION'] = '5.0'
     end
   end
 end

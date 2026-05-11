@@ -1,0 +1,11 @@
+/* Camera */
+NSCameraUsageDescription = "Kayfit использует камеру для распознавания еды на фото";
+
+/* Microphone */
+NSMicrophoneUsageDescription = "Kayfit использует микрофон для голосового добавления приёмов пищи";
+
+/* Photo Library */
+NSPhotoLibraryUsageDescription = "Kayfit использует библиотеку фотографий для выбора снимков еды";
+
+/* Face ID — flutter_secure_storage links LocalAuthentication.framework */
+NSFaceIDUsageDescription = "Kayfit использует Face ID для защиты данных аккаунта в Keychain.";

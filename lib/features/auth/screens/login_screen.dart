@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../core/locale/locale_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import '../../settings/screens/document_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -83,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: OBColors.bg,
+          backgroundColor: AppColors.surface,
           body: Column(
             children: [
               _buildHeader(context, isRu),
@@ -107,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         icon: Icons.mail_outline_rounded,
                         label: isRu ? 'Войти по email' : 'Sign in with Email',
                         iconColor: AppColors.textMuted,
-                        borderColor: OBColors.border,
+                        borderColor: AppColors.border,
                         onTap: _loading
                             ? null
                             : () {
@@ -116,15 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               },
                       ),
                       const SizedBox(height: 28),
-                      Text(
-                        l10n.auth_terms,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 12,
-                          height: 1.5,
-                        ),
-                      ),
+                      _TermsText(isRu: isRu),
                     ],
                   ),
                 ),
@@ -169,7 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFF597D), Color(0xFFFE7650)],
+          colors: [Color(0xFF007AFF), Color(0xFF0062CC)],
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
@@ -295,11 +289,76 @@ class _LangChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: active ? OBColors.pink : Colors.white,
+            color: active ? AppColors.accent : Colors.white,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _TermsText — "By continuing you agree to the [terms of service]"
+// ---------------------------------------------------------------------------
+
+class _TermsText extends StatefulWidget {
+  final bool isRu;
+  const _TermsText({required this.isRu});
+
+  @override
+  State<_TermsText> createState() => _TermsTextState();
+}
+
+class _TermsTextState extends State<_TermsText> {
+  late final TapGestureRecognizer _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = TapGestureRecognizer()
+      ..onTap = () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  const DocumentScreen(type: DocumentType.termsOfService),
+            ),
+          );
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const base = TextStyle(
+      color: AppColors.textMuted,
+      fontSize: 12,
+      height: 1.5,
+      decoration: TextDecoration.none,
+    );
+    final linkStyle = base.copyWith(
+      color: AppColors.accent,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.accent,
+    );
+
+    final before = widget.isRu
+        ? 'Продолжая, вы соглашаетесь с '
+        : 'By continuing you agree to the ';
+    final link = widget.isRu ? 'условиями использования' : 'terms of service';
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: base,
+        children: [
+          TextSpan(text: before),
+          TextSpan(text: link, style: linkStyle, recognizer: _recognizer),
+        ],
       ),
     );
   }

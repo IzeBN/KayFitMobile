@@ -59,3 +59,7 @@ app.*.map.json
 # (key.properties, *.keystore, *.jks уже исключены выше)
 # google-services.json и GoogleService-Info.plist намеренно НЕ игнорируются —
 # они нужны для сборки (Firebase, FCM)
+
+# Screenshot generation tools
+specs/appstore_screenshots/node_modules/
+specs/appstore_screenshots/package-lock.json

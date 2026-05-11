@@ -67,8 +67,8 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
         isRu ? 'Я согласен(а) с передачей данных' : 'I agree to the data transfer';
     final acceptLabel = isRu ? 'Принять и продолжить' : 'Accept & Continue';
     final declineLabel = isRu
-        ? 'Отказаться (ИИ-функции будут недоступны)'
-        : 'Decline (AI features will be unavailable)';
+        ? 'Отклонить'
+        : 'Decline';
 
     final errorText = isRu
         ? 'Не удалось подключиться. Попробуйте ещё раз.'
@@ -510,11 +510,11 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
-        title: Text(isRu ? 'Вы уверены?' : 'Are you sure?'),
+        title: Text(isRu ? 'Отключить AI-функции?' : 'Disable AI features?'),
         content: Text(
           isRu
-              ? 'AI-функции — основа приложения. Без согласия пользоваться KayFit нельзя, и вы будете отключены от аккаунта.'
-              : 'AI features are core to KayFit. Without consent the app cannot be used and you will be signed out.',
+              ? 'Без согласия функции распознавания, голосового ввода и AI-чата будут недоступны. Ручной ввод еды останется доступным.'
+              : 'Without consent, photo recognition, voice input and AI chat will be unavailable. Manual food logging will still work.',
           style: const TextStyle(color: AppColors.textMuted, height: 1.4),
         ),
         actions: [
@@ -528,7 +528,7 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              isRu ? 'Отказаться и выйти' : 'Decline & sign out',
+              isRu ? 'Отключить' : 'Decline',
               style: const TextStyle(color: AppColors.accentOver),
             ),
           ),
@@ -541,19 +541,16 @@ class _AiConsentScreenState extends ConsumerState<AiConsentScreen> {
       } catch (_) {
         // Analytics is best-effort.
       }
-      // Persist decline (best-effort) — local SharedPreferences already
-      // records it, so server failure (incl. 401) does not block sign-out.
+      // Persist decline — AI features will be individually disabled.
+      // User stays logged in and can use manual food logging.
       try {
         await ref.read(aiConsentProvider.notifier).setConsent(false);
       } on TimeoutException {
-        // ignore — local state still records the decline
+        // ignore — local state already records the decline
       } on DioException {
-        // ignore — local state still records the decline
+        // ignore — local state already records the decline
       }
-      // Without consent the app cannot be used → sign out unconditionally.
-      if (mounted) {
-        await ref.read(authNotifierProvider.notifier).logout();
-      }
+      if (mounted) context.go('/');
     }
   }
 }

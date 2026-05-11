@@ -122,10 +122,11 @@ class _RouterNotifier extends ChangeNotifier {
       return '/settings-v2';
     }
 
-    // AI consent is MANDATORY: only `true` lets the user past this gate.
-    // `null` (never answered) and `false` (declined) both redirect back.
-    // /kayfit2/preview is exempt — it's a design preview screen.
-    if (isLoggedIn && aiConsent != true && !showWayToGoal &&
+    // AI consent screen is shown only when the user has never answered (null).
+    // Declined users (false) pass through — AI features are disabled individually
+    // in each screen (chat, dashboard, recognition). Forcing sign-out on decline
+    // violates App Store Guideline 5.1.1 (consent must be freely given).
+    if (isLoggedIn && aiConsent == null && !showWayToGoal &&
         loc != '/ai-consent' && loc != '/way-to-goal' &&
         loc != '/kayfit2/preview') {
       return '/ai-consent';

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/i18n/generated/app_localizations.dart';
 import '../../../shared/models/ingredient_v2.dart';
 import '../../../shared/models/nutrients_v2.dart';
 import '../../../shared/theme/kayfit2_theme.dart';
@@ -350,7 +351,7 @@ class _SourceBadge extends StatelessWidget {
       case 'usda':
         return 'USDA';
       case 'fatsecret':
-        return 'FATSECRET';
+        return 'DB';
       case 'cache':
         return 'CACHE';
       case 'claude':
@@ -461,13 +462,14 @@ class _KF2MacroInlineEdit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             _MacroField(
-              label: 'PROTEIN',
+              label: l10n.macro_protein.toUpperCase(),
               ctrl: proteinCtrl,
               focus: proteinFocus,
               onChanged: (_) => onChanged(),
@@ -475,7 +477,7 @@ class _KF2MacroInlineEdit extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _MacroField(
-              label: 'FAT',
+              label: l10n.macro_fat.toUpperCase(),
               ctrl: fatCtrl,
               focus: fatFocus,
               onChanged: (_) => onChanged(),
@@ -483,7 +485,7 @@ class _KF2MacroInlineEdit extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _MacroField(
-              label: 'CARBS',
+              label: l10n.macro_carbs.toUpperCase(),
               ctrl: carbsCtrl,
               focus: carbsFocus,
               onChanged: (_) => onChanged(),
@@ -505,7 +507,7 @@ class _KF2MacroInlineEdit extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              'Done',
+              l10n.common_done,
               style: TextStyle(
                 fontFamily: K2Fonts.sans,
                 fontSize: 12,
