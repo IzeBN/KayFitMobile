@@ -301,6 +301,10 @@ class _JournalV2ScreenState extends ConsumerState<JournalV2Screen> {
               },
             ),
 
+            // Guideline 1.4.1 — disclaimer required on every screen with
+            // calculated health values.
+            _JournalDisclaimerBar(theme: t),
+
             Container(height: 1, color: t.hairline),
 
             // ── Meal list ────────────────────────────────────────────────────
@@ -681,6 +685,33 @@ class _EmptyMeals extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ── Guideline 1.4.1 disclaimer ───────────────────────────────────────────────
+
+class _JournalDisclaimerBar extends StatelessWidget {
+  const _JournalDisclaimerBar({required this.theme});
+  final K2Theme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final text = isRu
+        ? 'Расчёты КБЖУ — ориентировочные. Не заменяют консультацию врача.'
+        : 'Calorie estimates are approximate. Not a substitute for medical advice.';
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          color: theme.fgMute,
+          fontFamily: K2Fonts.sans,
+        ),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
