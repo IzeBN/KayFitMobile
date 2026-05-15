@@ -36,10 +36,12 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/ai_consent/ai_consent_provider.dart';
 import '../../../core/api/api_client.dart';
 import '../../../features/add_meal/screens/barcode_scanner_screen_v2.dart';
+import '../../../features/add_meal/screens/kf2_recognizing_screen.dart';
 import '../../../features/dashboard/providers/dashboard_provider.dart';
 import '../../../features/journal/screens/journal_screen.dart'
     show journalDayMealsProvider;
 import '../../../shared/models/ingredient_v2.dart';
+import '../../../shared/models/stats.dart';
 import '../../../shared/theme/kayfit2_theme.dart';
 import '../../../shared/utils/nutrient_parser.dart';
 import '../../../shared/widgets/kayfit2_tab_bar.dart';
@@ -512,6 +514,69 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
   String _detectMessageLang(String text) =>
       _kCyrillic.hasMatch(text) ? 'ru' : 'en';
 
+  /// Builds the post-add coaching message using fresh daily stats.
+  ///
+  /// [addedKcal] may be null when the caller (photo flow) doesn't know the
+  /// exact amount — the confirmation line is then shown without the kcal figure.
+  String _buildCoachMessage({
+    required MacroStats stats,
+    required String dishLabel,
+    required bool isRu,
+    double? addedKcal,
+  }) {
+    final confirmLine = addedKcal != null
+        ? (isRu
+            ? '✓ Добавлено: $dishLabel — ${addedKcal.round()} ккал'
+            : '✓ Added: $dishLabel — ${addedKcal.round()} kcal')
+        : (isRu ? '✓ Добавлено: $dishLabel' : '✓ Added: $dishLabel');
+
+    final cal = stats.caloriesEaten;
+    final calGoal = stats.caloriesGoal;
+    final pro = stats.proteinEaten;
+    final proGoal = stats.proteinGoal;
+
+    if (calGoal <= 0) return confirmLine;
+
+    final calPct = cal / calGoal;
+    final proPct = proGoal > 0 ? pro / proGoal : 1.0;
+
+    final String advice;
+    if (calPct > 1.10) {
+      advice = isRu
+          ? 'Сегодня перебор: ${cal.round()} из ${calGoal.round()} ккал.'
+              ' По исследованиям, важна средняя калорийность за неделю — в следующие дни старайся есть чуть легче.'
+          : 'You\'re over today: ${cal.round()} / ${calGoal.round()} kcal.'
+              ' Research shows weekly average matters more — try to eat a little lighter over the next few days.';
+    } else if (proPct < 0.5 && proGoal > 0) {
+      advice = isRu
+          ? 'Белка пока маловато — ${pro.round()} из ${proGoal.round()} г.'
+              ' Следующий приём пищи сделай белковым: яйца, творог, куриная грудка, рыба.'
+          : 'Protein is low — ${pro.round()} / ${proGoal.round()} g.'
+              ' Make your next meal protein-rich: eggs, cottage cheese, chicken, or fish.';
+    } else if (calPct > 0.85 && proPct >= 0.9) {
+      advice = isRu
+          ? 'Отличный баланс! ${cal.round()} / ${calGoal.round()} ккал, белок в норме (${pro.round()} г).'
+              ' Есть небольшой запас — можно позволить что-нибудь вкусненькое без чувства вины.'
+          : 'Great balance! ${cal.round()} / ${calGoal.round()} kcal, protein on track (${pro.round()} g).'
+              ' You have a little room — feel free to treat yourself.';
+    } else if (calPct > 0.85) {
+      advice = isRu
+          ? 'Калории почти на норме: ${cal.round()} / ${calGoal.round()} ккал.'
+              ' Белка не хватает: ${pro.round()} из ${proGoal.round()} г — добавь белковый перекус.'
+          : 'Calories near goal: ${cal.round()} / ${calGoal.round()} kcal.'
+              ' Protein is short: ${pro.round()} / ${proGoal.round()} g — grab a protein snack.';
+    } else {
+      final left = (calGoal - cal).round();
+      advice = isRu
+          ? 'Сегодня ${cal.round()} из ${calGoal.round()} ккал — ещё $left ккал до нормы.'
+              ' Белок: ${pro.round()} / ${proGoal.round()} г.'
+          : 'Today ${cal.round()} / ${calGoal.round()} kcal — $left kcal to goal.'
+              ' Protein: ${pro.round()} / ${proGoal.round()} g.';
+    }
+
+    return '$confirmLine\n\n$advice';
+  }
+
   /// Confirms the pending meal: posts to /api/meals/add_selected, invalidates
   /// dashboard/journal providers, replaces the preview with a synthetic
   /// "✓ added" assistant message (local-only, not persisted on backend).
@@ -571,9 +636,26 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
       final lastUserMsg = _messages
           .lastWhere((m) => m.role == 'user', orElse: () => _messages.first);
       final isRu = _detectMessageLang(lastUserMsg.content) == 'ru';
-      final reply = isRu
-          ? '✓ Добавлено в журнал: $dishLabel — ${totalKcal.round()} ккал'
-          : '✓ Added to journal: $dishLabel — ${totalKcal.round()} kcal';
+
+      // Fetch fresh stats (already invalidated above) for coaching message.
+      MacroStats freshStats;
+      try {
+        freshStats = await ref.read(todayStatsProvider.future);
+      } catch (_) {
+        freshStats = const MacroStats(
+          caloriesEaten: 0, caloriesGoal: 0,
+          proteinEaten: 0, proteinGoal: 0,
+          fatEaten: 0, fatGoal: 0,
+          carbsEaten: 0, carbsGoal: 0,
+        );
+      }
+
+      final reply = _buildCoachMessage(
+        stats: freshStats,
+        dishLabel: dishLabel,
+        isRu: isRu,
+        addedKcal: totalKcal,
+      );
 
       if (!mounted) return;
       final addedMsg = ChatMessage(
@@ -641,27 +723,57 @@ class _ChatV2ScreenState extends ConsumerState<ChatV2Screen> {
 
   // ── Attach toolbar handlers ─────────────────────────────────────────────────
 
-  /// Opens the KF2 capture screen, waits for a photo, then pushes to
-  /// recognizing. After save the router pops back here — no extra hook needed.
+  /// Opens the KF2 capture screen, waits for a photo, then shows the
+  /// recognizing screen. On successful save, adds a coaching message to chat.
   Future<void> _handleCamera() async {
     final photo = await context.push<XFile>('/kf2/capture');
     if (!mounted) return;
     if (photo == null) return;
-    final result = await context.push<String>(
-      '/kf2/recognizing',
-      extra: photo,
+
+    // Use plain Navigator (not GoRouter) so we can pass the onSaved callback
+    // and capture the dish name — GoRouter's push<String> can't receive a
+    // String from Kf2RecognizingScreen which internally uses pushReplacement.
+    String? savedDishName;
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        fullscreenDialog: true,
+        builder: (_) => Kf2RecognizingScreen(
+          photo: photo,
+          onSaved: (name) => savedDishName = name,
+        ),
+      ),
     );
-    if (!mounted) return;
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        _messages.add(ChatMessage(
-          role: 'user',
-          content: 'added: $result',
-          createdAt: DateTime.now(),
-        ));
-      });
-      _scrollToBottom();
+    if (!mounted || savedDishName == null) return;
+
+    // RecognitionResultSheetKF2 already invalidated todayStatsProvider.
+    // Reading the future here returns the freshly fetched value.
+    MacroStats freshStats;
+    try {
+      freshStats = await ref.read(todayStatsProvider.future);
+    } catch (_) {
+      freshStats = const MacroStats(
+        caloriesEaten: 0, caloriesGoal: 0,
+        proteinEaten: 0, proteinGoal: 0,
+        fatEaten: 0, fatGoal: 0,
+        carbsEaten: 0, carbsGoal: 0,
+      );
     }
+    if (!mounted) return;
+
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final coachText = _buildCoachMessage(
+      stats: freshStats,
+      dishLabel: savedDishName!,
+      isRu: isRu,
+    );
+    final coachMsg = ChatMessage(
+      role: 'assistant',
+      content: coachText,
+      createdAt: DateTime.now(),
+    );
+    setState(() => _messages.add(coachMsg));
+    unawaited(_persistLocalMessage(coachMsg));
+    _scrollToBottom();
   }
 
   /// Handles mic button tap: starts recording, or stops and transcribes.

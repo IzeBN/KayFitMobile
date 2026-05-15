@@ -23,9 +23,17 @@ import 'recognition_result_sheet_kf2.dart';
 ///   as a full-screen modal (so the back stack remains clean).
 /// - On error   → shows a [SnackBar] and pops back to the capture screen.
 class Kf2RecognizingScreen extends ConsumerStatefulWidget {
-  const Kf2RecognizingScreen({super.key, required this.photo});
+  const Kf2RecognizingScreen({
+    super.key,
+    required this.photo,
+    this.onSaved,
+  });
 
   final XFile photo;
+  /// Optional callback fired with the dish name when the user confirms saving.
+  /// Use this to inject a coaching message in the chat without depending on
+  /// the Navigator return type.
+  final void Function(String dishName)? onSaved;
 
   @override
   ConsumerState<Kf2RecognizingScreen> createState() =>
@@ -159,6 +167,7 @@ class _Kf2RecognizingScreenState extends ConsumerState<Kf2RecognizingScreen>
               ingredients: items,
               mealDate: null,
               originalText: null,
+              onSaved: widget.onSaved,
             ),
           ),
         ),

@@ -131,7 +131,9 @@ class _PreviewEditState {
 /// KF2-style recognition result sheet.
 ///
 /// Drop-in replacement for [RecognitionResultSheetV2] behind a feature flag.
-/// Same constructor parameters, same Navigator.pop(true/false) contract.
+/// Same Navigator.pop(true/false) contract. Optional [onSaved] fires with the
+/// dish name just before the pop — used by the chat screen to inject a
+/// coaching message without depending on the Navigator return type.
 class RecognitionResultSheetKF2 extends ConsumerStatefulWidget {
   const RecognitionResultSheetKF2({
     super.key,
@@ -139,12 +141,15 @@ class RecognitionResultSheetKF2 extends ConsumerStatefulWidget {
     required this.ingredients,
     this.mealDate,
     this.originalText,
+    this.onSaved,
   });
 
   final String dishName;
   final List<IngredientV2> ingredients;
   final DateTime? mealDate;
   final String? originalText;
+  /// Called with [dishName] immediately before Navigator.pop(true).
+  final void Function(String dishName)? onSaved;
 
   @override
   ConsumerState<RecognitionResultSheetKF2> createState() =>
@@ -328,7 +333,10 @@ class _RecognitionResultSheetKF2State
         // Refetch failure surfaces via UI's error path — don't block save success.
       }
 
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) {
+        widget.onSaved?.call(widget.dishName);
+        Navigator.of(context).pop(true);
+      }
     } on Exception catch (_) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
